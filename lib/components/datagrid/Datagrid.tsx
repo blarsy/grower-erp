@@ -1,4 +1,4 @@
-import { Typography, Stack, Box, Button, Alert, Backdrop, CircularProgress } from "@mui/material"
+import { Typography, Stack, Box, Button, Alert, Backdrop, CircularProgress, SvgIcon } from "@mui/material"
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
 import { FormikValues } from "formik"
@@ -29,10 +29,10 @@ export interface LineData {
     [prop: string]: CellContent
 }
 
-interface LineOperation {
+export interface LineOperation {
     fn: (line: LineData) => void
     name: string
-    icon: JSX.Element
+    makeIcon: () => ReactNode
 }
 
 interface Props {
@@ -50,7 +50,7 @@ export const NEW_LINE_KEY = -1
 export const CELL_SPACING = '0.5rem'
 export const LEFT_BUTTONS_FLEX = '0 0 4rem'
 
-const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation}: Props) => {
+const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation, lineOps}: Props) => {
     const client = useApolloClient()
     const [displayedLines, setDisplayedLines] = useState(lines)
     const [linesMarkedForDeletion, setLinesMarkedForDeletion] = useState([] as string[])
@@ -143,6 +143,8 @@ const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation
         return 0
     }
 
+
+
     const adjustedCols = adjustColumnsWidths(columns)
 
     return <Stack margin='1rem'>
@@ -154,21 +156,22 @@ const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation
         { feedback.severity && <Alert onClose={() => { setFeedback({})}} severity={feedback.severity}>{feedback.message}</Alert> }
         <Stack direction="row">
             <Box flex={LEFT_BUTTONS_FLEX}><span/></Box>
-            <Stack flex="1 0" spacing={CELL_SPACING} direction="row">
-            {
+            <Stack flex="1 0" spacing={CELL_SPACING} direction="row">{
                 adjustedCols.map(col => (<Typography 
                     key={col.key}
                     flex={`0 0 ${Math.round(col.widthPercent! * 100) / 100}%`}
                     variant="overline">
                     {col.headerText}
                 </Typography>))
-            }
-            </Stack>
+            }</Stack>
+            {lineOps && <Box flex={`0 0 ${Math.max(lineOps.length * 2, 4)}rem`}>
+            </Box>}
         </Stack>
         {displayedLines.length === 0 && <Typography textAlign="center" variant="h5">Pas encore de données ici</Typography>}
         {displayedLines.length > 0 && displayedLines.map(line => <DatagridLine key={line[columns[0].key] as string} 
             line={line} 
             columns={adjustedCols} 
+            lineOps={lineOps}
             onUpdate={async (values, line) => {
                 if(onUpdate) {
                     try {

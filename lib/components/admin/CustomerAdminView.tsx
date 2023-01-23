@@ -118,7 +118,7 @@ const CustomerAdminView = () => {
     ]
 
     const rows = data.allCustomers.edges.map((edge: any) => edge.node)
-    return <Datagrid title="Contenants"
+    return <Datagrid title="Clients"
       columns={columns} 
       lines={rows}
       onCreate={async values => {

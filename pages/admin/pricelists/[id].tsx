@@ -79,7 +79,7 @@ const PriceList = () => {
       lines={rows}
       onCreate={async values => {
         const result = await create({ variables: {articleId: values.articleId, priceListId: Number(priceListId), price: values.price } })
-        return { data: result.data?.createArticlesPrice?.articlesPrice, error: createError?.message }
+        return { data: result.data?.createArticlesPrice?.articlesPrice, error: createError }
       }}
       onUpdate={async (values, line) => {
         const result = await update({ variables: {articleId: values.articleId, priceListId: Number(priceListId), price: values.price, id: line.id}})

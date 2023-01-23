@@ -62,7 +62,7 @@ const PriceListAdminView = () => {
       lines={rows}
       lineOps={[{
         name: 'Editer prix des articles',
-        icon: <SellIcon />,
+        makeIcon: () => <SellIcon />,
         fn: line => { router.push(`/admin/pricelists/${line.id}`) }
       }]}
       onCreate={async values => {

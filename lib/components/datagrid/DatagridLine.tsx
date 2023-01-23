@@ -1,11 +1,11 @@
-import { Box, CircularProgress, IconButton, Stack, TextField, Typography, Checkbox, Autocomplete, FormControlLabel } from "@mui/material"
+import { Box, CircularProgress, IconButton, Stack, TextField, Typography, Checkbox, Autocomplete, FormControlLabel, Tooltip } from "@mui/material"
 import { Form, Formik, FormikErrors, FormikHelpers, FormikTouched, FormikValues } from "formik"
 import DeleteIcon from '@mui/icons-material/Close'
 import CheckIcon from '@mui/icons-material/Check'
 import ModifiedIcon from '@mui/icons-material/PriorityHigh'
-import { ChangeEvent, HTMLInputTypeAttribute, useState } from "react"
+import { ChangeEvent, FocusEventHandler, HTMLInputTypeAttribute, useState } from "react"
 import * as yup from 'yup'
-import { CellContent, cellInnerPaddingLeftRight, CELL_SPACING, Column, LEFT_BUTTONS_FLEX, LineData, NEW_LINE_KEY } from "./Datagrid"
+import { CellContent, cellInnerPaddingLeftRight, CELL_SPACING, Column, LEFT_BUTTONS_FLEX, LineData, LineOperation, NEW_LINE_KEY } from "./Datagrid"
 import RelationSelect from "./RelationSelect"
 
 interface Props {
@@ -16,13 +16,14 @@ interface Props {
     onDismissNewLine: () => void
     linesMarkedForDeletion: string[]
     onLinesMarkedForDeletionChanged: (linesMarkedForDeletion: string[]) => void
+    lineOps?: LineOperation[]
 }
 
 interface FormValues {
     [key: string]: CellContent
 }
 
-const DatagridLine = ({ line, columns, onUpdate, onCreate, onDismissNewLine, linesMarkedForDeletion, onLinesMarkedForDeletionChanged }: Props) => {
+const DatagridLine = ({ line, columns, onUpdate, onCreate, onDismissNewLine, linesMarkedForDeletion, onLinesMarkedForDeletionChanged, lineOps }: Props) => {
     const createFormValues = (cols: Column[], line: LineData): {[id: string]: any} => {
         const result = {} as FormValues
         cols.forEach(col => {
@@ -202,8 +203,8 @@ const DatagridLine = ({ line, columns, onUpdate, onCreate, onDismissNewLine, lin
             return <Stack direction="row">
                 <Box display="flex" flex={LEFT_BUTTONS_FLEX}>{tools}</Box>
                 <Stack spacing={CELL_SPACING}
-                    onBlur={e => { 
-                        if(!e.currentTarget.contains(e.relatedTarget)){
+                    onBlur={(e: React.FocusEvent<HTMLFormElement, any>) => { 
+                        if(e.currentTarget && e.currentTarget.contains(e.relatedTarget)){
                             //leaving the line
                             submitChanges()
                         }
@@ -224,6 +225,11 @@ const DatagridLine = ({ line, columns, onUpdate, onCreate, onDismissNewLine, lin
                         working, 
                         onDismissNewLine))}
                 </Stack>
+                { lineOps && <Box display="flex" flex={`0 0 ${Math.max(lineOps.length * 2, 4)}rem`}>{
+                    lineOps.map((op, idx) => {
+                        return <Tooltip key={idx} title={op.name}><IconButton sx={{ padding: 0 }} onClick={() => op.fn(line)}>{op.makeIcon()}</IconButton></Tooltip>
+                    })
+                }</Box>}
             </Stack>
 
         }}
