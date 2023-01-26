@@ -31,3 +31,18 @@ export const extractUiError = (e: any): { message: string, detail: string} => {
   }
   return { message: e.toString(), detail: ''}
 }
+
+export const isValidVatNumber = (vatNumber: string): boolean => {
+    if(vatNumber.toLowerCase().startsWith('be')) {
+        return /^be[0-9]{9,10}$/i.test(vatNumber)
+    } else if(vatNumber.toLowerCase().startsWith('fr')) {
+        return /^fr[0-9A-HJ-NP-Z][0-9A-HJ-NP-Z][0-9]{9}$/i.test(vatNumber)
+    } else if(vatNumber.toLowerCase().startsWith('de')) {
+        return /^de[0-9]{9}$/i.test(vatNumber)
+    } else if(vatNumber.toLowerCase().startsWith('lu')) {
+        return /^lu[0-9]{8}$/i.test(vatNumber)
+    } else if(vatNumber.toLowerCase().startsWith('nl')) {
+        return /^nl[0-9]{9}B[0-9]{2}$/i.test(vatNumber)
+    }
+    return false
+}

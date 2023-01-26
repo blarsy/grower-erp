@@ -3,14 +3,10 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import config from 'lib/serverSettings'
 import { utils } from 'ethers'
 import { ErrorResponse, makeErrorResponse } from 'lib/apiCommon'
-import { registerToken } from '../../lib/auth'
+import { checkToken, registerToken } from '../../lib/auth'
 
 type TokenResponse = {
   token: string
-}
-
-const makeTokenResponse = (): TokenResponse => {
-  return { token: registerToken() }
 }
 
 export default async function handler(
@@ -22,7 +18,8 @@ export default async function handler(
       const authorizedPublicKeys = config.authorizedPublicKeys
       if(authorizedPublicKeys.includes(utils.verifyMessage(req.body.message, req.body.signature))) {
         try{
-          res.status(200).json(makeTokenResponse())
+          const response = { token: await registerToken() }
+          res.status(200).json(response)
         } catch(e: any) {
           res.status(500).json(makeErrorResponse(e))
         }
@@ -32,6 +29,17 @@ export default async function handler(
     } else {
       res.status(500).json({ error: 'Missing parameter' })
     }
+  } else if (req.method === 'GET') {
+    if(!req.query.token) {
+      res.status(500).json({ error: 'Missing parameter' })
+    } else {
+      const sessionValid = await checkToken(req.query.token as string)
+      if(!sessionValid) {
+        res.status(500).json({ error: 'Unauthorized' })
+      } else {
+        res.status(200).end()
+      }
+    } 
   } else {
     res.status(501)
   }

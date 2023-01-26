@@ -74,14 +74,14 @@ const DatagridLine = ({ line, columns, onUpdate, onCreate, onDismissNewLine, lin
                 return <Typography
                     key={col.key}
                     sx={{ flex, fontStyle: "italic" }}
-                    variant="body1">
+                    variant="body2">
                     {col.valueForNew}
                 </Typography>
             } else {
                 return <Typography
                     key={col.key}
                     sx={{ flex }}
-                    variant="body1">
+                    variant="body2">
                     {line[col.key]}
                 </Typography>
             }
@@ -110,11 +110,22 @@ const DatagridLine = ({ line, columns, onUpdate, onCreate, onDismissNewLine, lin
                     name={col.key}
                     sx={{ flex }}
                     selectSx={{
+                        '& .MuiAutocomplete-hasPopupIcon.MuiAutocomplete-hasClearIcon': {
+                            '.MuiAutocomplete-inputRoot.MuiOutlinedInput-root': {
+                                paddingRight: '40px'
+                            } 
+                        },
                         '& .MuiOutlinedInput-root.MuiInputBase-sizeSmall' : {
                             padding: `0 ${cellInnerPaddingLeftRight}`
                         },
                         '& .MuiOutlinedInput-root.MuiInputBase-sizeSmall .MuiAutocomplete-input' : {
                             padding: `0`
+                        },
+                        '& .MuiOutlinedInput-root .MuiAutocomplete-endAdornment': {
+                            right: '0',
+                            '.MuiAutocomplete-clearIndicator': {
+                                padding: 0
+                            }
                         }
                     }}
                     query={col.relation.query} 

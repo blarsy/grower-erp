@@ -43,12 +43,20 @@ const Connected = ({ children } : Props) => {
     }
 
     useEffect(() => {
-        const storedToken = localStorage.getItem(TOKEN_KEY)
-        if(storedToken) {
-            setToken(storedToken)
-        } else {
-            setToken('')
+        const load = async () => {
+            const storedToken = localStorage.getItem(TOKEN_KEY)
+            if(storedToken) {
+                try {
+                    const res = await axios.get(`/api/auth?token=${storedToken}`)
+                    setToken(storedToken)
+                } catch(e : any) {
+                    setToken('')
+                }
+            } else {
+                setToken('')
+            }
         }
+        load()
     }, [token])
 
     if(token) {

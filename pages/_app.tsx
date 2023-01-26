@@ -12,18 +12,18 @@ const client = new ApolloClient({
 export default function MyApp({ Component, pageProps }: AppProps) {
   return <ApolloProvider client={client}>
       <ThemeProvider theme={theme}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', flexDirection: 'column', minHeight: '100vh'}}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh'}}>
         <GlobalStyles styles={{ body: { margin: 0 } }} />
         <Head>
           <title>Grower ERP</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
     
-        <Container sx={{ flex: '1' }}>
+        <Container sx={{ flex: '1', display: 'flex', flexDirection: 'column' }}>
           <Component {...pageProps} />
         </Container>
 
-        <Box sx={{ backgroundColor: 'primary.light', padding: '1rem 0'}}>
+        <Box sx={{ backgroundColor: '#90caf9', padding: '1rem 0'}}>
           <Container>
             Footy
           </Container>

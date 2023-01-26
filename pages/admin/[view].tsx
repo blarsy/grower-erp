@@ -1,10 +1,7 @@
-import Connected from "lib/components/admin/Connected"
-import AdminPanel from "lib/components/admin/AdminPanel"
+import AdminPage from "lib/components/admin/AdminPage"
 
 const AdminView = () => {
-    return <Connected>
-        <AdminPanel/>
-    </Connected>
+    return <AdminPage/>
 }
 
 export default AdminView

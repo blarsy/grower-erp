@@ -1,8 +1,9 @@
 import { gql, useMutation, useQuery } from "@apollo/client"
 import { CircularProgress, Alert } from "@mui/material"
-import Datagrid, { Column } from "lib/components/datagrid/Datagrid"
 import * as yup from 'yup'
 import { useRouter } from "next/router"
+import Datagrid, { Column } from "lib/components/datagrid/Datagrid"
+import AdminPage from "lib/components/admin/AdminPage"
 
 const GET = gql`query ArticlespricesByPricelistId($id: Int!) {
     pricelistById(id: $id) {
@@ -74,18 +75,20 @@ const PriceList = () => {
     ]
 
     const rows = data.pricelistById.articlesPricesByPriceListId.nodes
-    return <Datagrid title={`Liste de prix "${data.pricelistById.name}"`}
-      columns={columns} 
-      lines={rows}
-      onCreate={async values => {
-        const result = await create({ variables: {articleId: values.articleId, priceListId: Number(priceListId), price: values.price } })
-        return { data: result.data?.createArticlesPrice?.articlesPrice, error: createError }
-      }}
-      onUpdate={async (values, line) => {
-        const result = await update({ variables: {articleId: values.articleId, priceListId: Number(priceListId), price: values.price, id: line.id}})
-        return {error: updateError?.message, data: result.data.updateArticlesPriceById.articlesPrice}
-      }}
-      getDeleteMutation = {(paramIndex: string) => `deleteArticlesPriceById(input: {id: $id${paramIndex}}){deletedArticlesPriceId}`} />
+    return <AdminPage>
+        <Datagrid title={`Liste de prix "${data.pricelistById.name}"`}
+            columns={columns} 
+            lines={rows}
+            onCreate={async values => {
+                const result = await create({ variables: {articleId: values.articleId, priceListId: Number(priceListId), price: values.price } })
+                return { data: result.data?.createArticlesPrice?.articlesPrice, error: createError }
+            }}
+            onUpdate={async (values, line) => {
+                const result = await update({ variables: {articleId: values.articleId, priceListId: Number(priceListId), price: values.price, id: line.id}})
+                return {error: updateError?.message, data: result.data.updateArticlesPriceById.articlesPrice}
+            }}
+            getDeleteMutation = {(paramIndex: string) => `deleteArticlesPriceById(input: {id: $id${paramIndex}}){deletedArticlesPriceId}`} />
+    </AdminPage>
 }
 
 export default PriceList

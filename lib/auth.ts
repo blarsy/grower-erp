@@ -1,46 +1,71 @@
-const DEFAULT_TTL = 24 * 60 * 60 * 1000 //24 hours
-const TOKEN_LENGTH = 32
+import { RedisClientType } from '@redis/client'
+import { createClient } from 'redis'
+
+let client: RedisClientType
+
 type Session = {
     ttl: number,
     creationTimestamp: number,
     lastTimestamp: number
 }
 
-const activeTokens = {} as {
-    [token: string]: Session
+const getClient = async(): Promise<RedisClientType> => {
+    if(!client) {
+        client = createClient()
+        await client.connect()
+    }
+    return client  
 }
+const getActiveTokens = async (): Promise<{[token: string]: Session}> => {
+    const client = await getClient()
+    const rawTokens = await client.hGetAll('tokens')
+    const activeTokens: {[token: string]: Session} = {}
+    Object.keys(rawTokens).forEach(token => {
+        activeTokens[token] = JSON.parse(rawTokens[token])})
+    return activeTokens
+}
+
+
+const DEFAULT_TTL = 24 * 60 * 60 * 1000 //24 hours
+const TOKEN_LENGTH = 32
   
-export const registerToken = (): string => {
+export const registerToken = async (): Promise<string> => {
     const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
     let token = ''
     for (let i = TOKEN_LENGTH; i > 0; --i) token += chars[Math.floor(Math.random() * chars.length)]
   
     const now = new Date().valueOf()
-    activeTokens[token] = {
+    const client = await getClient()
+    await client.hSet('tokens', token, JSON.stringify({
         ttl: DEFAULT_TTL,
         creationTimestamp: now,
         lastTimestamp: now
-    }
+    }))
     // seems like a good moment to scan through the sessions and remove expired ones
-    removeExpired(now)
+    await removeExpired(now)
 
     return token
 }
   
-const removeExpired = (now: number): void => {
+const removeExpired = async (now: number): Promise<void> => {
+    const clientPromise = getClient()
+    const activeTokens = await getActiveTokens()
+    const client = await clientPromise
     Object.keys(activeTokens).reverse().forEach(token => {
-        if(sessionExpired(token, now)) {
-            delete activeTokens[token]
+        if(sessionExpired(activeTokens[token], now)) {
+            client.hDel('tokens', token)
         }
     })
 }
 
-const sessionExpired = (token: string, now: number): boolean => {
-    return activeTokens[token].creationTimestamp + activeTokens[token].ttl < now
+const sessionExpired = (session: Session, now: number): boolean => {
+   return (session.creationTimestamp + session.ttl) < now
 }
 
-export const checkToken = (token: string): boolean => {
-    if(!activeTokens[token]) return false
+export const checkToken = async (token: string): Promise<boolean> => {
+    const client = await getClient()
+    const session = await client.hGet('tokens', token)
+    if(!session) return false
     const now = new Date().valueOf()
-    return sessionExpired(token, now)
+    return !sessionExpired(JSON.parse(session), now)
 }

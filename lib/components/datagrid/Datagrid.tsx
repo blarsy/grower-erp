@@ -2,7 +2,7 @@ import { Typography, Stack, Box, Button, Alert, Backdrop, CircularProgress, SvgI
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
 import { FormikValues } from "formik"
-import { useState } from "react"
+import { ReactNode, useState } from "react"
 import DatagridLine from "./DatagridLine"
 import ConfirmDialog from "../ConfirmDialog"
 import { useApolloClient, gql, DocumentNode } from "@apollo/client"
