@@ -6,17 +6,15 @@ import Datagrid, { Column } from "../datagrid/Datagrid"
 
 const GET = gql`query CustomerAdminViewAllCustomersQuery {
   allCustomers {
-    edges {
-      node {
-        addressLine1
-        addressLine2
-        eshopAccess
-        id
-        name
-        priceListId
-        slug
-        vatNumber
-      }
+    nodes {
+      addressLine1
+      addressLine2
+      eshopAccess
+      id
+      name
+      priceListId
+      slug
+      vatNumber
     }
   }
 }`
@@ -118,7 +116,7 @@ const CustomerAdminView = () => {
         }
     ]
 
-    const rows = data.allCustomers.edges.map((edge: any) => edge.node)
+    const rows = data.allCustomers.nodes
     return <Datagrid title="Clients"
       columns={columns} 
       lines={rows}

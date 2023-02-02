@@ -48,14 +48,14 @@ const CompanyForm = ({data, updateQuery, createQuery}: Props) => {
 
     }}>
     {({ isSubmitting, handleSubmit, errors, touched, handleChange, values }) => {
-        return <Stack component={Form} spacing={2} margin="1rem" onSubmit={() => handleSubmit()}>
+        return <Stack spacing={2} margin="1rem" onSubmit={() => handleSubmit()}>
             <Typography variant="h3">Données de l'entreprise</Typography>
             <Typography variant="subtitle1">Utilisées sur les documents générés (bons de commande, de livraison, factures, ...), et dans les pages du webshop.</Typography>
             <TextField id="name" label="Nom de l'entreprise" variant="standard" value={values.name} onChange={handleChange} error={touched.name && !!errors.name} helperText={touched.name && errors.name as string}/>
             <TextField id="addressLine1" label="Addresse ligne 1" variant="standard" value={values.addressLine1} onChange={handleChange} error={touched.addressLine1 && !!errors.addressLine1} helperText={touched.addressLine1 && errors.addressLine1 as string}/>
             <TextField id="addressLine2" label="Addresse ligne 2" variant="standard" value={values.addressLine2} onChange={handleChange} error={touched.addressLine2 && !!errors.addressLine2} helperText={touched.addressLine2 && errors.addressLine2 as string} />
             <TextField id="vatNumber" label="Numéro de TVA" variant="standard" value={values.vatNumber} onChange={handleChange} error={touched.vatNumber && !!errors.vatNumber} helperText={touched.vatNumber && errors.vatNumber as string} />
-            <LoadingButton loading={isSubmitting} variant="contained" sx={{alignSelf: 'center'}} type="submit">Sauver</LoadingButton>
+            <LoadingButton loading={isSubmitting} variant="contained" sx={{alignSelf: 'center'}} onClick={() => handleSubmit()}>Sauver</LoadingButton>
             {error && <Alert severity="error">{error}</Alert>}
         </Stack>
     }}

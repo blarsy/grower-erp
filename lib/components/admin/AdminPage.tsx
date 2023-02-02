@@ -14,6 +14,8 @@ import PriceListAdminView from "./PriceListAdminView"
 import ArticleAdminView from "./ArticleAdminView"
 import CustomerAdminView from "./CustomerAdminView"
 import ProfileAdminView from "lib/components/admin/ProfileAdminView"
+import FulfillmentMethodAdminView from "./FulfillmentMethodAdminView"
+import SalesScheduleAdminView from "./SalesScheduleAdminView"
 
 interface NodeData {
     id: string
@@ -24,7 +26,10 @@ interface NodeData {
 }
 
 const nodesMap: NodeData[] = [
-    { id: '1', label: 'Profil', path: '/admin/profile', component: <ProfileAdminView/> },
+    { id: '1', label: 'Paramètres', children: [
+        { id: '1-1', label: 'Entreprise', path: '/admin/profile', component: <ProfileAdminView/> },
+        { id: '1-2', label: 'Méthode de livraison', path: '/admin/fulfilmentmethod', component: <FulfillmentMethodAdminView /> }
+    ] },
     { id: '2', label: 'Données' , children: [
         { id: '2-1', label: 'Clients', path: '/admin/customer', component: <CustomerAdminView/> },
         { id: '2-2', label: 'Articles', path: '/admin/article', component: <ArticleAdminView/> },
@@ -33,7 +38,10 @@ const nodesMap: NodeData[] = [
         { id: '2-5', label: 'Tarifs', path: '/admin/pricelist', component: <PriceListAdminView/> },
         { id: '2-6', label: 'Unités', path: '/admin/unit', component: <UnitAdminView/> },
         { id: '2-7', label: 'Contenants', path: '/admin/container', component: <ContainerAdminView/> },
-    ]}
+    ]},
+    { id: '3', label: "Ventes", children: [
+        { id: '3-1', label: 'Planification', path: '/admin/salesschedule', component: <SalesScheduleAdminView/>}
+    ] }
 ]
 const getSelectedNode = (nodeData: NodeData, route: string): {node: NodeData, toExpand: string[]} | undefined => {
     if(nodeData.path === route) {

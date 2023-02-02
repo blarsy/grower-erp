@@ -1,8 +1,9 @@
-import { Typography, Stack, Box, Button, Alert, Backdrop, CircularProgress, SvgIcon } from "@mui/material"
+import { Typography, Stack, Box, Button, Alert, Backdrop, CircularProgress, SvgIcon, useMediaQuery, useTheme, Tooltip } from "@mui/material"
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
 import { FormikValues } from "formik"
 import { ReactNode, useState } from "react"
+import InfoIcon from '@mui/icons-material/Info'
 import DatagridLine from "./DatagridLine"
 import ConfirmDialog from "../ConfirmDialog"
 import { useApolloClient, gql, DocumentNode } from "@apollo/client"
@@ -55,7 +56,7 @@ const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation
     const [displayedLines, setDisplayedLines] = useState(lines)
     const [linesMarkedForDeletion, setLinesMarkedForDeletion] = useState([] as string[])
     const [deleteOpStatus, setDeleteOpStatus] = useState({ opened: false, question: '', processing: false })
-    const [feedback, setFeedback] = useState({} as {severity?: "success" | "error", message?: string})
+    const [feedback, setFeedback] = useState({} as {severity?: "success" | "error", message?: string, detail?: string})
     const adjustColumnsWidths = (columns: Column[]): Column[] => {
 
         //Calculate width of columns, by splitting what remains when all columns with a percentWidth set have been taken into account
@@ -112,7 +113,6 @@ const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation
             ${deleteMutations.join('\n')}
           }
         `
-
         try {
             const result = await client.mutate({
                 mutation: gql(query),
@@ -127,10 +127,10 @@ const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation
               } else {
                   setLinesMarkedForDeletion([])
                   setDisplayedLines(displayedLines.filter(line => !linesMarkedForDeletion.includes(line.id as string)))
-                  setFeedback({ severity: 'success', message: 'Les données ont été éffacées.'})
+                  setFeedback({ severity: 'success', message: 'Les données ont été effacées.'})
               }
         } catch (e: any) {
-            setFeedback({severity: 'error', message: extractUiError(e).message})
+            setFeedback({severity: 'error', ...extractUiError(e)})
         } finally {
             setDeleteOpStatus({ opened:false, question: '', processing: false })
         }
@@ -143,7 +143,40 @@ const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation
         return 0
     }
 
+    const createRecord = async (values: FormikValues) => {
+        if(onCreate) {
+            try {
+                const result= await onCreate(values)
+                if(result.error) {
+                    setFeedback({severity:'error', ...extractUiError(result.error)})
+                } else {
+                    setDisplayedLines([result.data, ...displayedLines.filter(line => line.id !== NEW_LINE_KEY)])
+                }
+            } catch (e: any) {
+                setFeedback({severity: 'error', ...extractUiError(e)})
+            }
+        }
+    }
 
+    const updateRecord = async (values: FormikValues, line: LineData) => {
+        if(onUpdate) {
+            try {
+                const {error, data} = await onUpdate(values, line)
+                if(error) {
+                    setFeedback({severity:'error', message: error})
+                } else {
+                    const idx = displayedLines.findIndex(line => line[columns[0].key] === data[columns[0].key])
+                    setDisplayedLines([...displayedLines.slice(0, idx), data as LineData, ...displayedLines.slice(idx+1)])
+                }
+            } catch (e: any) {
+                setFeedback({severity: 'error', ...extractUiError(e)})
+            }
+        }
+    }
+
+    const dismissNewRecord = () => {
+        setDisplayedLines([...displayedLines.filter(line => line.id !== NEW_LINE_KEY)])
+    }
 
     const adjustedCols = adjustColumnsWidths(columns)
 
@@ -153,7 +186,14 @@ const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation
             {onCreate && <Button variant="outlined" size="small" startIcon={<AddIcon />} onClick={addRow}>Nouveau</Button>}
             {getDeleteMutation && <Button variant="outlined" size="small" startIcon={<DeleteIcon />} onClick={confirmDeleteLines}>Effacer sélection</Button>}
         </Stack>
-        { feedback.severity && <Alert onClose={() => { setFeedback({})}} severity={feedback.severity}>{feedback.message}</Alert> }
+        { feedback.severity && <Alert onClose={() => { setFeedback({})}} severity={feedback.severity}>
+            <Stack direction="row" justifyItems="space-between">
+                <Typography>{feedback.message}</Typography>
+                { feedback.detail && <Tooltip title={feedback.detail}>
+                    <InfoIcon/>
+                </Tooltip>}
+            </Stack>
+        </Alert> }
         <Stack direction="row">
             <Box flex={LEFT_BUTTONS_FLEX}><span/></Box>
             <Stack flex="1 0" spacing={CELL_SPACING} direction="row">{
@@ -172,38 +212,9 @@ const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation
             line={line} 
             columns={adjustedCols} 
             lineOps={lineOps}
-            onUpdate={async (values, line) => {
-                if(onUpdate) {
-                    try {
-                        const {error, data} = await onUpdate(values, line)
-                        if(error) {
-                            setFeedback({severity:'error', message: error})
-                        } else {
-                            const idx = displayedLines.findIndex(line => line[columns[0].key] === data[columns[0].key])
-                            setDisplayedLines([...displayedLines.slice(0, idx), data as LineData, ...displayedLines.slice(idx+1)])
-                        }
-                    } catch (e: any) {
-                        setFeedback({severity: 'error', message: extractUiError(e).message})
-                    }
-                }
-            }}
-            onCreate={async (values) => {
-                if(onCreate) {
-                    try {
-                        const result= await onCreate(values)
-                        if(result.error) {
-                            setFeedback({severity:'error', message: extractUiError(result.error).message})
-                        } else {
-                            setDisplayedLines([result.data, ...displayedLines.filter(line => line.id !== NEW_LINE_KEY)])
-                        }
-                    } catch (e: any) {
-                        setFeedback({severity: 'error', message: extractUiError(e).message})
-                    }
-                }
-            }}
-            onDismissNewLine={() => {
-                setDisplayedLines([...displayedLines.filter(line => line.id !== NEW_LINE_KEY)])
-            }}
+            onUpdate={updateRecord}
+            onCreate={createRecord}
+            onDismissNewLine={dismissNewRecord}
             linesMarkedForDeletion={linesMarkedForDeletion}
             onLinesMarkedForDeletionChanged={setLinesMarkedForDeletion} />)
         }

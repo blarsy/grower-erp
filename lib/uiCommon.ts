@@ -2,6 +2,7 @@ import { ApolloError } from "@apollo/client"
 import { AxiosError } from "axios"
 
 export const extractUiError = (e: any): { message: string, detail: string} => {
+  console.error(e)
   if (e as ApolloError) {
     const apolloError = e as ApolloError
     if(apolloError.message.includes('foreign key')) {
@@ -11,7 +12,11 @@ export const extractUiError = (e: any): { message: string, detail: string} => {
       return { message : `Cette opération viole l'intégrité des données, en tentant de créer une donnée en double. Il y a probablement déjà une enregistrement existant pour la donnée que vous tentez de créer ou modifier.`,
         detail: apolloError.message }
     } else {
-      return { message: e.toString(), detail: ''}
+      if(e.networkError?.result?.errors){
+        return { message: 'Erreur lors de l\'exécution de la requête', detail: e.networkError.result.errors.map((error: { message: any }) => error.message).join('\n') }
+      } else {
+        return { message: e.toString(), detail: ''}
+      }
     }
   } else if(e as AxiosError) {
       const res = (e as AxiosError).response!

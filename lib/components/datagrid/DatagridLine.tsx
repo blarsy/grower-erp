@@ -215,7 +215,7 @@ const DatagridLine = ({ line, columns, onUpdate, onCreate, onDismissNewLine, lin
                 <Box display="flex" flex={LEFT_BUTTONS_FLEX}>{tools}</Box>
                 <Stack spacing={CELL_SPACING}
                     onBlur={(e: React.FocusEvent<HTMLFormElement, any>) => { 
-                        if(e.currentTarget && e.currentTarget.contains(e.relatedTarget)){
+                        if(e.currentTarget && !e.currentTarget.contains(e.relatedTarget)){
                             //leaving the line
                             submitChanges()
                         }

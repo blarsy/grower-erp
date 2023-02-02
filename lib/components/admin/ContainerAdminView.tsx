@@ -6,12 +6,10 @@ import Datagrid, { Column } from "../datagrid/Datagrid"
 
 const GET = gql`query ContainerAdminViewAllContainersQuery {
   allContainers {
-    edges {
-      node {
-        id
-        name
-        description
-      }
+    nodes {
+      id
+      name
+      description
     }
   }
 }`
@@ -50,7 +48,7 @@ const ContainerAdminView = () => {
           }
         }]
 
-    const rows = data.allContainers.edges.map((edge: any) => edge.node)
+    const rows = data.allContainers.nodes
     return <Datagrid title="Contenants"
       columns={columns} 
       lines={rows}
