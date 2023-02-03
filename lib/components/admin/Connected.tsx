@@ -3,8 +3,9 @@ import { LoadingButton } from '@mui/lab'
 import LoginIcon from '@mui/icons-material/Login'
 import { ethers, providers } from "ethers"
 import axios from "axios"
-import { Alert, Stack } from "@mui/material"
+import { Alert, CircularProgress, Stack } from "@mui/material"
 import { extractUiError } from "lib/uiCommon"
+import Feedback from "../Feedback"
 
 const TOKEN_KEY = 'token'
 
@@ -19,7 +20,7 @@ declare global {
 }
 
 const Connected = ({ children } : Props) => {
-    const [token, setToken] = useState('')
+    const [authState, setAuthState] = useState({ loading: true, message: '', token: '', detail: ''} as { loading: boolean, message: string, token: string, detail?: string })
     const [connectionStatus, setConnectionStatus] = useState({ loading: false, error: '' })
 
     const connect = async () => {
@@ -32,13 +33,15 @@ const Connected = ({ children } : Props) => {
                 const message = new Date().toString()
                 const res = await axios.post('/api/auth', { message, signature: await signer.signMessage(message) })
                 localStorage.setItem(TOKEN_KEY, res.data.token)
-                setToken(res.data.token)
+                setAuthState({ loading: false, message: '', token: res.data.token })
                 setConnectionStatus({ loading: false, error: '' })
             } catch (ex) {
-                setConnectionStatus({ loading: false, error: `There was a failure connecting your wallet account: ${extractUiError(ex).message}` })
+                let reason = extractUiError(ex).message
+                if(reason === 'Unauthorized') reason = 'Accès refusé'
+                setConnectionStatus({ loading: false, error: `Un problème est survenu en tentant de vous connecter avec ce compte: ${reason}` })
             }
         } else {
-            setConnectionStatus({ loading: false, error: 'Could not detect Metamask, is it installed ?' })
+            setConnectionStatus({ loading: false, error: 'Metamask non détecté, est-il installé ?' })
         }
     }
 
@@ -48,19 +51,23 @@ const Connected = ({ children } : Props) => {
             if(storedToken) {
                 try {
                     const res = await axios.get(`/api/auth?token=${storedToken}`)
-                    setToken(storedToken)
+                    setAuthState({ loading: false, message: '', token: storedToken, detail: '' })
                 } catch(e : any) {
-                    setToken('')
+                    setAuthState({ loading: false, token: '', ...extractUiError(e)})
                 }
             } else {
-                setToken('')
+                setAuthState({ loading: false, token: '', message: ''})
             }
         }
         load()
-    }, [token])
+    }, [])
 
-    if(token) {
+    if(authState.loading){
+        return <CircularProgress/>
+    } else if (authState.token) {
         return children
+    } else if(authState.message) {
+        return <Feedback message={authState.message} severity="error" detail={authState.detail} onClose={() => setAuthState({ loading: false, token:'', message: '' })} />
     } else {
         return <Stack alignItems="center" padding="0.5rem 0">
             <LoadingButton loading={connectionStatus.loading}
@@ -68,7 +75,7 @@ const Connected = ({ children } : Props) => {
             startIcon={<LoginIcon />}
             variant="contained"
             onClick={connect}>Login</LoadingButton>
-            {connectionStatus.error && <Alert severity="error">{connectionStatus.error}</Alert>}
+            {connectionStatus.error && <Feedback severity="error" message={connectionStatus.error} onClose={() => {}}/>}
         </Stack>
     }
 }

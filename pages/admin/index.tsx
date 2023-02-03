@@ -1,7 +1,5 @@
 import AdminPage from "lib/components/admin/AdminPage"
 
-const Admin = () => {
-    return <AdminPage />
-}
+const Admin = () => <AdminPage />
 
 export default Admin

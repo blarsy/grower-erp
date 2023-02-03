@@ -2,7 +2,8 @@
 import { gql } from "@apollo/client"
 import * as yup from 'yup'
 import DatagridAdminvView from "./DatagridAdminView"
-
+import SellIcon from "@mui/icons-material/Sell"
+import { useRouter } from "next/router"
 
 const GET = gql`query PriceListAdminViewAllPriceListsQuery {
   allPricelists {
@@ -35,8 +36,15 @@ const CREATE = gql`
   }`
 
 const PriceListAdminView = () => {
+  const router = useRouter()
   return <DatagridAdminvView title="Tarifs" dataName="Pricelist" getQuery={GET} createQuery={CREATE}
-    updateQuery={UPDATE} columns={[
+    updateQuery={UPDATE} 
+    lineOps={[{
+      name: 'Editer prix des articles',
+      makeIcon: () => <SellIcon />,
+      fn: line => { router.push(`/admin/pricelists/${line.id}`) }
+    }]}
+    columns={[
       { key: 'id', headerText: 'ID', widthPercent: 5, type: "number"},
       { key: 'name', headerText: 'Nom', type: "string",  editable: {
         validation: yup.string().required('Ce champ est requis') 

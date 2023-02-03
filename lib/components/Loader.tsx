@@ -1,5 +1,6 @@
 import { Alert, Box, CircularProgress } from "@mui/material"
 import { extractUiError } from "lib/uiCommon"
+import Feedback from "./Feedback"
 
 interface Props {
     loading: boolean
@@ -9,7 +10,10 @@ interface Props {
 
 const Loader = ({ loading, error, children }: Props) => {
     if(loading) return <Box display="flex" justifyContent="center"><CircularProgress /></Box>
-    if(error) return <Alert severity='error'>{extractUiError(error).message}</Alert>
+    if(error){
+        const { message, detail } = extractUiError(error)
+        return <Feedback severity='error' message={message} detail={detail} onClose={() => {}}/>
+    }
     return children
 }
 

@@ -3,7 +3,22 @@ import { AxiosError } from "axios"
 
 export const extractUiError = (e: any): { message: string, detail: string} => {
   console.error(e)
-  if (e as ApolloError) {
+  if(e instanceof AxiosError) {
+    const res = (e as AxiosError).response!
+    if(res){
+      const resData = res.data
+      if (resData) {
+        const errorProp = (resData as {error: string}).error
+        if(errorProp) {
+          return { message: errorProp, detail: e.toString() }
+        } else {
+          return { message: `Erreur serveur: code ${res.status}, status: ${res.statusText}, data: ${res.data}`, detail: '' }
+        }
+      }
+    } else {
+      return { message: e.toString(), detail: (e as AxiosError).message }
+    }
+  } else if (e instanceof ApolloError) {
     const apolloError = e as ApolloError
     if(apolloError.message.includes('foreign key')) {
       return { message : `Cette opération viole l'intégrité des données. Soit la donnée que vous tentez d'effacer est liée à une autre, soit la mise à jour tentée rendrait orpheline une relation avec une autre donnée.`,
@@ -12,27 +27,12 @@ export const extractUiError = (e: any): { message: string, detail: string} => {
       return { message : `Cette opération viole l'intégrité des données, en tentant de créer une donnée en double. Il y a probablement déjà une enregistrement existant pour la donnée que vous tentez de créer ou modifier.`,
         detail: apolloError.message }
     } else {
-      if(e.networkError?.result?.errors){
-        return { message: 'Erreur lors de l\'exécution de la requête', detail: e.networkError.result.errors.map((error: { message: any }) => error.message).join('\n') }
+      if((apolloError.networkError as any)?.result?.errors){
+        return { message: 'Erreur lors de l\'exécution de la requête', detail: (e.networkError! as any).result.errors.map((error: { message: any }) => error.message).join('\n') }
       } else {
         return { message: e.toString(), detail: ''}
       }
     }
-  } else if(e as AxiosError) {
-      const res = (e as AxiosError).response!
-      if(res){
-        const resData = res.data
-        if (resData) {
-          const errorProp = (resData as {error: string}).error
-          if(errorProp) {
-            return { message: errorProp, detail: e.toString() }
-          } else {
-            return { message: `Erreur serveur: code ${res.status}, status: ${res.statusText}, data: ${res.data}`, detail: '' }
-          }
-        }
-      } else {
-        return { message: e.toString(), detail: (e as AxiosError).message }
-      }
   }
   return { message: e.toString(), detail: ''}
 }

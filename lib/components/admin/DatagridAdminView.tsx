@@ -1,7 +1,10 @@
 import { useQuery, useMutation, DocumentNode } from "@apollo/client"
-import { CircularProgress, Alert } from "@mui/material"
+import { CircularProgress } from "@mui/material"
 import { FormikValues } from "formik"
-import Datagrid, { Column, LineData } from "../datagrid/Datagrid"
+import { extractUiError } from "lib/uiCommon"
+import Datagrid, { Column, LineData, LineOperation } from "../datagrid/Datagrid"
+import Feedback from "../Feedback"
+import { useRouter } from "next/router"
 
 interface Props {
     title: string
@@ -11,6 +14,7 @@ interface Props {
     updateQuery?: DocumentNode
     createQuery?: DocumentNode
     getQueryPrefix?: string
+    lineOps?: LineOperation[]
 }
 
 const updateVariablesFromValues = (values: FormikValues, columns: Column[], line: LineData): {variables: {[id: string]: any}} => {
@@ -65,18 +69,22 @@ const createDataChangesHelper = (columns: Column[], dataName: string, updateQuer
     }
 }
 
-const DatagridAdminvView = ({title, dataName, columns, getQuery, updateQuery, createQuery, getQueryPrefix='all'}: Props) => {
+const DatagridAdminvView = ({title, dataName, columns, getQuery, updateQuery, createQuery, getQueryPrefix='all', lineOps}: Props) => {
     const { loading, error, data } = useQuery(getQuery)
     const dataChanges = createDataChangesHelper(columns, dataName, updateQuery, createQuery)
+    const router = useRouter()
 
     if(loading) return <CircularProgress />
-    if(error) return <Alert severity='error'>{error.message}</Alert>
-    
+    if(error){
+        const {message, detail} = extractUiError(error)
+        return <Feedback onClose={() => {}} message={message} detail={detail} severity="error" />
+    }
     const rows = data[`${getQueryPrefix}${dataName}s`].nodes
 
     return <Datagrid title={title}
         columns={columns} 
         lines={rows}
+        lineOps={lineOps}
         getDeleteMutation = {(paramIndex: string) => `delete${dataName}ById(input: {id: $id${paramIndex}}){deleted${dataName}Id}`}
         {...dataChanges.datagridProps} />
 }

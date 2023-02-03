@@ -8,6 +8,7 @@ import DatagridLine from "./DatagridLine"
 import ConfirmDialog from "../ConfirmDialog"
 import { useApolloClient, gql, DocumentNode } from "@apollo/client"
 import { extractUiError } from "lib/uiCommon"
+import Feedback from "../Feedback"
 
 export interface Column {
     key: string,
@@ -186,14 +187,8 @@ const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation
             {onCreate && <Button variant="outlined" size="small" startIcon={<AddIcon />} onClick={addRow}>Nouveau</Button>}
             {getDeleteMutation && <Button variant="outlined" size="small" startIcon={<DeleteIcon />} onClick={confirmDeleteLines}>Effacer sélection</Button>}
         </Stack>
-        { feedback.severity && <Alert onClose={() => { setFeedback({})}} severity={feedback.severity}>
-            <Stack direction="row" justifyItems="space-between">
-                <Typography>{feedback.message}</Typography>
-                { feedback.detail && <Tooltip title={feedback.detail}>
-                    <InfoIcon/>
-                </Tooltip>}
-            </Stack>
-        </Alert> }
+        { feedback.severity && <Feedback onClose={() => { setFeedback({})}} message={feedback.message!}
+            detail={feedback.detail} severity={feedback.severity} /> }
         <Stack direction="row">
             <Box flex={LEFT_BUTTONS_FLEX}><span/></Box>
             <Stack flex="1 0" spacing={CELL_SPACING} direction="row">{

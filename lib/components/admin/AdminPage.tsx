@@ -35,7 +35,7 @@ const nodesMap: NodeData[] = [
         { id: '2-2', label: 'Articles', path: '/admin/article', component: <ArticleAdminView/> },
         { id: '2-3', label: 'Produits', path: '/admin/product', component: <ProductAdminView/> },
         { id: '2-4', label: 'Stocks', path: '/admin/stock', component: <StockShapeAdminView/> },
-        { id: '2-5', label: 'Tarifs', path: '/admin/pricelist', component: <PriceListAdminView/> },
+        { id: '2-5', label: 'Tarifs', path: '/admin/pricelist', component: <PriceListAdminView/>},
         { id: '2-6', label: 'Unités', path: '/admin/unit', component: <UnitAdminView/> },
         { id: '2-7', label: 'Contenants', path: '/admin/container', component: <ContainerAdminView/> },
     ]},
@@ -43,6 +43,7 @@ const nodesMap: NodeData[] = [
         { id: '3-1', label: 'Planification', path: '/admin/salesschedule', component: <SalesScheduleAdminView/>}
     ] }
 ]
+
 const getSelectedNode = (nodeData: NodeData, route: string): {node: NodeData, toExpand: string[]} | undefined => {
     if(nodeData.path === route) {
         return {node: nodeData, toExpand: []}
@@ -62,6 +63,7 @@ const getSelectedNode = (nodeData: NodeData, route: string): {node: NodeData, to
 const AdminPage = () => {
     const router = useRouter()
     const [treeviewState, setTreeviewState] = useState({expanded: [] as string[], selected: null as NodeData | null})
+
     useEffect(() => {
         for(const nodeData of nodesMap){
             const result = getSelectedNode(nodeData, window.location.pathname)
@@ -70,7 +72,7 @@ const AdminPage = () => {
                 break
             }
         }
-    }, [router.asPath])
+    }, [])
 
     const createTreeItem = (nodeData : NodeData): JSX.Element => {
         return <TreeItem key={nodeData.id} nodeId={nodeData.id} label={nodeData.label} onClick={() => {
