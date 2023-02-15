@@ -1,30 +1,32 @@
 import { useQuery, useMutation, DocumentNode } from "@apollo/client"
 import { CircularProgress } from "@mui/material"
 import { FormikValues } from "formik"
-import { extractUiError } from "lib/uiCommon"
-import Datagrid, { Column, LineData, LineOperation } from "../datagrid/Datagrid"
-import Feedback from "../Feedback"
-import { useRouter } from "next/router"
+import { parseUiError } from "lib/uiCommon"
+import Datagrid, { Column, LineData, LineOperation } from "lib/components/datagrid/Datagrid"
+import Feedback from "lib/components/Feedback"
+import { useContext } from "react"
+import { AppContext } from "../AppContextProvider"
 
 interface Props {
     title: string
     dataName: string
     columns: Column[]
     getQuery: DocumentNode
+    filter?: Object
     updateQuery?: DocumentNode
     createQuery?: DocumentNode
-    getQueryPrefix?: string
+    getFromQueried?: (data: any) => any
     lineOps?: LineOperation[]
 }
 
-const updateVariablesFromValues = (values: FormikValues, columns: Column[], line: LineData): {variables: {[id: string]: any}} => {
-    const variables: {[id: string]: any} = {}
+const updateVariablesFromValues = (values: FormikValues, columns: Column[], fixedVariables: object, line: LineData): {variables: {[id: string]: any}} => {
+    const variables: {[id: string]: any} = fixedVariables
     columns.forEach(col => variables[col.key] = values[col.key])
     variables.id = line.id
     return { variables}
 }
-const createVariablesFromValues = (values: FormikValues, columns: Column[]): {variables: {[id: string]: any}} => {
-    const variables: {[id: string]: any} = {}
+const createVariablesFromValues = (values: FormikValues, columns: Column[], fixedVariables: object): {variables: {[id: string]: any}} => {
+    const variables: {[id: string]: any} = fixedVariables
     columns.forEach(col => {
         if(col.key !== 'id') {
             variables[col.key] = values[col.key]
@@ -33,7 +35,7 @@ const createVariablesFromValues = (values: FormikValues, columns: Column[]): {va
     return { variables}
 }
 const lowCaseFirstChar = (data: string):string => data[0].toLowerCase() + data.substring(1)
-const createDataChangesHelper = (columns: Column[], dataName: string, updateQuery?: DocumentNode, createQuery?: DocumentNode): 
+const createDataChangesHelper = (columns: Column[], dataName: string, fixedVariables: object = {}, updateQuery?: DocumentNode, createQuery?: DocumentNode): 
     {editable: boolean, datagridProps: { 
         onCreate: ((values: FormikValues) => Promise<{
             data: any
@@ -53,11 +55,11 @@ const createDataChangesHelper = (columns: Column[], dataName: string, updateQuer
             editable,
             datagridProps: {
                 onCreate: async values => {
-                    const result = await create(createVariablesFromValues(values, columns))
+                    const result = await create(createVariablesFromValues(values, columns, fixedVariables))
                     return { data: result.data?.[`create${dataName}`]?.[lowCaseFirstChar(dataName)], error: createError }
                 },
                 onUpdate: async (values, line) => {
-                    const result = await update(updateVariablesFromValues(values, columns, line))
+                    const result = await update(updateVariablesFromValues(values, columns, fixedVariables, line))
                     return { error: updateError?.message || '', data: result.data?.[`update${dataName}ById`][lowCaseFirstChar(dataName)] }
                 }
             }
@@ -69,24 +71,25 @@ const createDataChangesHelper = (columns: Column[], dataName: string, updateQuer
     }
 }
 
-const DatagridAdminvView = ({title, dataName, columns, getQuery, updateQuery, createQuery, getQueryPrefix='all', lineOps}: Props) => {
-    const { loading, error, data } = useQuery(getQuery)
-    const dataChanges = createDataChangesHelper(columns, dataName, updateQuery, createQuery)
-    const router = useRouter()
+const DatagridAdminView = ({title, dataName, columns, getQuery, filter, updateQuery, createQuery, getFromQueried=(data) => data[`all${dataName}s`].nodes, lineOps}: Props) => {
+    const { loading, error, data } = useQuery(getQuery, { variables: filter })
+    const appContext = useContext(AppContext)
+    const dataChanges = createDataChangesHelper(columns, dataName, filter, updateQuery, createQuery)
 
     if(loading) return <CircularProgress />
     if(error){
-        const {message, detail} = extractUiError(error)
+        const {message, detail} = parseUiError(error)
         return <Feedback onClose={() => {}} message={message} detail={detail} severity="error" />
     }
-    const rows = data[`${getQueryPrefix}${dataName}s`].nodes
+    const rows = getFromQueried(data)
+    const editable = columns.some(col => col.editable)
 
     return <Datagrid title={title}
         columns={columns} 
         lines={rows}
         lineOps={lineOps}
-        getDeleteMutation = {(paramIndex: string) => `delete${dataName}ById(input: {id: $id${paramIndex}}){deleted${dataName}Id}`}
+        getDeleteMutation = {editable ? (paramIndex: string) => `delete${dataName}ById(input: {id: $id${paramIndex}}){deleted${dataName}Id}` : undefined}
         {...dataChanges.datagridProps} />
 }
 
-export default DatagridAdminvView
+export default DatagridAdminView

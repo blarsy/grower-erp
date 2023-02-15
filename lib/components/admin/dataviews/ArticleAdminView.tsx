@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client"
 import * as yup from 'yup'
-import DatagridAdminvView from "./DatagridAdminView"
+import DatagridAdminView from "./DatagridAdminView"
+
 
 
 const GET = gql`query ArticleAdminViewAllArticlesQuery {
@@ -15,7 +16,7 @@ const GET = gql`query ArticleAdminViewAllArticlesQuery {
 }`
 
 const UPDATE = gql`
-  mutation UpdateArticle($stockShapeId: Int!, $containerId: Int!, $quantityPerContainer: BigFloat!, $id: Int!) {
+  mutation UpdateArticle($stockShapeId: Int!, $containerId: Int!, $quantityPerContainer: Float!, $id: Int!) {
     updateArticleById(
       input: {articlePatch: {stockShapeId: $stockShapeId, containerId: $containerId, quantityPerContainer: $quantityPerContainer }, id: $id}
     ) {
@@ -30,7 +31,7 @@ const UPDATE = gql`
 `
 
 const CREATE = gql`
-  mutation CreateArticle($stockShapeId: Int!, $containerId: Int!, $quantityPerContainer: BigFloat!) {
+  mutation CreateArticle($stockShapeId: Int!, $containerId: Int!, $quantityPerContainer: Float!) {
     createArticle(input: {article: {stockShapeId: $stockShapeId, containerId: $containerId, quantityPerContainer: $quantityPerContainer}}) {
         article {
             id
@@ -42,7 +43,7 @@ const CREATE = gql`
   }`
 
 const ArticleAdminView = () => {
-  return <DatagridAdminvView title="Articles" dataName="Article" getQuery={GET} updateQuery={UPDATE}
+  return <DatagridAdminView title="Articles" dataName="Article" getQuery={GET} updateQuery={UPDATE}
     createQuery={CREATE} columns={[
       { key: 'id', headerText: 'ID', widthPercent: 5, type: "number"},
       { key: 'stockShapeId', headerText: 'Stock', type: "number", widthPercent: 40, editable: {
@@ -56,7 +57,7 @@ const ArticleAdminView = () => {
                   unitAbbreviation
               }
           }
-        }`, getLabel: item => `${item.productName} / ${item.stockShapeName} (${item.unitAbbreviation})`}},
+        }`, getLabel: (item:any) => `${item.productName} / ${item.stockShapeName} (${item.unitAbbreviation})`}},
       { key: 'containerId', headerText: 'Contenant', type: "number", widthPercent: 35, editable: {
               validation: yup.number().required('Ce champ est requis')
           }, relation: { query: gql`query containersByName($search: String) {

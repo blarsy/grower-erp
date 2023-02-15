@@ -1,13 +1,23 @@
 version: "3.9"
 services:
   db:
-    image: "postgres:latest"
+    build:
+      context: './db'
+    image: "grower_erp_db"
     restart: always
+    env_file:
+      - ./.env
+    expose:
+      - "5432"
+  web:
+    restart: always
+    image: grower_erp_web
+    build:
+      context: ./
+      dockerfile: ./web/Dockerfile
+    env_file:
+        - ./.env
+    depends_on:
+        - db
     ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_PASSWORD=mysecretpassword
-  state:
-    image: "redis:latest"
-    ports:
-      - "6379:6379"
+        - "80:3000"

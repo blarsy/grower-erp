@@ -1,5 +1,5 @@
 import { Box, Container, Typography } from "@mui/material"
-import { AppContext } from "lib/AppContextProvider"
+import { AppContext } from "lib/components/admin/AppContextProvider"
 import { useContext } from "react"
 
 

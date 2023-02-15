@@ -1,8 +1,8 @@
 import { gql, useMutation, useQuery } from "@apollo/client"
 import { Alert, CircularProgress } from "@mui/material"
 import * as yup from 'yup'
-import Datagrid, { Column } from "../datagrid/Datagrid"
-import DatagridAdminvView from "./DatagridAdminView"
+import Datagrid, { Column } from "lib/components/datagrid/Datagrid"
+import DatagridAdminView from "./DatagridAdminView"
 
 
 const GET = gql`query StockShapeAdminViewAllStockShapesQuery {
@@ -35,7 +35,7 @@ const CREATE = gql`
 }`
 
 const StockShapeAdminView = () => {
-  return <DatagridAdminvView title="Stocks" dataName="StockShape" getQuery={GET} updateQuery={UPDATE}
+  return <DatagridAdminView title="Stocks" dataName="StockShape" getQuery={GET} updateQuery={UPDATE}
     createQuery={CREATE} columns={[
       { key: 'id', headerText: 'ID', widthPercent: 5, type: "number"},
       { key: 'name', headerText: 'Nom', widthPercent: 20, type: "string",  editable: {

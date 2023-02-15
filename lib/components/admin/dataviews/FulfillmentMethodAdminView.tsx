@@ -1,8 +1,6 @@
-import { useQuery, useMutation, gql } from "@apollo/client"
-import { CircularProgress, Alert } from "@mui/material"
+import { gql } from "@apollo/client"
 import * as yup from 'yup'
-import Datagrid, { Column } from "../datagrid/Datagrid"
-import DatagridAdminvView from "./DatagridAdminView"
+import DatagridAdminView from "./DatagridAdminView"
 
 const GET = gql`query FulfillmentMethodAdminViewAllFulfillmentMethodsQuery {
     allFulfillmentMethods {
@@ -47,7 +45,7 @@ const GET = gql`query FulfillmentMethodAdminViewAllFulfillmentMethodsQuery {
   
 
 const FulfillmentMethodAdminView = () => {
-    return <DatagridAdminvView dataName="FulfillmentMethod"
+    return <DatagridAdminView dataName="FulfillmentMethod"
       title="Méthodes de livraison" getQuery={GET} createQuery={CREATE} updateQuery={UPDATE}
       columns={[
         { key: 'id', headerText: 'Id', widthPercent: 5, type: "number"},

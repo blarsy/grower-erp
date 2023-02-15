@@ -1,8 +1,9 @@
 import { useApolloClient } from "@apollo/client"
 import { Autocomplete, Stack, SxProps, TextField, Theme, Typography } from "@mui/material"
 import { DocumentNode } from "graphql"
-import { extractUiError } from "lib/uiCommon"
-import { useEffect, useState } from "react"
+import { parseUiError } from "lib/uiCommon"
+import { useContext, useEffect, useState } from "react"
+import { AppContext } from "../admin/AppContextProvider"
 
 interface Props {
     query: DocumentNode,
@@ -18,6 +19,7 @@ interface Props {
 }
 
 function RelationSelect(props: Props) {
+    const appContext = useContext(AppContext)
     const {query, onChange, value } = props
     const client = useApolloClient()
     const [options, setOptions] = useState([] as {id: string, name: string}[])
@@ -31,12 +33,12 @@ function RelationSelect(props: Props) {
             setError('')
             const res = await client.query({ query, variables: { search: filter } })
             if(res.error) {
-                setError(extractUiError(res.error).message)
+                setError(parseUiError(res.error).message)
             } else {
                 setOptions(res.data[Object.getOwnPropertyNames(res.data)[0]].nodes)
             }
         } catch(e: any) {
-            setError(extractUiError(e).message)
+            setError(parseUiError(e).message)
         }
     }
 

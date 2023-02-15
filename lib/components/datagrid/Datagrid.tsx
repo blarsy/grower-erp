@@ -1,14 +1,14 @@
-import { Typography, Stack, Box, Button, Alert, Backdrop, CircularProgress, SvgIcon, useMediaQuery, useTheme, Tooltip } from "@mui/material"
+import { Typography, Stack, Box, Button, Backdrop, CircularProgress } from "@mui/material"
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
 import { FormikValues } from "formik"
-import { ReactNode, useState } from "react"
-import InfoIcon from '@mui/icons-material/Info'
+import { ReactNode, useContext, useState } from "react"
 import DatagridLine from "./DatagridLine"
 import ConfirmDialog from "../ConfirmDialog"
 import { useApolloClient, gql, DocumentNode } from "@apollo/client"
-import { extractUiError } from "lib/uiCommon"
+import { parseUiError } from "lib/uiCommon"
 import Feedback from "../Feedback"
+import { AppContext } from "../admin/AppContextProvider"
 
 export interface Column {
     key: string,
@@ -17,15 +17,16 @@ export interface Column {
     editable?: {
         validation: any
     },
-    type?: "number" | "string" | "relation" | "boolean"
+    type?: "number" | "string" | "relation" | "boolean" | "datetime" | "custom"
     relation?: {
         query: DocumentNode
         getLabel?: (rec: any) => string
     },
+    customDisplay?: (val: any) => string,
     valueForNew?: string
 }
 
-export type CellContent = string | number | null | boolean
+export type CellContent = string | number | null | boolean | Date
 
 export interface LineData {
     [prop: string]: CellContent
@@ -50,10 +51,16 @@ interface Props {
 export const cellInnerPaddingLeftRight = '0.5rem'
 export const NEW_LINE_KEY = -1
 export const CELL_SPACING = '0.5rem'
-export const LEFT_BUTTONS_FLEX = '0 0 4rem'
+export const getLeftButtonsFlex = (canDelete: boolean, readonly: boolean) => {
+    let width = 0
+    if(canDelete) width += 2
+    if(!readonly) width += 2
+    return `0 0 ${width}rem`
+} 
 
 const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation, lineOps}: Props) => {
     const client = useApolloClient()
+    const appContext = useContext(AppContext)
     const [displayedLines, setDisplayedLines] = useState(lines)
     const [linesMarkedForDeletion, setLinesMarkedForDeletion] = useState([] as string[])
     const [deleteOpStatus, setDeleteOpStatus] = useState({ opened: false, question: '', processing: false })
@@ -131,7 +138,7 @@ const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation
                   setFeedback({ severity: 'success', message: 'Les données ont été effacées.'})
               }
         } catch (e: any) {
-            setFeedback({severity: 'error', ...extractUiError(e)})
+            setFeedback({severity: 'error', ...parseUiError(e)})
         } finally {
             setDeleteOpStatus({ opened:false, question: '', processing: false })
         }
@@ -149,12 +156,12 @@ const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation
             try {
                 const result= await onCreate(values)
                 if(result.error) {
-                    setFeedback({severity:'error', ...extractUiError(result.error)})
+                    setFeedback({severity:'error', ...parseUiError(result.error)})
                 } else {
                     setDisplayedLines([result.data, ...displayedLines.filter(line => line.id !== NEW_LINE_KEY)])
                 }
             } catch (e: any) {
-                setFeedback({severity: 'error', ...extractUiError(e)})
+                setFeedback({severity: 'error', ...parseUiError(e)})
             }
         }
     }
@@ -170,7 +177,7 @@ const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation
                     setDisplayedLines([...displayedLines.slice(0, idx), data as LineData, ...displayedLines.slice(idx+1)])
                 }
             } catch (e: any) {
-                setFeedback({severity: 'error', ...extractUiError(e)})
+                setFeedback({severity: 'error', ...parseUiError(e)})
             }
         }
     }
@@ -180,6 +187,7 @@ const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation
     }
 
     const adjustedCols = adjustColumnsWidths(columns)
+    const readonly = !columns.some(col => col.editable)
 
     return <Stack margin='1rem'>
         <Stack spacing={2} direction="row" alignItems="flex-end" margin="0 0 1rem 0">
@@ -190,7 +198,7 @@ const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation
         { feedback.severity && <Feedback onClose={() => { setFeedback({})}} message={feedback.message!}
             detail={feedback.detail} severity={feedback.severity} /> }
         <Stack direction="row">
-            <Box flex={LEFT_BUTTONS_FLEX}><span/></Box>
+            <Box flex={getLeftButtonsFlex(!!getDeleteMutation, readonly)}><span/></Box>
             <Stack flex="1 0" spacing={CELL_SPACING} direction="row">{
                 adjustedCols.map(col => (<Typography 
                     key={col.key}
@@ -206,6 +214,8 @@ const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation
         {displayedLines.length > 0 && displayedLines.map(line => <DatagridLine key={line[columns[0].key] as string} 
             line={line} 
             columns={adjustedCols} 
+            readonly={readonly}
+            canDelete={!!getDeleteMutation}
             lineOps={lineOps}
             onUpdate={updateRecord}
             onCreate={createRecord}

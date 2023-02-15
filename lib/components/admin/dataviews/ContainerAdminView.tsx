@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client"
 import * as yup from 'yup'
-import DatagridAdminvView from "./DatagridAdminView"
+import DatagridAdminView from "./DatagridAdminView"
 
 
 const GET = gql`query ContainerAdminViewAllContainersQuery {
@@ -31,7 +31,7 @@ const CREATE = gql`
   }`
 
 const ContainerAdminView = () => {
-  return <DatagridAdminvView title="Contenants" dataName="Container" getQuery={GET} createQuery={CREATE}
+  return <DatagridAdminView title="Contenants" dataName="Container" getQuery={GET} createQuery={CREATE}
     updateQuery={UPDATE} columns={[
       { key: 'id', headerText: 'ID', widthPercent: 5, type: "number"},
       { key: 'name', headerText: 'Nom', widthPercent: 20, type: "string",  editable: {

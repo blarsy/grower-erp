@@ -1,8 +1,6 @@
-import { gql, useMutation, useQuery } from "@apollo/client"
-import { Alert, CircularProgress } from "@mui/material"
+import { gql } from "@apollo/client"
 import * as yup from 'yup'
-import Datagrid, { Column } from "../datagrid/Datagrid"
-import DatagridAdminvView from "./DatagridAdminView"
+import DatagridAdminView from "./DatagridAdminView"
 
 
 const GET = gql`query ProductAdminViewAllProductsQuery {
@@ -34,7 +32,7 @@ const CREATE = gql`
   }`
 
 const ProductAdminView = () => {
-  return <DatagridAdminvView title="Produits" dataName="Product" getQuery={GET} updateQuery={UPDATE}
+  return <DatagridAdminView title="Produits" dataName="Product" getQuery={GET} updateQuery={UPDATE}
     createQuery={CREATE} columns={[
       { key: 'id', headerText: 'ID', widthPercent: 5, type: "number"},
       { key: 'name', headerText: 'Nom', widthPercent: 20, type: "string",  editable: {

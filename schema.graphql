@@ -17,6 +17,416 @@ type Query implements Node {
     nodeId: ID!
   ): Node
 
+  """Reads and enables pagination through a set of `Article`."""
+  allArticles(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Article`."""
+    orderBy: [ArticlesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: ArticleCondition
+  ): ArticlesConnection
+
+  """Reads and enables pagination through a set of `ArticlesPrice`."""
+  allArticlesPrices(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `ArticlesPrice`."""
+    orderBy: [ArticlesPricesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: ArticlesPriceCondition
+  ): ArticlesPricesConnection
+
+  """Reads and enables pagination through a set of `Company`."""
+  allCompanies(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Company`."""
+    orderBy: [CompaniesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: CompanyCondition
+  ): CompaniesConnection
+
+  """Reads and enables pagination through a set of `Contact`."""
+  allContacts(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Contact`."""
+    orderBy: [ContactsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: ContactCondition
+  ): ContactsConnection
+
+  """Reads and enables pagination through a set of `Container`."""
+  allContainers(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Container`."""
+    orderBy: [ContainersOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: ContainerCondition
+  ): ContainersConnection
+
+  """Reads and enables pagination through a set of `Customer`."""
+  allCustomers(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Customer`."""
+    orderBy: [CustomersOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: CustomerCondition
+  ): CustomersConnection
+
+  """Reads and enables pagination through a set of `FulfillmentMethod`."""
+  allFulfillmentMethods(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `FulfillmentMethod`."""
+    orderBy: [FulfillmentMethodsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: FulfillmentMethodCondition
+  ): FulfillmentMethodsConnection
+
+  """Reads and enables pagination through a set of `Pricelist`."""
+  allPricelists(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Pricelist`."""
+    orderBy: [PricelistsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: PricelistCondition
+  ): PricelistsConnection
+
+  """Reads and enables pagination through a set of `Product`."""
+  allProducts(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Product`."""
+    orderBy: [ProductsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: ProductCondition
+  ): ProductsConnection
+
+  """Reads and enables pagination through a set of `SalesSchedule`."""
+  allSalesSchedules(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `SalesSchedule`."""
+    orderBy: [SalesSchedulesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: SalesScheduleCondition
+  ): SalesSchedulesConnection
+
+  """
+  Reads and enables pagination through a set of `SalesSchedulesFulfillmentMethod`.
+  """
+  allSalesSchedulesFulfillmentMethods(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `SalesSchedulesFulfillmentMethod`."""
+    orderBy: [SalesSchedulesFulfillmentMethodsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: SalesSchedulesFulfillmentMethodCondition
+  ): SalesSchedulesFulfillmentMethodsConnection
+
+  """
+  Reads and enables pagination through a set of `SalesSchedulesPricelist`.
+  """
+  allSalesSchedulesPricelists(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `SalesSchedulesPricelist`."""
+    orderBy: [SalesSchedulesPricelistsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: SalesSchedulesPricelistCondition
+  ): SalesSchedulesPricelistsConnection
+
+  """Reads and enables pagination through a set of `Setting`."""
+  allSettings(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Setting`."""
+    orderBy: [SettingsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: SettingCondition
+  ): SettingsConnection
+
+  """Reads and enables pagination through a set of `StockShape`."""
+  allStockShapes(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `StockShape`."""
+    orderBy: [StockShapesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: StockShapeCondition
+  ): StockShapesConnection
+
   """Reads and enables pagination through a set of `Unit`."""
   allUnits(
     """Only read the first `n` values of the set."""
@@ -45,7 +455,330 @@ type Query implements Node {
     """
     condition: UnitCondition
   ): UnitsConnection
+  articleById(id: Int!): Article
+  articlesPriceById(id: Int!): ArticlesPrice
+  articlesPriceByArticleIdAndPriceListId(articleId: Int!, priceListId: Int!): ArticlesPrice
+  companyById(id: Int!): Company
+  companyByCompanyNumber(companyNumber: String!): Company
+  contactById(id: Int!): Contact
+  containerById(id: Int!): Container
+  customerById(id: Int!): Customer
+  fulfillmentMethodById(id: Int!): FulfillmentMethod
+  pricelistById(id: Int!): Pricelist
+  productById(id: Int!): Product
+  salesScheduleById(id: Int!): SalesSchedule
+  salesSchedulesFulfillmentMethodBySalesScheduleIdAndFulfillmentMethodId(salesScheduleId: Int!, fulfillmentMethodId: Int!): SalesSchedulesFulfillmentMethod
+  salesSchedulesPricelistByPricelistIdAndSalesScheduleId(pricelistId: Int!, salesScheduleId: Int!): SalesSchedulesPricelist
+  settingById(id: Int!): Setting
+  stockShapeById(id: Int!): StockShape
   unitById(id: Int!): Unit
+
+  """Reads and enables pagination through a set of `Customer`."""
+  customerBySlug(
+    slug: String!
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+  ): CustomersConnection
+
+  """Reads and enables pagination through a set of `ArticleDisplay`."""
+  filterArticles(
+    searchTerm: String
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+  ): ArticleDisplaysConnection
+
+  """Reads and enables pagination through a set of `Company`."""
+  filterCompanies(
+    searchTerm: String
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+  ): CompaniesConnection
+
+  """Reads and enables pagination through a set of `Contact`."""
+  filterContacts(
+    searchTerm: String
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+  ): ContactsConnection
+
+  """Reads and enables pagination through a set of `Container`."""
+  filterContainers(
+    searchTerm: String
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+  ): ContainersConnection
+
+  """Reads and enables pagination through a set of `Pricelist`."""
+  filterPricelists(
+    searchTerm: String
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+  ): PricelistsConnection
+
+  """Reads and enables pagination through a set of `Product`."""
+  filterProducts(
+    searchTerm: String
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+  ): ProductsConnection
+
+  """Reads and enables pagination through a set of `StockShapeDisplay`."""
+  filterStockshapes(
+    searchTerm: String
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+  ): StockShapeDisplaysConnection
+
+  """Reads and enables pagination through a set of `Unit`."""
+  filterUnits(
+    searchTerm: String
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+  ): UnitsConnection
+
+  """Reads a single `Article` using its globally unique `ID`."""
+  article(
+    """The globally unique `ID` to be used in selecting a single `Article`."""
+    nodeId: ID!
+  ): Article
+
+  """Reads a single `ArticlesPrice` using its globally unique `ID`."""
+  articlesPrice(
+    """
+    The globally unique `ID` to be used in selecting a single `ArticlesPrice`.
+    """
+    nodeId: ID!
+  ): ArticlesPrice
+
+  """Reads a single `Company` using its globally unique `ID`."""
+  company(
+    """The globally unique `ID` to be used in selecting a single `Company`."""
+    nodeId: ID!
+  ): Company
+
+  """Reads a single `Contact` using its globally unique `ID`."""
+  contact(
+    """The globally unique `ID` to be used in selecting a single `Contact`."""
+    nodeId: ID!
+  ): Contact
+
+  """Reads a single `Container` using its globally unique `ID`."""
+  container(
+    """The globally unique `ID` to be used in selecting a single `Container`."""
+    nodeId: ID!
+  ): Container
+
+  """Reads a single `Customer` using its globally unique `ID`."""
+  customer(
+    """The globally unique `ID` to be used in selecting a single `Customer`."""
+    nodeId: ID!
+  ): Customer
+
+  """Reads a single `FulfillmentMethod` using its globally unique `ID`."""
+  fulfillmentMethod(
+    """
+    The globally unique `ID` to be used in selecting a single `FulfillmentMethod`.
+    """
+    nodeId: ID!
+  ): FulfillmentMethod
+
+  """Reads a single `Pricelist` using its globally unique `ID`."""
+  pricelist(
+    """The globally unique `ID` to be used in selecting a single `Pricelist`."""
+    nodeId: ID!
+  ): Pricelist
+
+  """Reads a single `Product` using its globally unique `ID`."""
+  product(
+    """The globally unique `ID` to be used in selecting a single `Product`."""
+    nodeId: ID!
+  ): Product
+
+  """Reads a single `SalesSchedule` using its globally unique `ID`."""
+  salesSchedule(
+    """
+    The globally unique `ID` to be used in selecting a single `SalesSchedule`.
+    """
+    nodeId: ID!
+  ): SalesSchedule
+
+  """
+  Reads a single `SalesSchedulesFulfillmentMethod` using its globally unique `ID`.
+  """
+  salesSchedulesFulfillmentMethod(
+    """
+    The globally unique `ID` to be used in selecting a single `SalesSchedulesFulfillmentMethod`.
+    """
+    nodeId: ID!
+  ): SalesSchedulesFulfillmentMethod
+
+  """
+  Reads a single `SalesSchedulesPricelist` using its globally unique `ID`.
+  """
+  salesSchedulesPricelist(
+    """
+    The globally unique `ID` to be used in selecting a single `SalesSchedulesPricelist`.
+    """
+    nodeId: ID!
+  ): SalesSchedulesPricelist
+
+  """Reads a single `Setting` using its globally unique `ID`."""
+  setting(
+    """The globally unique `ID` to be used in selecting a single `Setting`."""
+    nodeId: ID!
+  ): Setting
+
+  """Reads a single `StockShape` using its globally unique `ID`."""
+  stockShape(
+    """
+    The globally unique `ID` to be used in selecting a single `StockShape`.
+    """
+    nodeId: ID!
+  ): StockShape
 
   """Reads a single `Unit` using its globally unique `ID`."""
   unit(
@@ -62,40 +795,217 @@ interface Node {
   nodeId: ID!
 }
 
-"""A connection to a list of `Unit` values."""
-type UnitsConnection {
-  """A list of `Unit` objects."""
-  nodes: [Unit]!
+"""A connection to a list of `Article` values."""
+type ArticlesConnection {
+  """A list of `Article` objects."""
+  nodes: [Article!]!
 
   """
-  A list of edges which contains the `Unit` and cursor to aid in pagination.
+  A list of edges which contains the `Article` and cursor to aid in pagination.
   """
-  edges: [UnitsEdge!]!
+  edges: [ArticlesEdge!]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  """The count of *all* `Unit` you could get from the connection."""
+  """The count of *all* `Article` you could get from the connection."""
   totalCount: Int!
 }
 
-type Unit implements Node {
+type Article implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  stockShapeId: Int!
+  containerId: Int!
+  quantityPerContainer: BigFloat!
+
+  """Reads a single `StockShape` that is related to this `Article`."""
+  stockShapeByStockShapeId: StockShape
+
+  """Reads a single `Container` that is related to this `Article`."""
+  containerByContainerId: Container
+
+  """Reads and enables pagination through a set of `ArticlesPrice`."""
+  articlesPricesByArticleId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `ArticlesPrice`."""
+    orderBy: [ArticlesPricesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: ArticlesPriceCondition
+  ): ArticlesPricesConnection!
+}
+
+"""
+A floating point number that requires more precision than IEEE 754 binary 64
+"""
+scalar BigFloat
+
+type StockShape implements Node {
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
   id: Int!
   name: String!
-  abbreviation: String!
+  productId: Int!
+  unitId: Int!
+  inStock: BigFloat!
+
+  """Reads a single `Product` that is related to this `StockShape`."""
+  productByProductId: Product
+
+  """Reads a single `Unit` that is related to this `StockShape`."""
+  unitByUnitId: Unit
+
+  """Reads and enables pagination through a set of `Article`."""
+  articlesByStockShapeId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Article`."""
+    orderBy: [ArticlesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: ArticleCondition
+  ): ArticlesConnection!
 }
 
-"""A `Unit` edge in the connection."""
-type UnitsEdge {
+type Product implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  name: String!
+  description: String
+  parentProduct: Int
+
+  """Reads a single `Product` that is related to this `Product`."""
+  productByParentProduct: Product
+
+  """Reads and enables pagination through a set of `Product`."""
+  productsByParentProduct(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Product`."""
+    orderBy: [ProductsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: ProductCondition
+  ): ProductsConnection!
+
+  """Reads and enables pagination through a set of `StockShape`."""
+  stockShapesByProductId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `StockShape`."""
+    orderBy: [StockShapesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: StockShapeCondition
+  ): StockShapesConnection!
+}
+
+"""A connection to a list of `Product` values."""
+type ProductsConnection {
+  """A list of `Product` objects."""
+  nodes: [Product!]!
+
+  """
+  A list of edges which contains the `Product` and cursor to aid in pagination.
+  """
+  edges: [ProductsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Product` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Product` edge in the connection."""
+type ProductsEdge {
   """A cursor for use in pagination."""
   cursor: Cursor
 
-  """The `Unit` at the end of the edge."""
-  node: Unit
+  """The `Product` at the end of the edge."""
+  node: Product!
 }
 
 """A location in a connection that can be used for resuming pagination."""
@@ -114,6 +1024,1377 @@ type PageInfo {
 
   """When paginating forwards, the cursor to continue."""
   endCursor: Cursor
+}
+
+"""Methods to use when ordering `Product`."""
+enum ProductsOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  NAME_ASC
+  NAME_DESC
+  DESCRIPTION_ASC
+  DESCRIPTION_DESC
+  PARENT_PRODUCT_ASC
+  PARENT_PRODUCT_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `Product` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input ProductCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `name` field."""
+  name: String
+
+  """Checks for equality with the object’s `description` field."""
+  description: String
+
+  """Checks for equality with the object’s `parentProduct` field."""
+  parentProduct: Int
+}
+
+"""A connection to a list of `StockShape` values."""
+type StockShapesConnection {
+  """A list of `StockShape` objects."""
+  nodes: [StockShape!]!
+
+  """
+  A list of edges which contains the `StockShape` and cursor to aid in pagination.
+  """
+  edges: [StockShapesEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `StockShape` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `StockShape` edge in the connection."""
+type StockShapesEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `StockShape` at the end of the edge."""
+  node: StockShape!
+}
+
+"""Methods to use when ordering `StockShape`."""
+enum StockShapesOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  NAME_ASC
+  NAME_DESC
+  PRODUCT_ID_ASC
+  PRODUCT_ID_DESC
+  UNIT_ID_ASC
+  UNIT_ID_DESC
+  IN_STOCK_ASC
+  IN_STOCK_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `StockShape` object types. All fields are tested
+for equality and combined with a logical ‘and.’
+"""
+input StockShapeCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `name` field."""
+  name: String
+
+  """Checks for equality with the object’s `productId` field."""
+  productId: Int
+
+  """Checks for equality with the object’s `unitId` field."""
+  unitId: Int
+
+  """Checks for equality with the object’s `inStock` field."""
+  inStock: BigFloat
+}
+
+type Unit implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  name: String!
+  abbreviation: String!
+
+  """Reads and enables pagination through a set of `StockShape`."""
+  stockShapesByUnitId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `StockShape`."""
+    orderBy: [StockShapesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: StockShapeCondition
+  ): StockShapesConnection!
+}
+
+"""Methods to use when ordering `Article`."""
+enum ArticlesOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  STOCK_SHAPE_ID_ASC
+  STOCK_SHAPE_ID_DESC
+  CONTAINER_ID_ASC
+  CONTAINER_ID_DESC
+  QUANTITY_PER_CONTAINER_ASC
+  QUANTITY_PER_CONTAINER_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `Article` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input ArticleCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `stockShapeId` field."""
+  stockShapeId: Int
+
+  """Checks for equality with the object’s `containerId` field."""
+  containerId: Int
+
+  """Checks for equality with the object’s `quantityPerContainer` field."""
+  quantityPerContainer: BigFloat
+}
+
+type Container implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  name: String!
+  description: String!
+
+  """Reads and enables pagination through a set of `Article`."""
+  articlesByContainerId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Article`."""
+    orderBy: [ArticlesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: ArticleCondition
+  ): ArticlesConnection!
+}
+
+"""A connection to a list of `ArticlesPrice` values."""
+type ArticlesPricesConnection {
+  """A list of `ArticlesPrice` objects."""
+  nodes: [ArticlesPrice!]!
+
+  """
+  A list of edges which contains the `ArticlesPrice` and cursor to aid in pagination.
+  """
+  edges: [ArticlesPricesEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `ArticlesPrice` you could get from the connection."""
+  totalCount: Int!
+}
+
+type ArticlesPrice implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  articleId: Int!
+  priceListId: Int!
+  price: Float!
+
+  """Reads a single `Article` that is related to this `ArticlesPrice`."""
+  articleByArticleId: Article
+
+  """Reads a single `Pricelist` that is related to this `ArticlesPrice`."""
+  pricelistByPriceListId: Pricelist
+}
+
+type Pricelist implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  name: String!
+  vatIncluded: Boolean!
+
+  """Reads and enables pagination through a set of `Customer`."""
+  customersByPriceListId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Customer`."""
+    orderBy: [CustomersOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: CustomerCondition
+  ): CustomersConnection!
+
+  """Reads and enables pagination through a set of `ArticlesPrice`."""
+  articlesPricesByPriceListId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `ArticlesPrice`."""
+    orderBy: [ArticlesPricesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: ArticlesPriceCondition
+  ): ArticlesPricesConnection!
+
+  """
+  Reads and enables pagination through a set of `SalesSchedulesPricelist`.
+  """
+  salesSchedulesPricelistsByPricelistId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `SalesSchedulesPricelist`."""
+    orderBy: [SalesSchedulesPricelistsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: SalesSchedulesPricelistCondition
+  ): SalesSchedulesPricelistsConnection!
+}
+
+"""A connection to a list of `Customer` values."""
+type CustomersConnection {
+  """A list of `Customer` objects."""
+  nodes: [Customer!]!
+
+  """
+  A list of edges which contains the `Customer` and cursor to aid in pagination.
+  """
+  edges: [CustomersEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Customer` you could get from the connection."""
+  totalCount: Int!
+}
+
+type Customer implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  slug: String!
+  priceListId: Int!
+  eshopAccess: Boolean!
+  contactId: Int
+  companyId: Int
+
+  """Reads a single `Pricelist` that is related to this `Customer`."""
+  pricelistByPriceListId: Pricelist
+}
+
+"""A `Customer` edge in the connection."""
+type CustomersEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Customer` at the end of the edge."""
+  node: Customer!
+}
+
+"""Methods to use when ordering `Customer`."""
+enum CustomersOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  SLUG_ASC
+  SLUG_DESC
+  PRICE_LIST_ID_ASC
+  PRICE_LIST_ID_DESC
+  ESHOP_ACCESS_ASC
+  ESHOP_ACCESS_DESC
+  CONTACT_ID_ASC
+  CONTACT_ID_DESC
+  COMPANY_ID_ASC
+  COMPANY_ID_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `Customer` object types. All fields are tested
+for equality and combined with a logical ‘and.’
+"""
+input CustomerCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `slug` field."""
+  slug: String
+
+  """Checks for equality with the object’s `priceListId` field."""
+  priceListId: Int
+
+  """Checks for equality with the object’s `eshopAccess` field."""
+  eshopAccess: Boolean
+
+  """Checks for equality with the object’s `contactId` field."""
+  contactId: Int
+
+  """Checks for equality with the object’s `companyId` field."""
+  companyId: Int
+}
+
+"""Methods to use when ordering `ArticlesPrice`."""
+enum ArticlesPricesOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  ARTICLE_ID_ASC
+  ARTICLE_ID_DESC
+  PRICE_LIST_ID_ASC
+  PRICE_LIST_ID_DESC
+  PRICE_ASC
+  PRICE_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `ArticlesPrice` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input ArticlesPriceCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `articleId` field."""
+  articleId: Int
+
+  """Checks for equality with the object’s `priceListId` field."""
+  priceListId: Int
+
+  """Checks for equality with the object’s `price` field."""
+  price: Float
+}
+
+"""A connection to a list of `SalesSchedulesPricelist` values."""
+type SalesSchedulesPricelistsConnection {
+  """A list of `SalesSchedulesPricelist` objects."""
+  nodes: [SalesSchedulesPricelist!]!
+
+  """
+  A list of edges which contains the `SalesSchedulesPricelist` and cursor to aid in pagination.
+  """
+  edges: [SalesSchedulesPricelistsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `SalesSchedulesPricelist` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+type SalesSchedulesPricelist implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  pricelistId: Int!
+  salesScheduleId: Int!
+
+  """
+  Reads a single `Pricelist` that is related to this `SalesSchedulesPricelist`.
+  """
+  pricelistByPricelistId: Pricelist
+
+  """
+  Reads a single `SalesSchedule` that is related to this `SalesSchedulesPricelist`.
+  """
+  salesScheduleBySalesScheduleId: SalesSchedule
+}
+
+type SalesSchedule implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  fulfillmentDate: Datetime!
+  name: String
+  orderClosureDate: Datetime!
+  deliveryPrice: Float
+  freeDeliveryTurnover: Float
+  beginSalesDate: Datetime
+  disabled: Boolean!
+
+  """
+  Reads and enables pagination through a set of `SalesSchedulesFulfillmentMethod`.
+  """
+  salesSchedulesFulfillmentMethodsBySalesScheduleId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `SalesSchedulesFulfillmentMethod`."""
+    orderBy: [SalesSchedulesFulfillmentMethodsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: SalesSchedulesFulfillmentMethodCondition
+  ): SalesSchedulesFulfillmentMethodsConnection!
+
+  """
+  Reads and enables pagination through a set of `SalesSchedulesPricelist`.
+  """
+  salesSchedulesPricelistsBySalesScheduleId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `SalesSchedulesPricelist`."""
+    orderBy: [SalesSchedulesPricelistsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: SalesSchedulesPricelistCondition
+  ): SalesSchedulesPricelistsConnection!
+}
+
+"""
+A point in time as described by the [ISO
+8601](https://en.wikipedia.org/wiki/ISO_8601) standard. May or may not include a timezone.
+"""
+scalar Datetime
+
+"""A connection to a list of `SalesSchedulesFulfillmentMethod` values."""
+type SalesSchedulesFulfillmentMethodsConnection {
+  """A list of `SalesSchedulesFulfillmentMethod` objects."""
+  nodes: [SalesSchedulesFulfillmentMethod!]!
+
+  """
+  A list of edges which contains the `SalesSchedulesFulfillmentMethod` and cursor to aid in pagination.
+  """
+  edges: [SalesSchedulesFulfillmentMethodsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `SalesSchedulesFulfillmentMethod` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+type SalesSchedulesFulfillmentMethod implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  salesScheduleId: Int!
+  fulfillmentMethodId: Int!
+
+  """
+  Reads a single `SalesSchedule` that is related to this `SalesSchedulesFulfillmentMethod`.
+  """
+  salesScheduleBySalesScheduleId: SalesSchedule
+
+  """
+  Reads a single `FulfillmentMethod` that is related to this `SalesSchedulesFulfillmentMethod`.
+  """
+  fulfillmentMethodByFulfillmentMethodId: FulfillmentMethod
+}
+
+type FulfillmentMethod implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  name: String!
+  needsPickupAddress: Boolean!
+  needsCustomerAddress: Boolean!
+
+  """
+  Reads and enables pagination through a set of `SalesSchedulesFulfillmentMethod`.
+  """
+  salesSchedulesFulfillmentMethodsByFulfillmentMethodId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `SalesSchedulesFulfillmentMethod`."""
+    orderBy: [SalesSchedulesFulfillmentMethodsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: SalesSchedulesFulfillmentMethodCondition
+  ): SalesSchedulesFulfillmentMethodsConnection!
+}
+
+"""Methods to use when ordering `SalesSchedulesFulfillmentMethod`."""
+enum SalesSchedulesFulfillmentMethodsOrderBy {
+  NATURAL
+  SALES_SCHEDULE_ID_ASC
+  SALES_SCHEDULE_ID_DESC
+  FULFILLMENT_METHOD_ID_ASC
+  FULFILLMENT_METHOD_ID_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `SalesSchedulesFulfillmentMethod` object types.
+All fields are tested for equality and combined with a logical ‘and.’
+"""
+input SalesSchedulesFulfillmentMethodCondition {
+  """Checks for equality with the object’s `salesScheduleId` field."""
+  salesScheduleId: Int
+
+  """Checks for equality with the object’s `fulfillmentMethodId` field."""
+  fulfillmentMethodId: Int
+}
+
+"""A `SalesSchedulesFulfillmentMethod` edge in the connection."""
+type SalesSchedulesFulfillmentMethodsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `SalesSchedulesFulfillmentMethod` at the end of the edge."""
+  node: SalesSchedulesFulfillmentMethod!
+}
+
+"""Methods to use when ordering `SalesSchedulesPricelist`."""
+enum SalesSchedulesPricelistsOrderBy {
+  NATURAL
+  PRICELIST_ID_ASC
+  PRICELIST_ID_DESC
+  SALES_SCHEDULE_ID_ASC
+  SALES_SCHEDULE_ID_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `SalesSchedulesPricelist` object types. All
+fields are tested for equality and combined with a logical ‘and.’
+"""
+input SalesSchedulesPricelistCondition {
+  """Checks for equality with the object’s `pricelistId` field."""
+  pricelistId: Int
+
+  """Checks for equality with the object’s `salesScheduleId` field."""
+  salesScheduleId: Int
+}
+
+"""A `SalesSchedulesPricelist` edge in the connection."""
+type SalesSchedulesPricelistsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `SalesSchedulesPricelist` at the end of the edge."""
+  node: SalesSchedulesPricelist!
+}
+
+"""A `ArticlesPrice` edge in the connection."""
+type ArticlesPricesEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `ArticlesPrice` at the end of the edge."""
+  node: ArticlesPrice!
+}
+
+"""A `Article` edge in the connection."""
+type ArticlesEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Article` at the end of the edge."""
+  node: Article!
+}
+
+"""A connection to a list of `Company` values."""
+type CompaniesConnection {
+  """A list of `Company` objects."""
+  nodes: [Company!]!
+
+  """
+  A list of edges which contains the `Company` and cursor to aid in pagination.
+  """
+  edges: [CompaniesEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Company` you could get from the connection."""
+  totalCount: Int!
+}
+
+type Company implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  name: String!
+  addressLine1: String
+  addressLine2: String
+  companyNumber: String
+  zipCode: String
+  city: String
+  mainContactId: Int
+
+  """Reads a single `Contact` that is related to this `Company`."""
+  contactByMainContactId: Contact
+
+  """Reads and enables pagination through a set of `Contact`."""
+  contactsByCompanyId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Contact`."""
+    orderBy: [ContactsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: ContactCondition
+  ): ContactsConnection!
+
+  """Reads and enables pagination through a set of `Setting`."""
+  settingsByOwnerId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Setting`."""
+    orderBy: [SettingsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: SettingCondition
+  ): SettingsConnection!
+}
+
+type Contact implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  firstName: String
+  lastName: String!
+  email: String
+  phone: String
+  addressLine1: String
+  addressLine2: String
+  zipCode: String
+  city: String
+  publicKey: String
+  companyId: Int
+
+  """Reads a single `Company` that is related to this `Contact`."""
+  companyByCompanyId: Company
+
+  """Reads and enables pagination through a set of `Company`."""
+  companiesByMainContactId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Company`."""
+    orderBy: [CompaniesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: CompanyCondition
+  ): CompaniesConnection!
+}
+
+"""Methods to use when ordering `Company`."""
+enum CompaniesOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  NAME_ASC
+  NAME_DESC
+  ADDRESS_LINE1_ASC
+  ADDRESS_LINE1_DESC
+  ADDRESS_LINE2_ASC
+  ADDRESS_LINE2_DESC
+  COMPANY_NUMBER_ASC
+  COMPANY_NUMBER_DESC
+  ZIP_CODE_ASC
+  ZIP_CODE_DESC
+  CITY_ASC
+  CITY_DESC
+  MAIN_CONTACT_ID_ASC
+  MAIN_CONTACT_ID_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `Company` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input CompanyCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `name` field."""
+  name: String
+
+  """Checks for equality with the object’s `addressLine1` field."""
+  addressLine1: String
+
+  """Checks for equality with the object’s `addressLine2` field."""
+  addressLine2: String
+
+  """Checks for equality with the object’s `companyNumber` field."""
+  companyNumber: String
+
+  """Checks for equality with the object’s `zipCode` field."""
+  zipCode: String
+
+  """Checks for equality with the object’s `city` field."""
+  city: String
+
+  """Checks for equality with the object’s `mainContactId` field."""
+  mainContactId: Int
+}
+
+"""A connection to a list of `Contact` values."""
+type ContactsConnection {
+  """A list of `Contact` objects."""
+  nodes: [Contact!]!
+
+  """
+  A list of edges which contains the `Contact` and cursor to aid in pagination.
+  """
+  edges: [ContactsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Contact` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Contact` edge in the connection."""
+type ContactsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Contact` at the end of the edge."""
+  node: Contact!
+}
+
+"""Methods to use when ordering `Contact`."""
+enum ContactsOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  FIRST_NAME_ASC
+  FIRST_NAME_DESC
+  LAST_NAME_ASC
+  LAST_NAME_DESC
+  EMAIL_ASC
+  EMAIL_DESC
+  PHONE_ASC
+  PHONE_DESC
+  ADDRESS_LINE1_ASC
+  ADDRESS_LINE1_DESC
+  ADDRESS_LINE2_ASC
+  ADDRESS_LINE2_DESC
+  ZIP_CODE_ASC
+  ZIP_CODE_DESC
+  CITY_ASC
+  CITY_DESC
+  PUBLIC_KEY_ASC
+  PUBLIC_KEY_DESC
+  COMPANY_ID_ASC
+  COMPANY_ID_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `Contact` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input ContactCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `firstName` field."""
+  firstName: String
+
+  """Checks for equality with the object’s `lastName` field."""
+  lastName: String
+
+  """Checks for equality with the object’s `email` field."""
+  email: String
+
+  """Checks for equality with the object’s `phone` field."""
+  phone: String
+
+  """Checks for equality with the object’s `addressLine1` field."""
+  addressLine1: String
+
+  """Checks for equality with the object’s `addressLine2` field."""
+  addressLine2: String
+
+  """Checks for equality with the object’s `zipCode` field."""
+  zipCode: String
+
+  """Checks for equality with the object’s `city` field."""
+  city: String
+
+  """Checks for equality with the object’s `publicKey` field."""
+  publicKey: String
+
+  """Checks for equality with the object’s `companyId` field."""
+  companyId: Int
+}
+
+"""A connection to a list of `Setting` values."""
+type SettingsConnection {
+  """A list of `Setting` objects."""
+  nodes: [Setting!]!
+
+  """
+  A list of edges which contains the `Setting` and cursor to aid in pagination.
+  """
+  edges: [SettingsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Setting` you could get from the connection."""
+  totalCount: Int!
+}
+
+type Setting implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  ownerId: Int!
+  id: Int!
+
+  """Reads a single `Company` that is related to this `Setting`."""
+  companyByOwnerId: Company
+}
+
+"""A `Setting` edge in the connection."""
+type SettingsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Setting` at the end of the edge."""
+  node: Setting!
+}
+
+"""Methods to use when ordering `Setting`."""
+enum SettingsOrderBy {
+  NATURAL
+  OWNER_ID_ASC
+  OWNER_ID_DESC
+  ID_ASC
+  ID_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `Setting` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input SettingCondition {
+  """Checks for equality with the object’s `ownerId` field."""
+  ownerId: Int
+
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+}
+
+"""A `Company` edge in the connection."""
+type CompaniesEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Company` at the end of the edge."""
+  node: Company!
+}
+
+"""A connection to a list of `Container` values."""
+type ContainersConnection {
+  """A list of `Container` objects."""
+  nodes: [Container!]!
+
+  """
+  A list of edges which contains the `Container` and cursor to aid in pagination.
+  """
+  edges: [ContainersEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Container` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Container` edge in the connection."""
+type ContainersEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Container` at the end of the edge."""
+  node: Container!
+}
+
+"""Methods to use when ordering `Container`."""
+enum ContainersOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  NAME_ASC
+  NAME_DESC
+  DESCRIPTION_ASC
+  DESCRIPTION_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `Container` object types. All fields are tested
+for equality and combined with a logical ‘and.’
+"""
+input ContainerCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `name` field."""
+  name: String
+
+  """Checks for equality with the object’s `description` field."""
+  description: String
+}
+
+"""A connection to a list of `FulfillmentMethod` values."""
+type FulfillmentMethodsConnection {
+  """A list of `FulfillmentMethod` objects."""
+  nodes: [FulfillmentMethod!]!
+
+  """
+  A list of edges which contains the `FulfillmentMethod` and cursor to aid in pagination.
+  """
+  edges: [FulfillmentMethodsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `FulfillmentMethod` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+"""A `FulfillmentMethod` edge in the connection."""
+type FulfillmentMethodsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `FulfillmentMethod` at the end of the edge."""
+  node: FulfillmentMethod!
+}
+
+"""Methods to use when ordering `FulfillmentMethod`."""
+enum FulfillmentMethodsOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  NAME_ASC
+  NAME_DESC
+  NEEDS_PICKUP_ADDRESS_ASC
+  NEEDS_PICKUP_ADDRESS_DESC
+  NEEDS_CUSTOMER_ADDRESS_ASC
+  NEEDS_CUSTOMER_ADDRESS_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `FulfillmentMethod` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input FulfillmentMethodCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `name` field."""
+  name: String
+
+  """Checks for equality with the object’s `needsPickupAddress` field."""
+  needsPickupAddress: Boolean
+
+  """Checks for equality with the object’s `needsCustomerAddress` field."""
+  needsCustomerAddress: Boolean
+}
+
+"""A connection to a list of `Pricelist` values."""
+type PricelistsConnection {
+  """A list of `Pricelist` objects."""
+  nodes: [Pricelist!]!
+
+  """
+  A list of edges which contains the `Pricelist` and cursor to aid in pagination.
+  """
+  edges: [PricelistsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Pricelist` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Pricelist` edge in the connection."""
+type PricelistsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Pricelist` at the end of the edge."""
+  node: Pricelist!
+}
+
+"""Methods to use when ordering `Pricelist`."""
+enum PricelistsOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  NAME_ASC
+  NAME_DESC
+  VAT_INCLUDED_ASC
+  VAT_INCLUDED_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `Pricelist` object types. All fields are tested
+for equality and combined with a logical ‘and.’
+"""
+input PricelistCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `name` field."""
+  name: String
+
+  """Checks for equality with the object’s `vatIncluded` field."""
+  vatIncluded: Boolean
+}
+
+"""A connection to a list of `SalesSchedule` values."""
+type SalesSchedulesConnection {
+  """A list of `SalesSchedule` objects."""
+  nodes: [SalesSchedule!]!
+
+  """
+  A list of edges which contains the `SalesSchedule` and cursor to aid in pagination.
+  """
+  edges: [SalesSchedulesEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `SalesSchedule` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `SalesSchedule` edge in the connection."""
+type SalesSchedulesEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `SalesSchedule` at the end of the edge."""
+  node: SalesSchedule!
+}
+
+"""Methods to use when ordering `SalesSchedule`."""
+enum SalesSchedulesOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  FULFILLMENT_DATE_ASC
+  FULFILLMENT_DATE_DESC
+  NAME_ASC
+  NAME_DESC
+  ORDER_CLOSURE_DATE_ASC
+  ORDER_CLOSURE_DATE_DESC
+  DELIVERY_PRICE_ASC
+  DELIVERY_PRICE_DESC
+  FREE_DELIVERY_TURNOVER_ASC
+  FREE_DELIVERY_TURNOVER_DESC
+  BEGIN_SALES_DATE_ASC
+  BEGIN_SALES_DATE_DESC
+  DISABLED_ASC
+  DISABLED_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `SalesSchedule` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input SalesScheduleCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `fulfillmentDate` field."""
+  fulfillmentDate: Datetime
+
+  """Checks for equality with the object’s `name` field."""
+  name: String
+
+  """Checks for equality with the object’s `orderClosureDate` field."""
+  orderClosureDate: Datetime
+
+  """Checks for equality with the object’s `deliveryPrice` field."""
+  deliveryPrice: Float
+
+  """Checks for equality with the object’s `freeDeliveryTurnover` field."""
+  freeDeliveryTurnover: Float
+
+  """Checks for equality with the object’s `beginSalesDate` field."""
+  beginSalesDate: Datetime
+
+  """Checks for equality with the object’s `disabled` field."""
+  disabled: Boolean
+}
+
+"""A connection to a list of `Unit` values."""
+type UnitsConnection {
+  """A list of `Unit` objects."""
+  nodes: [Unit!]!
+
+  """
+  A list of edges which contains the `Unit` and cursor to aid in pagination.
+  """
+  edges: [UnitsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Unit` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Unit` edge in the connection."""
+type UnitsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Unit` at the end of the edge."""
+  node: Unit!
 }
 
 """Methods to use when ordering `Unit`."""
@@ -143,10 +2424,192 @@ input UnitCondition {
   abbreviation: String
 }
 
+"""A connection to a list of `ArticleDisplay` values."""
+type ArticleDisplaysConnection {
+  """A list of `ArticleDisplay` objects."""
+  nodes: [ArticleDisplay!]!
+
+  """
+  A list of edges which contains the `ArticleDisplay` and cursor to aid in pagination.
+  """
+  edges: [ArticleDisplaysEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `ArticleDisplay` you could get from the connection."""
+  totalCount: Int!
+}
+
+type ArticleDisplay {
+  id: Int
+  containerName: String
+  quantityPerContainer: BigFloat
+  productName: String
+  stockshapeName: String
+  unitAbbreviation: String
+}
+
+"""A `ArticleDisplay` edge in the connection."""
+type ArticleDisplaysEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `ArticleDisplay` at the end of the edge."""
+  node: ArticleDisplay!
+}
+
+"""A connection to a list of `StockShapeDisplay` values."""
+type StockShapeDisplaysConnection {
+  """A list of `StockShapeDisplay` objects."""
+  nodes: [StockShapeDisplay!]!
+
+  """
+  A list of edges which contains the `StockShapeDisplay` and cursor to aid in pagination.
+  """
+  edges: [StockShapeDisplaysEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `StockShapeDisplay` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+type StockShapeDisplay {
+  id: Int
+  stockShapeName: String
+  productName: String
+  unitAbbreviation: String
+}
+
+"""A `StockShapeDisplay` edge in the connection."""
+type StockShapeDisplaysEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `StockShapeDisplay` at the end of the edge."""
+  node: StockShapeDisplay!
+}
+
 """
 The root mutation type which contains root level fields which mutate data.
 """
 type Mutation {
+  """Creates a single `Article`."""
+  createArticle(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateArticleInput!
+  ): CreateArticlePayload
+
+  """Creates a single `ArticlesPrice`."""
+  createArticlesPrice(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateArticlesPriceInput!
+  ): CreateArticlesPricePayload
+
+  """Creates a single `Company`."""
+  createCompany(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateCompanyInput!
+  ): CreateCompanyPayload
+
+  """Creates a single `Contact`."""
+  createContact(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateContactInput!
+  ): CreateContactPayload
+
+  """Creates a single `Container`."""
+  createContainer(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateContainerInput!
+  ): CreateContainerPayload
+
+  """Creates a single `Customer`."""
+  createCustomer(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateCustomerInput!
+  ): CreateCustomerPayload
+
+  """Creates a single `FulfillmentMethod`."""
+  createFulfillmentMethod(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateFulfillmentMethodInput!
+  ): CreateFulfillmentMethodPayload
+
+  """Creates a single `Pricelist`."""
+  createPricelist(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreatePricelistInput!
+  ): CreatePricelistPayload
+
+  """Creates a single `Product`."""
+  createProduct(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateProductInput!
+  ): CreateProductPayload
+
+  """Creates a single `SalesSchedule`."""
+  createSalesSchedule(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateSalesScheduleInput!
+  ): CreateSalesSchedulePayload
+
+  """Creates a single `SalesSchedulesFulfillmentMethod`."""
+  createSalesSchedulesFulfillmentMethod(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateSalesSchedulesFulfillmentMethodInput!
+  ): CreateSalesSchedulesFulfillmentMethodPayload
+
+  """Creates a single `SalesSchedulesPricelist`."""
+  createSalesSchedulesPricelist(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateSalesSchedulesPricelistInput!
+  ): CreateSalesSchedulesPricelistPayload
+
+  """Creates a single `Setting`."""
+  createSetting(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateSettingInput!
+  ): CreateSettingPayload
+
+  """Creates a single `StockShape`."""
+  createStockShape(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateStockShapeInput!
+  ): CreateStockShapePayload
+
   """Creates a single `Unit`."""
   createUnit(
     """
@@ -154,6 +2617,244 @@ type Mutation {
     """
     input: CreateUnitInput!
   ): CreateUnitPayload
+
+  """Updates a single `Article` using its globally unique id and a patch."""
+  updateArticle(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateArticleInput!
+  ): UpdateArticlePayload
+
+  """Updates a single `Article` using a unique key and a patch."""
+  updateArticleById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateArticleByIdInput!
+  ): UpdateArticlePayload
+
+  """
+  Updates a single `ArticlesPrice` using its globally unique id and a patch.
+  """
+  updateArticlesPrice(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateArticlesPriceInput!
+  ): UpdateArticlesPricePayload
+
+  """Updates a single `ArticlesPrice` using a unique key and a patch."""
+  updateArticlesPriceById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateArticlesPriceByIdInput!
+  ): UpdateArticlesPricePayload
+
+  """Updates a single `ArticlesPrice` using a unique key and a patch."""
+  updateArticlesPriceByArticleIdAndPriceListId(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateArticlesPriceByArticleIdAndPriceListIdInput!
+  ): UpdateArticlesPricePayload
+
+  """Updates a single `Company` using its globally unique id and a patch."""
+  updateCompany(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateCompanyInput!
+  ): UpdateCompanyPayload
+
+  """Updates a single `Company` using a unique key and a patch."""
+  updateCompanyById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateCompanyByIdInput!
+  ): UpdateCompanyPayload
+
+  """Updates a single `Company` using a unique key and a patch."""
+  updateCompanyByCompanyNumber(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateCompanyByCompanyNumberInput!
+  ): UpdateCompanyPayload
+
+  """Updates a single `Contact` using its globally unique id and a patch."""
+  updateContact(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateContactInput!
+  ): UpdateContactPayload
+
+  """Updates a single `Contact` using a unique key and a patch."""
+  updateContactById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateContactByIdInput!
+  ): UpdateContactPayload
+
+  """Updates a single `Container` using its globally unique id and a patch."""
+  updateContainer(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateContainerInput!
+  ): UpdateContainerPayload
+
+  """Updates a single `Container` using a unique key and a patch."""
+  updateContainerById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateContainerByIdInput!
+  ): UpdateContainerPayload
+
+  """Updates a single `Customer` using its globally unique id and a patch."""
+  updateCustomer(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateCustomerInput!
+  ): UpdateCustomerPayload
+
+  """Updates a single `Customer` using a unique key and a patch."""
+  updateCustomerById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateCustomerByIdInput!
+  ): UpdateCustomerPayload
+
+  """
+  Updates a single `FulfillmentMethod` using its globally unique id and a patch.
+  """
+  updateFulfillmentMethod(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateFulfillmentMethodInput!
+  ): UpdateFulfillmentMethodPayload
+
+  """Updates a single `FulfillmentMethod` using a unique key and a patch."""
+  updateFulfillmentMethodById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateFulfillmentMethodByIdInput!
+  ): UpdateFulfillmentMethodPayload
+
+  """Updates a single `Pricelist` using its globally unique id and a patch."""
+  updatePricelist(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdatePricelistInput!
+  ): UpdatePricelistPayload
+
+  """Updates a single `Pricelist` using a unique key and a patch."""
+  updatePricelistById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdatePricelistByIdInput!
+  ): UpdatePricelistPayload
+
+  """Updates a single `Product` using its globally unique id and a patch."""
+  updateProduct(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateProductInput!
+  ): UpdateProductPayload
+
+  """Updates a single `Product` using a unique key and a patch."""
+  updateProductById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateProductByIdInput!
+  ): UpdateProductPayload
+
+  """
+  Updates a single `SalesSchedulesFulfillmentMethod` using its globally unique id and a patch.
+  """
+  updateSalesSchedulesFulfillmentMethod(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateSalesSchedulesFulfillmentMethodInput!
+  ): UpdateSalesSchedulesFulfillmentMethodPayload
+
+  """
+  Updates a single `SalesSchedulesFulfillmentMethod` using a unique key and a patch.
+  """
+  updateSalesSchedulesFulfillmentMethodBySalesScheduleIdAndFulfillmentMethodId(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateSalesSchedulesFulfillmentMethodBySalesScheduleIdAndFulfillmentMethodIdInput!
+  ): UpdateSalesSchedulesFulfillmentMethodPayload
+
+  """
+  Updates a single `SalesSchedulesPricelist` using its globally unique id and a patch.
+  """
+  updateSalesSchedulesPricelist(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateSalesSchedulesPricelistInput!
+  ): UpdateSalesSchedulesPricelistPayload
+
+  """
+  Updates a single `SalesSchedulesPricelist` using a unique key and a patch.
+  """
+  updateSalesSchedulesPricelistByPricelistIdAndSalesScheduleId(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateSalesSchedulesPricelistByPricelistIdAndSalesScheduleIdInput!
+  ): UpdateSalesSchedulesPricelistPayload
+
+  """Updates a single `Setting` using its globally unique id and a patch."""
+  updateSetting(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateSettingInput!
+  ): UpdateSettingPayload
+
+  """Updates a single `Setting` using a unique key and a patch."""
+  updateSettingById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateSettingByIdInput!
+  ): UpdateSettingPayload
+
+  """
+  Updates a single `StockShape` using its globally unique id and a patch.
+  """
+  updateStockShape(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateStockShapeInput!
+  ): UpdateStockShapePayload
+
+  """Updates a single `StockShape` using a unique key and a patch."""
+  updateStockShapeById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateStockShapeByIdInput!
+  ): UpdateStockShapePayload
 
   """Updates a single `Unit` using its globally unique id and a patch."""
   updateUnit(
@@ -171,6 +2872,234 @@ type Mutation {
     input: UpdateUnitByIdInput!
   ): UpdateUnitPayload
 
+  """Deletes a single `Article` using its globally unique id."""
+  deleteArticle(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteArticleInput!
+  ): DeleteArticlePayload
+
+  """Deletes a single `Article` using a unique key."""
+  deleteArticleById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteArticleByIdInput!
+  ): DeleteArticlePayload
+
+  """Deletes a single `ArticlesPrice` using its globally unique id."""
+  deleteArticlesPrice(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteArticlesPriceInput!
+  ): DeleteArticlesPricePayload
+
+  """Deletes a single `ArticlesPrice` using a unique key."""
+  deleteArticlesPriceById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteArticlesPriceByIdInput!
+  ): DeleteArticlesPricePayload
+
+  """Deletes a single `ArticlesPrice` using a unique key."""
+  deleteArticlesPriceByArticleIdAndPriceListId(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteArticlesPriceByArticleIdAndPriceListIdInput!
+  ): DeleteArticlesPricePayload
+
+  """Deletes a single `Company` using its globally unique id."""
+  deleteCompany(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteCompanyInput!
+  ): DeleteCompanyPayload
+
+  """Deletes a single `Company` using a unique key."""
+  deleteCompanyById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteCompanyByIdInput!
+  ): DeleteCompanyPayload
+
+  """Deletes a single `Company` using a unique key."""
+  deleteCompanyByCompanyNumber(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteCompanyByCompanyNumberInput!
+  ): DeleteCompanyPayload
+
+  """Deletes a single `Contact` using its globally unique id."""
+  deleteContact(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteContactInput!
+  ): DeleteContactPayload
+
+  """Deletes a single `Contact` using a unique key."""
+  deleteContactById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteContactByIdInput!
+  ): DeleteContactPayload
+
+  """Deletes a single `Container` using its globally unique id."""
+  deleteContainer(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteContainerInput!
+  ): DeleteContainerPayload
+
+  """Deletes a single `Container` using a unique key."""
+  deleteContainerById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteContainerByIdInput!
+  ): DeleteContainerPayload
+
+  """Deletes a single `Customer` using its globally unique id."""
+  deleteCustomer(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteCustomerInput!
+  ): DeleteCustomerPayload
+
+  """Deletes a single `Customer` using a unique key."""
+  deleteCustomerById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteCustomerByIdInput!
+  ): DeleteCustomerPayload
+
+  """Deletes a single `FulfillmentMethod` using its globally unique id."""
+  deleteFulfillmentMethod(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteFulfillmentMethodInput!
+  ): DeleteFulfillmentMethodPayload
+
+  """Deletes a single `FulfillmentMethod` using a unique key."""
+  deleteFulfillmentMethodById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteFulfillmentMethodByIdInput!
+  ): DeleteFulfillmentMethodPayload
+
+  """Deletes a single `Pricelist` using its globally unique id."""
+  deletePricelist(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeletePricelistInput!
+  ): DeletePricelistPayload
+
+  """Deletes a single `Pricelist` using a unique key."""
+  deletePricelistById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeletePricelistByIdInput!
+  ): DeletePricelistPayload
+
+  """Deletes a single `Product` using its globally unique id."""
+  deleteProduct(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteProductInput!
+  ): DeleteProductPayload
+
+  """Deletes a single `Product` using a unique key."""
+  deleteProductById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteProductByIdInput!
+  ): DeleteProductPayload
+
+  """
+  Deletes a single `SalesSchedulesFulfillmentMethod` using its globally unique id.
+  """
+  deleteSalesSchedulesFulfillmentMethod(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteSalesSchedulesFulfillmentMethodInput!
+  ): DeleteSalesSchedulesFulfillmentMethodPayload
+
+  """Deletes a single `SalesSchedulesFulfillmentMethod` using a unique key."""
+  deleteSalesSchedulesFulfillmentMethodBySalesScheduleIdAndFulfillmentMethodId(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteSalesSchedulesFulfillmentMethodBySalesScheduleIdAndFulfillmentMethodIdInput!
+  ): DeleteSalesSchedulesFulfillmentMethodPayload
+
+  """
+  Deletes a single `SalesSchedulesPricelist` using its globally unique id.
+  """
+  deleteSalesSchedulesPricelist(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteSalesSchedulesPricelistInput!
+  ): DeleteSalesSchedulesPricelistPayload
+
+  """Deletes a single `SalesSchedulesPricelist` using a unique key."""
+  deleteSalesSchedulesPricelistByPricelistIdAndSalesScheduleId(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteSalesSchedulesPricelistByPricelistIdAndSalesScheduleIdInput!
+  ): DeleteSalesSchedulesPricelistPayload
+
+  """Deletes a single `Setting` using its globally unique id."""
+  deleteSetting(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteSettingInput!
+  ): DeleteSettingPayload
+
+  """Deletes a single `Setting` using a unique key."""
+  deleteSettingById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteSettingByIdInput!
+  ): DeleteSettingPayload
+
+  """Deletes a single `StockShape` using its globally unique id."""
+  deleteStockShape(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteStockShapeInput!
+  ): DeleteStockShapePayload
+
+  """Deletes a single `StockShape` using a unique key."""
+  deleteStockShapeById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteStockShapeByIdInput!
+  ): DeleteStockShapePayload
+
   """Deletes a single `Unit` using its globally unique id."""
   deleteUnit(
     """
@@ -186,6 +3115,693 @@ type Mutation {
     """
     input: DeleteUnitByIdInput!
   ): DeleteUnitPayload
+  authenticatePubKey(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: AuthenticatePubKeyInput!
+  ): AuthenticatePubKeyPayload
+  createSalesScheduleWithDeps(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateSalesScheduleWithDepsInput!
+  ): CreateSalesScheduleWithDepsPayload
+  updateSalesScheduleWithDeps(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateSalesScheduleWithDepsInput!
+  ): UpdateSalesScheduleWithDepsPayload
+}
+
+"""The output of our create `Article` mutation."""
+type CreateArticlePayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Article` that was created by this mutation."""
+  article: Article
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `StockShape` that is related to this `Article`."""
+  stockShapeByStockShapeId: StockShape
+
+  """Reads a single `Container` that is related to this `Article`."""
+  containerByContainerId: Container
+
+  """An edge for our `Article`. May be used by Relay 1."""
+  articleEdge(
+    """The method to use when ordering `Article`."""
+    orderBy: [ArticlesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): ArticlesEdge
+}
+
+"""All input for the create `Article` mutation."""
+input CreateArticleInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `Article` to be created by this mutation."""
+  article: ArticleInput!
+}
+
+"""An input for mutations affecting `Article`"""
+input ArticleInput {
+  id: Int
+  stockShapeId: Int!
+  containerId: Int!
+  quantityPerContainer: BigFloat!
+}
+
+"""The output of our create `ArticlesPrice` mutation."""
+type CreateArticlesPricePayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `ArticlesPrice` that was created by this mutation."""
+  articlesPrice: ArticlesPrice
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Article` that is related to this `ArticlesPrice`."""
+  articleByArticleId: Article
+
+  """Reads a single `Pricelist` that is related to this `ArticlesPrice`."""
+  pricelistByPriceListId: Pricelist
+
+  """An edge for our `ArticlesPrice`. May be used by Relay 1."""
+  articlesPriceEdge(
+    """The method to use when ordering `ArticlesPrice`."""
+    orderBy: [ArticlesPricesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): ArticlesPricesEdge
+}
+
+"""All input for the create `ArticlesPrice` mutation."""
+input CreateArticlesPriceInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `ArticlesPrice` to be created by this mutation."""
+  articlesPrice: ArticlesPriceInput!
+}
+
+"""An input for mutations affecting `ArticlesPrice`"""
+input ArticlesPriceInput {
+  id: Int
+  articleId: Int!
+  priceListId: Int!
+  price: Float!
+}
+
+"""The output of our create `Company` mutation."""
+type CreateCompanyPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Company` that was created by this mutation."""
+  company: Company
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Contact` that is related to this `Company`."""
+  contactByMainContactId: Contact
+
+  """An edge for our `Company`. May be used by Relay 1."""
+  companyEdge(
+    """The method to use when ordering `Company`."""
+    orderBy: [CompaniesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): CompaniesEdge
+}
+
+"""All input for the create `Company` mutation."""
+input CreateCompanyInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `Company` to be created by this mutation."""
+  company: CompanyInput!
+}
+
+"""An input for mutations affecting `Company`"""
+input CompanyInput {
+  id: Int
+  name: String!
+  addressLine1: String
+  addressLine2: String
+  companyNumber: String
+  zipCode: String
+  city: String
+  mainContactId: Int
+}
+
+"""The output of our create `Contact` mutation."""
+type CreateContactPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Contact` that was created by this mutation."""
+  contact: Contact
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Company` that is related to this `Contact`."""
+  companyByCompanyId: Company
+
+  """An edge for our `Contact`. May be used by Relay 1."""
+  contactEdge(
+    """The method to use when ordering `Contact`."""
+    orderBy: [ContactsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): ContactsEdge
+}
+
+"""All input for the create `Contact` mutation."""
+input CreateContactInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `Contact` to be created by this mutation."""
+  contact: ContactInput!
+}
+
+"""An input for mutations affecting `Contact`"""
+input ContactInput {
+  id: Int
+  firstName: String
+  lastName: String!
+  email: String
+  phone: String
+  addressLine1: String
+  addressLine2: String
+  zipCode: String
+  city: String
+  publicKey: String
+  companyId: Int
+}
+
+"""The output of our create `Container` mutation."""
+type CreateContainerPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Container` that was created by this mutation."""
+  container: Container
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `Container`. May be used by Relay 1."""
+  containerEdge(
+    """The method to use when ordering `Container`."""
+    orderBy: [ContainersOrderBy!] = [PRIMARY_KEY_ASC]
+  ): ContainersEdge
+}
+
+"""All input for the create `Container` mutation."""
+input CreateContainerInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `Container` to be created by this mutation."""
+  container: ContainerInput!
+}
+
+"""An input for mutations affecting `Container`"""
+input ContainerInput {
+  id: Int
+  name: String!
+  description: String!
+}
+
+"""The output of our create `Customer` mutation."""
+type CreateCustomerPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Customer` that was created by this mutation."""
+  customer: Customer
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Pricelist` that is related to this `Customer`."""
+  pricelistByPriceListId: Pricelist
+
+  """An edge for our `Customer`. May be used by Relay 1."""
+  customerEdge(
+    """The method to use when ordering `Customer`."""
+    orderBy: [CustomersOrderBy!] = [PRIMARY_KEY_ASC]
+  ): CustomersEdge
+}
+
+"""All input for the create `Customer` mutation."""
+input CreateCustomerInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `Customer` to be created by this mutation."""
+  customer: CustomerInput!
+}
+
+"""An input for mutations affecting `Customer`"""
+input CustomerInput {
+  id: Int
+  slug: String!
+  priceListId: Int!
+  eshopAccess: Boolean
+  contactId: Int
+  companyId: Int
+}
+
+"""The output of our create `FulfillmentMethod` mutation."""
+type CreateFulfillmentMethodPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `FulfillmentMethod` that was created by this mutation."""
+  fulfillmentMethod: FulfillmentMethod
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `FulfillmentMethod`. May be used by Relay 1."""
+  fulfillmentMethodEdge(
+    """The method to use when ordering `FulfillmentMethod`."""
+    orderBy: [FulfillmentMethodsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): FulfillmentMethodsEdge
+}
+
+"""All input for the create `FulfillmentMethod` mutation."""
+input CreateFulfillmentMethodInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `FulfillmentMethod` to be created by this mutation."""
+  fulfillmentMethod: FulfillmentMethodInput!
+}
+
+"""An input for mutations affecting `FulfillmentMethod`"""
+input FulfillmentMethodInput {
+  id: Int
+  name: String!
+  needsPickupAddress: Boolean!
+  needsCustomerAddress: Boolean!
+}
+
+"""The output of our create `Pricelist` mutation."""
+type CreatePricelistPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Pricelist` that was created by this mutation."""
+  pricelist: Pricelist
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `Pricelist`. May be used by Relay 1."""
+  pricelistEdge(
+    """The method to use when ordering `Pricelist`."""
+    orderBy: [PricelistsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PricelistsEdge
+}
+
+"""All input for the create `Pricelist` mutation."""
+input CreatePricelistInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `Pricelist` to be created by this mutation."""
+  pricelist: PricelistInput!
+}
+
+"""An input for mutations affecting `Pricelist`"""
+input PricelistInput {
+  id: Int
+  name: String!
+  vatIncluded: Boolean
+}
+
+"""The output of our create `Product` mutation."""
+type CreateProductPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Product` that was created by this mutation."""
+  product: Product
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Product` that is related to this `Product`."""
+  productByParentProduct: Product
+
+  """An edge for our `Product`. May be used by Relay 1."""
+  productEdge(
+    """The method to use when ordering `Product`."""
+    orderBy: [ProductsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): ProductsEdge
+}
+
+"""All input for the create `Product` mutation."""
+input CreateProductInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `Product` to be created by this mutation."""
+  product: ProductInput!
+}
+
+"""An input for mutations affecting `Product`"""
+input ProductInput {
+  id: Int
+  name: String!
+  description: String
+  parentProduct: Int
+}
+
+"""The output of our create `SalesSchedule` mutation."""
+type CreateSalesSchedulePayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `SalesSchedule` that was created by this mutation."""
+  salesSchedule: SalesSchedule
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `SalesSchedule`. May be used by Relay 1."""
+  salesScheduleEdge(
+    """The method to use when ordering `SalesSchedule`."""
+    orderBy: [SalesSchedulesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): SalesSchedulesEdge
+}
+
+"""All input for the create `SalesSchedule` mutation."""
+input CreateSalesScheduleInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `SalesSchedule` to be created by this mutation."""
+  salesSchedule: SalesScheduleInput!
+}
+
+"""An input for mutations affecting `SalesSchedule`"""
+input SalesScheduleInput {
+  id: Int
+  fulfillmentDate: Datetime!
+  name: String
+  orderClosureDate: Datetime!
+  deliveryPrice: Float
+  freeDeliveryTurnover: Float
+  beginSalesDate: Datetime
+  disabled: Boolean
+}
+
+"""The output of our create `SalesSchedulesFulfillmentMethod` mutation."""
+type CreateSalesSchedulesFulfillmentMethodPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """
+  The `SalesSchedulesFulfillmentMethod` that was created by this mutation.
+  """
+  salesSchedulesFulfillmentMethod: SalesSchedulesFulfillmentMethod
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """
+  Reads a single `SalesSchedule` that is related to this `SalesSchedulesFulfillmentMethod`.
+  """
+  salesScheduleBySalesScheduleId: SalesSchedule
+
+  """
+  Reads a single `FulfillmentMethod` that is related to this `SalesSchedulesFulfillmentMethod`.
+  """
+  fulfillmentMethodByFulfillmentMethodId: FulfillmentMethod
+
+  """
+  An edge for our `SalesSchedulesFulfillmentMethod`. May be used by Relay 1.
+  """
+  salesSchedulesFulfillmentMethodEdge(
+    """The method to use when ordering `SalesSchedulesFulfillmentMethod`."""
+    orderBy: [SalesSchedulesFulfillmentMethodsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): SalesSchedulesFulfillmentMethodsEdge
+}
+
+"""All input for the create `SalesSchedulesFulfillmentMethod` mutation."""
+input CreateSalesSchedulesFulfillmentMethodInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `SalesSchedulesFulfillmentMethod` to be created by this mutation."""
+  salesSchedulesFulfillmentMethod: SalesSchedulesFulfillmentMethodInput!
+}
+
+"""An input for mutations affecting `SalesSchedulesFulfillmentMethod`"""
+input SalesSchedulesFulfillmentMethodInput {
+  salesScheduleId: Int!
+  fulfillmentMethodId: Int!
+}
+
+"""The output of our create `SalesSchedulesPricelist` mutation."""
+type CreateSalesSchedulesPricelistPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `SalesSchedulesPricelist` that was created by this mutation."""
+  salesSchedulesPricelist: SalesSchedulesPricelist
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """
+  Reads a single `Pricelist` that is related to this `SalesSchedulesPricelist`.
+  """
+  pricelistByPricelistId: Pricelist
+
+  """
+  Reads a single `SalesSchedule` that is related to this `SalesSchedulesPricelist`.
+  """
+  salesScheduleBySalesScheduleId: SalesSchedule
+
+  """An edge for our `SalesSchedulesPricelist`. May be used by Relay 1."""
+  salesSchedulesPricelistEdge(
+    """The method to use when ordering `SalesSchedulesPricelist`."""
+    orderBy: [SalesSchedulesPricelistsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): SalesSchedulesPricelistsEdge
+}
+
+"""All input for the create `SalesSchedulesPricelist` mutation."""
+input CreateSalesSchedulesPricelistInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `SalesSchedulesPricelist` to be created by this mutation."""
+  salesSchedulesPricelist: SalesSchedulesPricelistInput!
+}
+
+"""An input for mutations affecting `SalesSchedulesPricelist`"""
+input SalesSchedulesPricelistInput {
+  pricelistId: Int!
+  salesScheduleId: Int!
+}
+
+"""The output of our create `Setting` mutation."""
+type CreateSettingPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Setting` that was created by this mutation."""
+  setting: Setting
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Company` that is related to this `Setting`."""
+  companyByOwnerId: Company
+
+  """An edge for our `Setting`. May be used by Relay 1."""
+  settingEdge(
+    """The method to use when ordering `Setting`."""
+    orderBy: [SettingsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): SettingsEdge
+}
+
+"""All input for the create `Setting` mutation."""
+input CreateSettingInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `Setting` to be created by this mutation."""
+  setting: SettingInput!
+}
+
+"""An input for mutations affecting `Setting`"""
+input SettingInput {
+  ownerId: Int!
+  id: Int
+}
+
+"""The output of our create `StockShape` mutation."""
+type CreateStockShapePayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `StockShape` that was created by this mutation."""
+  stockShape: StockShape
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Product` that is related to this `StockShape`."""
+  productByProductId: Product
+
+  """Reads a single `Unit` that is related to this `StockShape`."""
+  unitByUnitId: Unit
+
+  """An edge for our `StockShape`. May be used by Relay 1."""
+  stockShapeEdge(
+    """The method to use when ordering `StockShape`."""
+    orderBy: [StockShapesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): StockShapesEdge
+}
+
+"""All input for the create `StockShape` mutation."""
+input CreateStockShapeInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `StockShape` to be created by this mutation."""
+  stockShape: StockShapeInput!
+}
+
+"""An input for mutations affecting `StockShape`"""
+input StockShapeInput {
+  id: Int
+  name: String!
+  productId: Int!
+  unitId: Int!
+  inStock: BigFloat
 }
 
 """The output of our create `Unit` mutation."""
@@ -228,6 +3844,979 @@ input UnitInput {
   id: Int
   name: String!
   abbreviation: String!
+}
+
+"""The output of our update `Article` mutation."""
+type UpdateArticlePayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Article` that was updated by this mutation."""
+  article: Article
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `StockShape` that is related to this `Article`."""
+  stockShapeByStockShapeId: StockShape
+
+  """Reads a single `Container` that is related to this `Article`."""
+  containerByContainerId: Container
+
+  """An edge for our `Article`. May be used by Relay 1."""
+  articleEdge(
+    """The method to use when ordering `Article`."""
+    orderBy: [ArticlesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): ArticlesEdge
+}
+
+"""All input for the `updateArticle` mutation."""
+input UpdateArticleInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Article` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `Article` being updated.
+  """
+  articlePatch: ArticlePatch!
+}
+
+"""
+Represents an update to a `Article`. Fields that are set will be updated.
+"""
+input ArticlePatch {
+  id: Int
+  stockShapeId: Int
+  containerId: Int
+  quantityPerContainer: BigFloat
+}
+
+"""All input for the `updateArticleById` mutation."""
+input UpdateArticleByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `Article` being updated.
+  """
+  articlePatch: ArticlePatch!
+  id: Int!
+}
+
+"""The output of our update `ArticlesPrice` mutation."""
+type UpdateArticlesPricePayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `ArticlesPrice` that was updated by this mutation."""
+  articlesPrice: ArticlesPrice
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Article` that is related to this `ArticlesPrice`."""
+  articleByArticleId: Article
+
+  """Reads a single `Pricelist` that is related to this `ArticlesPrice`."""
+  pricelistByPriceListId: Pricelist
+
+  """An edge for our `ArticlesPrice`. May be used by Relay 1."""
+  articlesPriceEdge(
+    """The method to use when ordering `ArticlesPrice`."""
+    orderBy: [ArticlesPricesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): ArticlesPricesEdge
+}
+
+"""All input for the `updateArticlesPrice` mutation."""
+input UpdateArticlesPriceInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `ArticlesPrice` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `ArticlesPrice` being updated.
+  """
+  articlesPricePatch: ArticlesPricePatch!
+}
+
+"""
+Represents an update to a `ArticlesPrice`. Fields that are set will be updated.
+"""
+input ArticlesPricePatch {
+  id: Int
+  articleId: Int
+  priceListId: Int
+  price: Float
+}
+
+"""All input for the `updateArticlesPriceById` mutation."""
+input UpdateArticlesPriceByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `ArticlesPrice` being updated.
+  """
+  articlesPricePatch: ArticlesPricePatch!
+  id: Int!
+}
+
+"""
+All input for the `updateArticlesPriceByArticleIdAndPriceListId` mutation.
+"""
+input UpdateArticlesPriceByArticleIdAndPriceListIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `ArticlesPrice` being updated.
+  """
+  articlesPricePatch: ArticlesPricePatch!
+  articleId: Int!
+  priceListId: Int!
+}
+
+"""The output of our update `Company` mutation."""
+type UpdateCompanyPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Company` that was updated by this mutation."""
+  company: Company
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Contact` that is related to this `Company`."""
+  contactByMainContactId: Contact
+
+  """An edge for our `Company`. May be used by Relay 1."""
+  companyEdge(
+    """The method to use when ordering `Company`."""
+    orderBy: [CompaniesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): CompaniesEdge
+}
+
+"""All input for the `updateCompany` mutation."""
+input UpdateCompanyInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Company` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `Company` being updated.
+  """
+  companyPatch: CompanyPatch!
+}
+
+"""
+Represents an update to a `Company`. Fields that are set will be updated.
+"""
+input CompanyPatch {
+  id: Int
+  name: String
+  addressLine1: String
+  addressLine2: String
+  companyNumber: String
+  zipCode: String
+  city: String
+  mainContactId: Int
+}
+
+"""All input for the `updateCompanyById` mutation."""
+input UpdateCompanyByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `Company` being updated.
+  """
+  companyPatch: CompanyPatch!
+  id: Int!
+}
+
+"""All input for the `updateCompanyByCompanyNumber` mutation."""
+input UpdateCompanyByCompanyNumberInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `Company` being updated.
+  """
+  companyPatch: CompanyPatch!
+  companyNumber: String!
+}
+
+"""The output of our update `Contact` mutation."""
+type UpdateContactPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Contact` that was updated by this mutation."""
+  contact: Contact
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Company` that is related to this `Contact`."""
+  companyByCompanyId: Company
+
+  """An edge for our `Contact`. May be used by Relay 1."""
+  contactEdge(
+    """The method to use when ordering `Contact`."""
+    orderBy: [ContactsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): ContactsEdge
+}
+
+"""All input for the `updateContact` mutation."""
+input UpdateContactInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Contact` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `Contact` being updated.
+  """
+  contactPatch: ContactPatch!
+}
+
+"""
+Represents an update to a `Contact`. Fields that are set will be updated.
+"""
+input ContactPatch {
+  id: Int
+  firstName: String
+  lastName: String
+  email: String
+  phone: String
+  addressLine1: String
+  addressLine2: String
+  zipCode: String
+  city: String
+  publicKey: String
+  companyId: Int
+}
+
+"""All input for the `updateContactById` mutation."""
+input UpdateContactByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `Contact` being updated.
+  """
+  contactPatch: ContactPatch!
+  id: Int!
+}
+
+"""The output of our update `Container` mutation."""
+type UpdateContainerPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Container` that was updated by this mutation."""
+  container: Container
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `Container`. May be used by Relay 1."""
+  containerEdge(
+    """The method to use when ordering `Container`."""
+    orderBy: [ContainersOrderBy!] = [PRIMARY_KEY_ASC]
+  ): ContainersEdge
+}
+
+"""All input for the `updateContainer` mutation."""
+input UpdateContainerInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Container` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `Container` being updated.
+  """
+  containerPatch: ContainerPatch!
+}
+
+"""
+Represents an update to a `Container`. Fields that are set will be updated.
+"""
+input ContainerPatch {
+  id: Int
+  name: String
+  description: String
+}
+
+"""All input for the `updateContainerById` mutation."""
+input UpdateContainerByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `Container` being updated.
+  """
+  containerPatch: ContainerPatch!
+  id: Int!
+}
+
+"""The output of our update `Customer` mutation."""
+type UpdateCustomerPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Customer` that was updated by this mutation."""
+  customer: Customer
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Pricelist` that is related to this `Customer`."""
+  pricelistByPriceListId: Pricelist
+
+  """An edge for our `Customer`. May be used by Relay 1."""
+  customerEdge(
+    """The method to use when ordering `Customer`."""
+    orderBy: [CustomersOrderBy!] = [PRIMARY_KEY_ASC]
+  ): CustomersEdge
+}
+
+"""All input for the `updateCustomer` mutation."""
+input UpdateCustomerInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Customer` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `Customer` being updated.
+  """
+  customerPatch: CustomerPatch!
+}
+
+"""
+Represents an update to a `Customer`. Fields that are set will be updated.
+"""
+input CustomerPatch {
+  id: Int
+  slug: String
+  priceListId: Int
+  eshopAccess: Boolean
+  contactId: Int
+  companyId: Int
+}
+
+"""All input for the `updateCustomerById` mutation."""
+input UpdateCustomerByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `Customer` being updated.
+  """
+  customerPatch: CustomerPatch!
+  id: Int!
+}
+
+"""The output of our update `FulfillmentMethod` mutation."""
+type UpdateFulfillmentMethodPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `FulfillmentMethod` that was updated by this mutation."""
+  fulfillmentMethod: FulfillmentMethod
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `FulfillmentMethod`. May be used by Relay 1."""
+  fulfillmentMethodEdge(
+    """The method to use when ordering `FulfillmentMethod`."""
+    orderBy: [FulfillmentMethodsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): FulfillmentMethodsEdge
+}
+
+"""All input for the `updateFulfillmentMethod` mutation."""
+input UpdateFulfillmentMethodInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `FulfillmentMethod` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `FulfillmentMethod` being updated.
+  """
+  fulfillmentMethodPatch: FulfillmentMethodPatch!
+}
+
+"""
+Represents an update to a `FulfillmentMethod`. Fields that are set will be updated.
+"""
+input FulfillmentMethodPatch {
+  id: Int
+  name: String
+  needsPickupAddress: Boolean
+  needsCustomerAddress: Boolean
+}
+
+"""All input for the `updateFulfillmentMethodById` mutation."""
+input UpdateFulfillmentMethodByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `FulfillmentMethod` being updated.
+  """
+  fulfillmentMethodPatch: FulfillmentMethodPatch!
+  id: Int!
+}
+
+"""The output of our update `Pricelist` mutation."""
+type UpdatePricelistPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Pricelist` that was updated by this mutation."""
+  pricelist: Pricelist
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `Pricelist`. May be used by Relay 1."""
+  pricelistEdge(
+    """The method to use when ordering `Pricelist`."""
+    orderBy: [PricelistsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PricelistsEdge
+}
+
+"""All input for the `updatePricelist` mutation."""
+input UpdatePricelistInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Pricelist` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `Pricelist` being updated.
+  """
+  pricelistPatch: PricelistPatch!
+}
+
+"""
+Represents an update to a `Pricelist`. Fields that are set will be updated.
+"""
+input PricelistPatch {
+  id: Int
+  name: String
+  vatIncluded: Boolean
+}
+
+"""All input for the `updatePricelistById` mutation."""
+input UpdatePricelistByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `Pricelist` being updated.
+  """
+  pricelistPatch: PricelistPatch!
+  id: Int!
+}
+
+"""The output of our update `Product` mutation."""
+type UpdateProductPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Product` that was updated by this mutation."""
+  product: Product
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Product` that is related to this `Product`."""
+  productByParentProduct: Product
+
+  """An edge for our `Product`. May be used by Relay 1."""
+  productEdge(
+    """The method to use when ordering `Product`."""
+    orderBy: [ProductsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): ProductsEdge
+}
+
+"""All input for the `updateProduct` mutation."""
+input UpdateProductInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Product` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `Product` being updated.
+  """
+  productPatch: ProductPatch!
+}
+
+"""
+Represents an update to a `Product`. Fields that are set will be updated.
+"""
+input ProductPatch {
+  id: Int
+  name: String
+  description: String
+  parentProduct: Int
+}
+
+"""All input for the `updateProductById` mutation."""
+input UpdateProductByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `Product` being updated.
+  """
+  productPatch: ProductPatch!
+  id: Int!
+}
+
+"""The output of our update `SalesSchedulesFulfillmentMethod` mutation."""
+type UpdateSalesSchedulesFulfillmentMethodPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """
+  The `SalesSchedulesFulfillmentMethod` that was updated by this mutation.
+  """
+  salesSchedulesFulfillmentMethod: SalesSchedulesFulfillmentMethod
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """
+  Reads a single `SalesSchedule` that is related to this `SalesSchedulesFulfillmentMethod`.
+  """
+  salesScheduleBySalesScheduleId: SalesSchedule
+
+  """
+  Reads a single `FulfillmentMethod` that is related to this `SalesSchedulesFulfillmentMethod`.
+  """
+  fulfillmentMethodByFulfillmentMethodId: FulfillmentMethod
+
+  """
+  An edge for our `SalesSchedulesFulfillmentMethod`. May be used by Relay 1.
+  """
+  salesSchedulesFulfillmentMethodEdge(
+    """The method to use when ordering `SalesSchedulesFulfillmentMethod`."""
+    orderBy: [SalesSchedulesFulfillmentMethodsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): SalesSchedulesFulfillmentMethodsEdge
+}
+
+"""All input for the `updateSalesSchedulesFulfillmentMethod` mutation."""
+input UpdateSalesSchedulesFulfillmentMethodInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `SalesSchedulesFulfillmentMethod` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `SalesSchedulesFulfillmentMethod` being updated.
+  """
+  salesSchedulesFulfillmentMethodPatch: SalesSchedulesFulfillmentMethodPatch!
+}
+
+"""
+Represents an update to a `SalesSchedulesFulfillmentMethod`. Fields that are set will be updated.
+"""
+input SalesSchedulesFulfillmentMethodPatch {
+  salesScheduleId: Int
+  fulfillmentMethodId: Int
+}
+
+"""
+All input for the `updateSalesSchedulesFulfillmentMethodBySalesScheduleIdAndFulfillmentMethodId` mutation.
+"""
+input UpdateSalesSchedulesFulfillmentMethodBySalesScheduleIdAndFulfillmentMethodIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `SalesSchedulesFulfillmentMethod` being updated.
+  """
+  salesSchedulesFulfillmentMethodPatch: SalesSchedulesFulfillmentMethodPatch!
+  salesScheduleId: Int!
+  fulfillmentMethodId: Int!
+}
+
+"""The output of our update `SalesSchedulesPricelist` mutation."""
+type UpdateSalesSchedulesPricelistPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `SalesSchedulesPricelist` that was updated by this mutation."""
+  salesSchedulesPricelist: SalesSchedulesPricelist
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """
+  Reads a single `Pricelist` that is related to this `SalesSchedulesPricelist`.
+  """
+  pricelistByPricelistId: Pricelist
+
+  """
+  Reads a single `SalesSchedule` that is related to this `SalesSchedulesPricelist`.
+  """
+  salesScheduleBySalesScheduleId: SalesSchedule
+
+  """An edge for our `SalesSchedulesPricelist`. May be used by Relay 1."""
+  salesSchedulesPricelistEdge(
+    """The method to use when ordering `SalesSchedulesPricelist`."""
+    orderBy: [SalesSchedulesPricelistsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): SalesSchedulesPricelistsEdge
+}
+
+"""All input for the `updateSalesSchedulesPricelist` mutation."""
+input UpdateSalesSchedulesPricelistInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `SalesSchedulesPricelist` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `SalesSchedulesPricelist` being updated.
+  """
+  salesSchedulesPricelistPatch: SalesSchedulesPricelistPatch!
+}
+
+"""
+Represents an update to a `SalesSchedulesPricelist`. Fields that are set will be updated.
+"""
+input SalesSchedulesPricelistPatch {
+  pricelistId: Int
+  salesScheduleId: Int
+}
+
+"""
+All input for the `updateSalesSchedulesPricelistByPricelistIdAndSalesScheduleId` mutation.
+"""
+input UpdateSalesSchedulesPricelistByPricelistIdAndSalesScheduleIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `SalesSchedulesPricelist` being updated.
+  """
+  salesSchedulesPricelistPatch: SalesSchedulesPricelistPatch!
+  pricelistId: Int!
+  salesScheduleId: Int!
+}
+
+"""The output of our update `Setting` mutation."""
+type UpdateSettingPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Setting` that was updated by this mutation."""
+  setting: Setting
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Company` that is related to this `Setting`."""
+  companyByOwnerId: Company
+
+  """An edge for our `Setting`. May be used by Relay 1."""
+  settingEdge(
+    """The method to use when ordering `Setting`."""
+    orderBy: [SettingsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): SettingsEdge
+}
+
+"""All input for the `updateSetting` mutation."""
+input UpdateSettingInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Setting` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `Setting` being updated.
+  """
+  settingPatch: SettingPatch!
+}
+
+"""
+Represents an update to a `Setting`. Fields that are set will be updated.
+"""
+input SettingPatch {
+  ownerId: Int
+  id: Int
+}
+
+"""All input for the `updateSettingById` mutation."""
+input UpdateSettingByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `Setting` being updated.
+  """
+  settingPatch: SettingPatch!
+  id: Int!
+}
+
+"""The output of our update `StockShape` mutation."""
+type UpdateStockShapePayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `StockShape` that was updated by this mutation."""
+  stockShape: StockShape
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Product` that is related to this `StockShape`."""
+  productByProductId: Product
+
+  """Reads a single `Unit` that is related to this `StockShape`."""
+  unitByUnitId: Unit
+
+  """An edge for our `StockShape`. May be used by Relay 1."""
+  stockShapeEdge(
+    """The method to use when ordering `StockShape`."""
+    orderBy: [StockShapesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): StockShapesEdge
+}
+
+"""All input for the `updateStockShape` mutation."""
+input UpdateStockShapeInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `StockShape` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `StockShape` being updated.
+  """
+  stockShapePatch: StockShapePatch!
+}
+
+"""
+Represents an update to a `StockShape`. Fields that are set will be updated.
+"""
+input StockShapePatch {
+  id: Int
+  name: String
+  productId: Int
+  unitId: Int
+  inStock: BigFloat
+}
+
+"""All input for the `updateStockShapeById` mutation."""
+input UpdateStockShapeByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `StockShape` being updated.
+  """
+  stockShapePatch: StockShapePatch!
+  id: Int!
 }
 
 """The output of our update `Unit` mutation."""
@@ -294,6 +4883,716 @@ input UpdateUnitByIdInput {
   id: Int!
 }
 
+"""The output of our delete `Article` mutation."""
+type DeleteArticlePayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Article` that was deleted by this mutation."""
+  article: Article
+  deletedArticleId: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `StockShape` that is related to this `Article`."""
+  stockShapeByStockShapeId: StockShape
+
+  """Reads a single `Container` that is related to this `Article`."""
+  containerByContainerId: Container
+
+  """An edge for our `Article`. May be used by Relay 1."""
+  articleEdge(
+    """The method to use when ordering `Article`."""
+    orderBy: [ArticlesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): ArticlesEdge
+}
+
+"""All input for the `deleteArticle` mutation."""
+input DeleteArticleInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Article` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""All input for the `deleteArticleById` mutation."""
+input DeleteArticleByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+}
+
+"""The output of our delete `ArticlesPrice` mutation."""
+type DeleteArticlesPricePayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `ArticlesPrice` that was deleted by this mutation."""
+  articlesPrice: ArticlesPrice
+  deletedArticlesPriceId: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Article` that is related to this `ArticlesPrice`."""
+  articleByArticleId: Article
+
+  """Reads a single `Pricelist` that is related to this `ArticlesPrice`."""
+  pricelistByPriceListId: Pricelist
+
+  """An edge for our `ArticlesPrice`. May be used by Relay 1."""
+  articlesPriceEdge(
+    """The method to use when ordering `ArticlesPrice`."""
+    orderBy: [ArticlesPricesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): ArticlesPricesEdge
+}
+
+"""All input for the `deleteArticlesPrice` mutation."""
+input DeleteArticlesPriceInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `ArticlesPrice` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""All input for the `deleteArticlesPriceById` mutation."""
+input DeleteArticlesPriceByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+}
+
+"""
+All input for the `deleteArticlesPriceByArticleIdAndPriceListId` mutation.
+"""
+input DeleteArticlesPriceByArticleIdAndPriceListIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  articleId: Int!
+  priceListId: Int!
+}
+
+"""The output of our delete `Company` mutation."""
+type DeleteCompanyPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Company` that was deleted by this mutation."""
+  company: Company
+  deletedCompanyId: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Contact` that is related to this `Company`."""
+  contactByMainContactId: Contact
+
+  """An edge for our `Company`. May be used by Relay 1."""
+  companyEdge(
+    """The method to use when ordering `Company`."""
+    orderBy: [CompaniesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): CompaniesEdge
+}
+
+"""All input for the `deleteCompany` mutation."""
+input DeleteCompanyInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Company` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""All input for the `deleteCompanyById` mutation."""
+input DeleteCompanyByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+}
+
+"""All input for the `deleteCompanyByCompanyNumber` mutation."""
+input DeleteCompanyByCompanyNumberInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  companyNumber: String!
+}
+
+"""The output of our delete `Contact` mutation."""
+type DeleteContactPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Contact` that was deleted by this mutation."""
+  contact: Contact
+  deletedContactId: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Company` that is related to this `Contact`."""
+  companyByCompanyId: Company
+
+  """An edge for our `Contact`. May be used by Relay 1."""
+  contactEdge(
+    """The method to use when ordering `Contact`."""
+    orderBy: [ContactsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): ContactsEdge
+}
+
+"""All input for the `deleteContact` mutation."""
+input DeleteContactInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Contact` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""All input for the `deleteContactById` mutation."""
+input DeleteContactByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+}
+
+"""The output of our delete `Container` mutation."""
+type DeleteContainerPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Container` that was deleted by this mutation."""
+  container: Container
+  deletedContainerId: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `Container`. May be used by Relay 1."""
+  containerEdge(
+    """The method to use when ordering `Container`."""
+    orderBy: [ContainersOrderBy!] = [PRIMARY_KEY_ASC]
+  ): ContainersEdge
+}
+
+"""All input for the `deleteContainer` mutation."""
+input DeleteContainerInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Container` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""All input for the `deleteContainerById` mutation."""
+input DeleteContainerByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+}
+
+"""The output of our delete `Customer` mutation."""
+type DeleteCustomerPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Customer` that was deleted by this mutation."""
+  customer: Customer
+  deletedCustomerId: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Pricelist` that is related to this `Customer`."""
+  pricelistByPriceListId: Pricelist
+
+  """An edge for our `Customer`. May be used by Relay 1."""
+  customerEdge(
+    """The method to use when ordering `Customer`."""
+    orderBy: [CustomersOrderBy!] = [PRIMARY_KEY_ASC]
+  ): CustomersEdge
+}
+
+"""All input for the `deleteCustomer` mutation."""
+input DeleteCustomerInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Customer` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""All input for the `deleteCustomerById` mutation."""
+input DeleteCustomerByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+}
+
+"""The output of our delete `FulfillmentMethod` mutation."""
+type DeleteFulfillmentMethodPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `FulfillmentMethod` that was deleted by this mutation."""
+  fulfillmentMethod: FulfillmentMethod
+  deletedFulfillmentMethodId: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `FulfillmentMethod`. May be used by Relay 1."""
+  fulfillmentMethodEdge(
+    """The method to use when ordering `FulfillmentMethod`."""
+    orderBy: [FulfillmentMethodsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): FulfillmentMethodsEdge
+}
+
+"""All input for the `deleteFulfillmentMethod` mutation."""
+input DeleteFulfillmentMethodInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `FulfillmentMethod` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""All input for the `deleteFulfillmentMethodById` mutation."""
+input DeleteFulfillmentMethodByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+}
+
+"""The output of our delete `Pricelist` mutation."""
+type DeletePricelistPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Pricelist` that was deleted by this mutation."""
+  pricelist: Pricelist
+  deletedPricelistId: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `Pricelist`. May be used by Relay 1."""
+  pricelistEdge(
+    """The method to use when ordering `Pricelist`."""
+    orderBy: [PricelistsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PricelistsEdge
+}
+
+"""All input for the `deletePricelist` mutation."""
+input DeletePricelistInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Pricelist` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""All input for the `deletePricelistById` mutation."""
+input DeletePricelistByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+}
+
+"""The output of our delete `Product` mutation."""
+type DeleteProductPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Product` that was deleted by this mutation."""
+  product: Product
+  deletedProductId: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Product` that is related to this `Product`."""
+  productByParentProduct: Product
+
+  """An edge for our `Product`. May be used by Relay 1."""
+  productEdge(
+    """The method to use when ordering `Product`."""
+    orderBy: [ProductsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): ProductsEdge
+}
+
+"""All input for the `deleteProduct` mutation."""
+input DeleteProductInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Product` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""All input for the `deleteProductById` mutation."""
+input DeleteProductByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+}
+
+"""The output of our delete `SalesSchedulesFulfillmentMethod` mutation."""
+type DeleteSalesSchedulesFulfillmentMethodPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """
+  The `SalesSchedulesFulfillmentMethod` that was deleted by this mutation.
+  """
+  salesSchedulesFulfillmentMethod: SalesSchedulesFulfillmentMethod
+  deletedSalesSchedulesFulfillmentMethodId: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """
+  Reads a single `SalesSchedule` that is related to this `SalesSchedulesFulfillmentMethod`.
+  """
+  salesScheduleBySalesScheduleId: SalesSchedule
+
+  """
+  Reads a single `FulfillmentMethod` that is related to this `SalesSchedulesFulfillmentMethod`.
+  """
+  fulfillmentMethodByFulfillmentMethodId: FulfillmentMethod
+
+  """
+  An edge for our `SalesSchedulesFulfillmentMethod`. May be used by Relay 1.
+  """
+  salesSchedulesFulfillmentMethodEdge(
+    """The method to use when ordering `SalesSchedulesFulfillmentMethod`."""
+    orderBy: [SalesSchedulesFulfillmentMethodsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): SalesSchedulesFulfillmentMethodsEdge
+}
+
+"""All input for the `deleteSalesSchedulesFulfillmentMethod` mutation."""
+input DeleteSalesSchedulesFulfillmentMethodInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `SalesSchedulesFulfillmentMethod` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""
+All input for the `deleteSalesSchedulesFulfillmentMethodBySalesScheduleIdAndFulfillmentMethodId` mutation.
+"""
+input DeleteSalesSchedulesFulfillmentMethodBySalesScheduleIdAndFulfillmentMethodIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  salesScheduleId: Int!
+  fulfillmentMethodId: Int!
+}
+
+"""The output of our delete `SalesSchedulesPricelist` mutation."""
+type DeleteSalesSchedulesPricelistPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `SalesSchedulesPricelist` that was deleted by this mutation."""
+  salesSchedulesPricelist: SalesSchedulesPricelist
+  deletedSalesSchedulesPricelistId: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """
+  Reads a single `Pricelist` that is related to this `SalesSchedulesPricelist`.
+  """
+  pricelistByPricelistId: Pricelist
+
+  """
+  Reads a single `SalesSchedule` that is related to this `SalesSchedulesPricelist`.
+  """
+  salesScheduleBySalesScheduleId: SalesSchedule
+
+  """An edge for our `SalesSchedulesPricelist`. May be used by Relay 1."""
+  salesSchedulesPricelistEdge(
+    """The method to use when ordering `SalesSchedulesPricelist`."""
+    orderBy: [SalesSchedulesPricelistsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): SalesSchedulesPricelistsEdge
+}
+
+"""All input for the `deleteSalesSchedulesPricelist` mutation."""
+input DeleteSalesSchedulesPricelistInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `SalesSchedulesPricelist` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""
+All input for the `deleteSalesSchedulesPricelistByPricelistIdAndSalesScheduleId` mutation.
+"""
+input DeleteSalesSchedulesPricelistByPricelistIdAndSalesScheduleIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  pricelistId: Int!
+  salesScheduleId: Int!
+}
+
+"""The output of our delete `Setting` mutation."""
+type DeleteSettingPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Setting` that was deleted by this mutation."""
+  setting: Setting
+  deletedSettingId: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Company` that is related to this `Setting`."""
+  companyByOwnerId: Company
+
+  """An edge for our `Setting`. May be used by Relay 1."""
+  settingEdge(
+    """The method to use when ordering `Setting`."""
+    orderBy: [SettingsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): SettingsEdge
+}
+
+"""All input for the `deleteSetting` mutation."""
+input DeleteSettingInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Setting` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""All input for the `deleteSettingById` mutation."""
+input DeleteSettingByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+}
+
+"""The output of our delete `StockShape` mutation."""
+type DeleteStockShapePayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `StockShape` that was deleted by this mutation."""
+  stockShape: StockShape
+  deletedStockShapeId: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Product` that is related to this `StockShape`."""
+  productByProductId: Product
+
+  """Reads a single `Unit` that is related to this `StockShape`."""
+  unitByUnitId: Unit
+
+  """An edge for our `StockShape`. May be used by Relay 1."""
+  stockShapeEdge(
+    """The method to use when ordering `StockShape`."""
+    orderBy: [StockShapesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): StockShapesEdge
+}
+
+"""All input for the `deleteStockShape` mutation."""
+input DeleteStockShapeInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `StockShape` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""All input for the `deleteStockShapeById` mutation."""
+input DeleteStockShapeByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+}
+
 """The output of our delete `Unit` mutation."""
 type DeleteUnitPayload {
   """
@@ -340,4 +5639,114 @@ input DeleteUnitByIdInput {
   """
   clientMutationId: String
   id: Int!
+}
+
+"""The output of our `authenticatePubKey` mutation."""
+type AuthenticatePubKeyPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+  jwtToken: JwtToken
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+}
+
+"""
+A JSON Web Token defined by [RFC 7519](https://tools.ietf.org/html/rfc7519)
+which securely represents claims between two parties.
+"""
+scalar JwtToken
+
+"""All input for the `authenticatePubKey` mutation."""
+input AuthenticatePubKeyInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  pubKey: String
+}
+
+"""The output of our `createSalesScheduleWithDeps` mutation."""
+type CreateSalesScheduleWithDepsPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+  salesSchedule: SalesSchedule
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `SalesSchedule`. May be used by Relay 1."""
+  salesScheduleEdge(
+    """The method to use when ordering `SalesSchedule`."""
+    orderBy: [SalesSchedulesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): SalesSchedulesEdge
+}
+
+"""All input for the `createSalesScheduleWithDeps` mutation."""
+input CreateSalesScheduleWithDepsInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  fulfillmentDate: Datetime
+  name: String
+  orderClosureDate: Datetime
+  deliveryPrice: Float
+  freeDeliveryTurnover: Float
+  beginSalesDate: Datetime
+  disabled: Boolean
+  fulfillmentMethods: [Int]
+  pricelists: [Int]
+}
+
+"""The output of our `updateSalesScheduleWithDeps` mutation."""
+type UpdateSalesScheduleWithDepsPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+  salesSchedule: SalesSchedule
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `SalesSchedule`. May be used by Relay 1."""
+  salesScheduleEdge(
+    """The method to use when ordering `SalesSchedule`."""
+    orderBy: [SalesSchedulesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): SalesSchedulesEdge
+}
+
+"""All input for the `updateSalesScheduleWithDeps` mutation."""
+input UpdateSalesScheduleWithDepsInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  ssid: Int
+  pfulfillmentDate: Datetime
+  pname: String
+  porderClosureDate: Datetime
+  pdeliveryPrice: Float
+  pfreeDeliveryTurnover: Float
+  pbeginSalesDate: Datetime
+  pdisabled: Boolean
+  pfulfillmentMethods: [Int]
+  ppricelists: [Int]
 }

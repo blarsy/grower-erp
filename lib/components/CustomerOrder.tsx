@@ -10,14 +10,10 @@ const CustomerOrder = ({ slug }: Props) => {
   const { loading, error, data } = useQuery(gql`query MyQuery($slug: String!) {
         customerBySlug(slug: $slug) {
           nodes {
-            addressLine1
-            addressLine2
             eshopAccess
             id
-            name
             priceListId
             slug
-            vatNumber
           }
         }
       }`, { variables: { slug } })

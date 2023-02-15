@@ -1,34 +1,54 @@
-import { Box, Container, createTheme, GlobalStyles, ThemeProvider } from '@mui/material'
+import { Box, createTheme, GlobalStyles, ThemeProvider } from '@mui/material'
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
-import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client'
-import AppContextProvider from 'lib/AppContextProvider'
-import Footer from 'lib/components/Footer'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink } from '@apollo/client'
+import { setContext } from '@apollo/client/link/context'
+
+import { LocalizationProvider } from '@mui/x-date-pickers'
+import { config } from 'lib/uiCommon'
+import apolloErrorLink from 'lib/components/admin/apolloErrorLink'
 
 const theme = createTheme()
+const TOKEN_KEY = 'token'
+const httpLink = createHttpLink({
+  uri: config.graphQlUrl,
+})
+
+const authLink = setContext((_, { headers }) => {
+  // get the authentication token from local storage if it exists
+  const token = localStorage.getItem(TOKEN_KEY);
+  // return the headers to the context so httpLink can read them
+  if(token) {
+    return {
+      headers: {
+        ...headers,
+        authorization: token ? `Bearer ${token}` : "",
+      }
+    }
+  } else {
+    return headers
+  }
+
+})
 const client = new ApolloClient({
-  uri: 'http://localhost:5000/graphql',
-  cache: new InMemoryCache(),
+  link: apolloErrorLink.concat(authLink.concat(httpLink)),
+  cache: new InMemoryCache()
 })
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   return <ApolloProvider client={client}>
-      <ThemeProvider theme={theme}>
-        <AppContextProvider>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <ThemeProvider theme={theme}>
           <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh'}}>
             <GlobalStyles styles={{ body: { margin: 0, overflow: 'visible' } }} />
             <Head>
               <title>Grower ERP</title>
               <link rel="icon" href="/favicon.ico" />
             </Head>
-        
-            <Container maxWidth="xl" sx={{ flex: '1', display: 'flex', flexDirection: 'column' }}>
-              <Component {...pageProps} />
-            </Container>
-
-            <Footer/>
+            <Component {...pageProps} />
           </Box>
-        </AppContextProvider>
-    </ThemeProvider>
+        </ThemeProvider>
+      </LocalizationProvider>
   </ApolloProvider>
 }
