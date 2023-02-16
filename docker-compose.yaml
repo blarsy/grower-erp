@@ -3,20 +3,20 @@ services:
   db:
     build:
       context: './db'
-    image: "grower_erp_db"
-    restart: always
     env_file:
-      - ./.env
-    expose:
-      - "5432"
+      - ./.env.production
+    image: grower-erp-db
+    restart: always
+    ports:
+      - "5432:5432"
   web:
     restart: always
-    image: grower_erp_web
+    image: blarsy/grower-erp:0.0.1
     build:
       context: ./
       dockerfile: ./web/Dockerfile
     env_file:
-        - ./.env
+        - ./.env.production
     depends_on:
         - db
     ports:
