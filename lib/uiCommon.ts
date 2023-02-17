@@ -53,7 +53,7 @@ export const isValidVatNumber = (vatNumber: string): boolean => {
 }
 
 const dateTimeFormat = process.env.NEXT_PUBLIC_DATETIME_FORMAT!
-const graphQlUrl = process.env.NEXT_PUBLIC_GRAPHQL_URL!
+const graphQlUrl = process.env.NEXT_PUBLIC_CLIENT_GRAPHQL_URL!
 
 interface ClientConfig {
     dateTimeFormat: string

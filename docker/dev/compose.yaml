@@ -1,0 +1,10 @@
+services:
+  db:
+    build:
+      context: './../db'
+    env_file:
+      - ./../../.env
+    image: grower-erp-db
+    restart: always
+    ports:
+      - "5432:5432"
