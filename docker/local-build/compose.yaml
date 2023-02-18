@@ -10,7 +10,7 @@ services:
       - "5432:5432"
   web:
     restart: always
-    image: blarsy/grower-erp:0.0.4
+    image: blarsy/grower-erp:0.0.5
     build:
       context: ./../../
       dockerfile: ./docker/web/Dockerfile
