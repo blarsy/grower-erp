@@ -16,7 +16,7 @@ const GET = gql`query ArticleAdminViewAllArticlesQuery {
 }`
 
 const UPDATE = gql`
-  mutation UpdateArticle($stockShapeId: Int!, $containerId: Int!, $quantityPerContainer: Float!, $id: Int!) {
+  mutation UpdateArticle($stockShapeId: Int!, $containerId: Int!, $quantityPerContainer: BigFloat!, $id: Int!) {
     updateArticleById(
       input: {articlePatch: {stockShapeId: $stockShapeId, containerId: $containerId, quantityPerContainer: $quantityPerContainer }, id: $id}
     ) {
@@ -31,7 +31,7 @@ const UPDATE = gql`
 `
 
 const CREATE = gql`
-  mutation CreateArticle($stockShapeId: Int!, $containerId: Int!, $quantityPerContainer: Float!) {
+  mutation CreateArticle($stockShapeId: Int!, $containerId: Int!, $quantityPerContainer: BigFloat!) {
     createArticle(input: {article: {stockShapeId: $stockShapeId, containerId: $containerId, quantityPerContainer: $quantityPerContainer}}) {
         article {
             id

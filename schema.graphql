@@ -1277,7 +1277,7 @@ type Pricelist implements Node {
   vatIncluded: Boolean!
 
   """Reads and enables pagination through a set of `Customer`."""
-  customersByPriceListId(
+  customersByPricelistId(
     """Only read the first `n` values of the set."""
     first: Int
 
@@ -1390,13 +1390,13 @@ type Customer implements Node {
   nodeId: ID!
   id: Int!
   slug: String!
-  priceListId: Int!
+  pricelistId: Int!
   eshopAccess: Boolean!
   contactId: Int
   companyId: Int
 
   """Reads a single `Pricelist` that is related to this `Customer`."""
-  pricelistByPriceListId: Pricelist
+  pricelistByPricelistId: Pricelist
 }
 
 """A `Customer` edge in the connection."""
@@ -1415,8 +1415,8 @@ enum CustomersOrderBy {
   ID_DESC
   SLUG_ASC
   SLUG_DESC
-  PRICE_LIST_ID_ASC
-  PRICE_LIST_ID_DESC
+  PRICELIST_ID_ASC
+  PRICELIST_ID_DESC
   ESHOP_ACCESS_ASC
   ESHOP_ACCESS_DESC
   CONTACT_ID_ASC
@@ -1438,8 +1438,8 @@ input CustomerCondition {
   """Checks for equality with the object’s `slug` field."""
   slug: String
 
-  """Checks for equality with the object’s `priceListId` field."""
-  priceListId: Int
+  """Checks for equality with the object’s `pricelistId` field."""
+  pricelistId: Int
 
   """Checks for equality with the object’s `eshopAccess` field."""
   eshopAccess: Boolean
@@ -3415,7 +3415,7 @@ type CreateCustomerPayload {
   query: Query
 
   """Reads a single `Pricelist` that is related to this `Customer`."""
-  pricelistByPriceListId: Pricelist
+  pricelistByPricelistId: Pricelist
 
   """An edge for our `Customer`. May be used by Relay 1."""
   customerEdge(
@@ -3440,7 +3440,7 @@ input CreateCustomerInput {
 input CustomerInput {
   id: Int
   slug: String!
-  priceListId: Int!
+  pricelistId: Int!
   eshopAccess: Boolean
   contactId: Int
   companyId: Int
@@ -4280,7 +4280,7 @@ type UpdateCustomerPayload {
   query: Query
 
   """Reads a single `Pricelist` that is related to this `Customer`."""
-  pricelistByPriceListId: Pricelist
+  pricelistByPricelistId: Pricelist
 
   """An edge for our `Customer`. May be used by Relay 1."""
   customerEdge(
@@ -4314,7 +4314,7 @@ Represents an update to a `Customer`. Fields that are set will be updated.
 input CustomerPatch {
   id: Int
   slug: String
-  priceListId: Int
+  pricelistId: Int
   eshopAccess: Boolean
   contactId: Int
   companyId: Int
@@ -5203,7 +5203,7 @@ type DeleteCustomerPayload {
   query: Query
 
   """Reads a single `Pricelist` that is related to this `Customer`."""
-  pricelistByPriceListId: Pricelist
+  pricelistByPricelistId: Pricelist
 
   """An edge for our `Customer`. May be used by Relay 1."""
   customerEdge(

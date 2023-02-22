@@ -57,7 +57,6 @@ const PricelistDetail = ({ pricelistId }: Props) => {
         }
       }`, { variables: { id: pricelistId }})
     
-    console.log(data)
     return <Loader loading={loading} error={error}>
         <Stack>
             <Stack direction="row" alignItems="center">
@@ -85,7 +84,7 @@ const PricelistDetail = ({ pricelistId }: Props) => {
                     { key: 'price', headerText: `Prix ${data && data.pricelistById.vatIncluded ? 'TVAC': 'HTVA'}`, type: "number", editable: {
                         validation: yup.number().positive().required('Ce champ est requis')
                     }}
-                ]} />
+                ]} fixedMutationVariables={{ priceListId: pricelistId }} />
         </Stack>
     </Loader>
 }

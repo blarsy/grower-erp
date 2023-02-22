@@ -4,8 +4,6 @@ import { FormikValues } from "formik"
 import { parseUiError } from "lib/uiCommon"
 import Datagrid, { Column, LineData, LineOperation } from "lib/components/datagrid/Datagrid"
 import Feedback from "lib/components/Feedback"
-import { useContext } from "react"
-import { AppContext } from "../AppContextProvider"
 
 interface Props {
     title: string
@@ -17,6 +15,7 @@ interface Props {
     createQuery?: DocumentNode
     getFromQueried?: (data: any) => any
     lineOps?: LineOperation[]
+    fixedMutationVariables?: Object
 }
 
 const updateVariablesFromValues = (values: FormikValues, columns: Column[], fixedVariables: object, line: LineData): {variables: {[id: string]: any}} => {
@@ -71,10 +70,9 @@ const createDataChangesHelper = (columns: Column[], dataName: string, fixedVaria
     }
 }
 
-const DatagridAdminView = ({title, dataName, columns, getQuery, filter, updateQuery, createQuery, getFromQueried=(data) => data[`all${dataName}s`].nodes, lineOps}: Props) => {
-    const { loading, error, data } = useQuery(getQuery, { variables: filter })
-    const appContext = useContext(AppContext)
-    const dataChanges = createDataChangesHelper(columns, dataName, filter, updateQuery, createQuery)
+const DatagridAdminView = ({title, dataName, columns, getQuery, filter, updateQuery, createQuery, getFromQueried=(data) => data[`all${dataName}s`].nodes, lineOps, fixedMutationVariables}: Props) => {
+    const { loading, error, data } = useQuery(getQuery, { variables: filter, fetchPolicy: 'cache-and-network' })
+    const dataChanges = createDataChangesHelper(columns, dataName, fixedMutationVariables, updateQuery, createQuery)
 
     if(loading) return <CircularProgress />
     if(error){
