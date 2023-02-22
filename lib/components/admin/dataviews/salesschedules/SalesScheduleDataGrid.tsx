@@ -44,7 +44,7 @@ const SalesScheduleDataGrid = () => {
         }]}
         columns={[
             { key: 'id', headerText: 'ID', widthPercent: 5, type: "number"},
-            { headerText: 'Début de délivrance', type: 'datetime', widthPercent: 15, key: 'fulfillmentDate' },
+            { headerText: 'Début de l\'acheminement', type: 'datetime', widthPercent: 15, key: 'fulfillmentDate' },
             { headerText: 'Actif/suspendu', type: 'boolean', widthPercent: 10, key: 'disabled' },
             { headerText: 'A partir de', type: 'datetime', widthPercent: 15, key: 'beginSalesDate' },
             { headerText: 'jusque', type: 'datetime', widthPercent: 15, key: 'orderClosureDate' },
@@ -53,7 +53,7 @@ const SalesScheduleDataGrid = () => {
               customDisplay: (val) => {
                 return val.nodes.map((node: any) => node.pricelistByPricelistId.name).join(', ')
               } },
-            { headerText: 'Méthodes de délivrance', type: 'custom', key: 'salesSchedulesFulfillmentMethodsBySalesScheduleId', 
+            { headerText: 'Méthodes d\'acheminement', type: 'custom', key: 'salesSchedulesFulfillmentMethodsBySalesScheduleId', 
             customDisplay: (val) => {
               return val.nodes.map((node: any) => node.fulfillmentMethodByFulfillmentMethodId.name).join(', ')
             } }

@@ -2,13 +2,15 @@ import { Box, CircularProgress, IconButton, Stack, TextField, Typography, Checkb
 import { Form, Formik, FormikErrors, FormikHelpers, FormikTouched, FormikValues } from "formik"
 import DeleteIcon from '@mui/icons-material/Close'
 import CheckIcon from '@mui/icons-material/Check'
-import ModifiedIcon from '@mui/icons-material/PriorityHigh'
+import SaveIcon from '@mui/icons-material/SaveAlt'
 import { ChangeEvent, HTMLInputTypeAttribute, useState } from "react"
 import * as yup from 'yup'
 import { CellContent, cellInnerPaddingLeftRight, CELL_SPACING, Column, getLeftButtonsFlex, LineData, LineOperation, NEW_LINE_KEY } from "./Datagrid"
 import RelationSelect from "./RelationSelect"
 import dayjs from "dayjs"
 import { config } from "lib/uiCommon"
+
+const SAVENOW_TIP = <div><p>Sauver maintenant</p><p>Notez que le simple fait de sortir le curseur de la ligne en cours d'édition la sauve automatiquement</p></div>
 
 interface Props {
     line: LineData,
@@ -26,6 +28,10 @@ interface Props {
 interface FormValues {
     [key: string]: CellContent
 }
+
+const SaveButton = ({ submitForm }: { submitForm:  () => Promise<void>}) => <Tooltip title={SAVENOW_TIP}>
+    <IconButton sx={{ padding: 0 }} onClick={submitForm}><SaveIcon /></IconButton>
+</Tooltip>
 
 const DatagridLine = ({ line, columns, canDelete, readonly, onUpdate, onCreate, onDismissNewLine, linesMarkedForDeletion, onLinesMarkedForDeletionChanged, lineOps }: Props) => {
     const createFormValues = (cols: Column[], line: LineData): {[id: string]: any} => {
@@ -53,7 +59,8 @@ const DatagridLine = ({ line, columns, canDelete, readonly, onUpdate, onCreate, 
         touched: FormikTouched<FormikValues>,
         errors: FormikErrors<FormikValues>,
         working: boolean,
-        onDismissNewLine: () => void): JSX.Element => {
+        onDismissNewLine: () => void,
+        submitForm: () => Promise<void>): JSX.Element => {
 
         let flex = '1'
         if(!isLastCol) flex = `0 0 ${Math.round(col.widthPercent! * 100) / 100}%`
@@ -63,11 +70,6 @@ const DatagridLine = ({ line, columns, canDelete, readonly, onUpdate, onCreate, 
                 if(working) {
                     return <Box key={col.key} sx={{ flex }}>
                         <CircularProgress size="1rem" />
-                    </Box>
-                } else if(line[col.key] === NEW_LINE_KEY) {
-                    return <Box key={col.key} sx={{ flex }
-                        }>
-                        <IconButton sx={{padding: 0}} onClick={onDismissNewLine}><DeleteIcon /></IconButton>
                     </Box>
                 }
                 return <Box key={col.key}
@@ -223,9 +225,12 @@ const DatagridLine = ({ line, columns, canDelete, readonly, onUpdate, onCreate, 
                         }} checked={linesMarkedForDeletion.includes(line[columns[0].key] as string)}/>)
                 }
                 if(!readonly) {
-                    if(dirty) tools.push(<ModifiedIcon key={`status-${line[columns[0].key]}`}/>)
-                    else tools.push(<CheckIcon key={`status-${line[columns[0].key]}`}/>)
+                    if(dirty) tools.push(<SaveButton submitForm={submitForm} key={`status-${line[columns[0].key]}`}/>)
+                    else tools.push(<Tooltip key={`status-${line[columns[0].key]}`} title="Données synchronisée avec le serveur"><CheckIcon/></Tooltip>)
                 }
+            } else {
+                tools.push(<Tooltip title={SAVENOW_TIP}><IconButton sx={{padding: 0}} onClick={submitForm}><SaveIcon /></IconButton></Tooltip>)
+                tools.push(<Tooltip title="Annuler la création"><IconButton sx={{padding: 0}} onClick={onDismissNewLine}><DeleteIcon /></IconButton></Tooltip>)
             }
 
             return <Stack direction="row">
@@ -251,7 +256,8 @@ const DatagridLine = ({ line, columns, canDelete, readonly, onUpdate, onCreate, 
                         touched, 
                         errors, 
                         working, 
-                        onDismissNewLine))}
+                        onDismissNewLine,
+                        submitForm))}
                 </Stack>
                 { lineOps && <Box display="flex" flex={`0 0 ${Math.max(lineOps.length * 2, 4)}rem`}>{
                     lineOps.map((op, idx) => {

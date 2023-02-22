@@ -2,13 +2,12 @@ import { Typography, Stack, Box, Button, Backdrop, CircularProgress } from "@mui
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
 import { FormikValues } from "formik"
-import { ReactNode, useContext, useState } from "react"
+import { ReactNode, useState } from "react"
 import DatagridLine from "./DatagridLine"
 import ConfirmDialog from "../ConfirmDialog"
 import { useApolloClient, gql, DocumentNode } from "@apollo/client"
 import { parseUiError } from "lib/uiCommon"
 import Feedback from "../Feedback"
-import { AppContext } from "../admin/AppContextProvider"
 
 export interface Column {
     key: string,
@@ -60,7 +59,6 @@ export const getLeftButtonsFlex = (canDelete: boolean, readonly: boolean) => {
 
 const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation, lineOps}: Props) => {
     const client = useApolloClient()
-    const appContext = useContext(AppContext)
     const [displayedLines, setDisplayedLines] = useState(lines)
     const [linesMarkedForDeletion, setLinesMarkedForDeletion] = useState([] as string[])
     const [deleteOpStatus, setDeleteOpStatus] = useState({ opened: false, question: '', processing: false })
@@ -116,14 +114,12 @@ const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation
         })
         const variables = {} as {[id: string]: string}
         linesMarkedForDeletion.forEach((lineId, idx) => variables[`id${idx}`] = lineId)
-        const query = `
-          mutation genericDelete(${deleteParams.join(',')}){
+        const deleteMutation = `mutation genericDelete(${deleteParams.join(',')}){
             ${deleteMutations.join('\n')}
-          }
-        `
+          }`
         try {
             const result = await client.mutate({
-                mutation: gql(query),
+                mutation: gql(deleteMutation),
                 variables
               })
       
@@ -212,8 +208,8 @@ const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation
         </Stack>
         {displayedLines.length === 0 && <Typography textAlign="center" variant="h5">Pas encore de données ici</Typography>}
         {displayedLines.length > 0 && displayedLines.map(line => <DatagridLine key={line[columns[0].key] as string} 
-            line={line} 
-            columns={adjustedCols} 
+            line={line}
+            columns={adjustedCols}
             readonly={readonly}
             canDelete={!!getDeleteMutation}
             lineOps={lineOps}

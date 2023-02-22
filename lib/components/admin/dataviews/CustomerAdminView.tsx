@@ -11,24 +11,24 @@ const GET = gql`query CustomerAdminViewAllCustomersQuery {
       companyId
       eshopAccess
       id
-      priceListId
+      pricelistId
       slug
     }
   }
 }`
 
 const UPDATE = gql`
-  mutation UpdateCustomer($contactId: Int, $companyId: Int, $eshopAccess: Boolean!, $priceListId: Int!,
+  mutation UpdateCustomer($contactId: Int, $companyId: Int, $eshopAccess: Boolean!, $pricelistId: Int!,
     $id: Int!) {
     updateCustomerById(
-      input: {customerPatch: {contactId: $contactId, companyId: $companyId, eshopAccess: $eshopAccess, priceListId: $priceListId}, id: $id}
+      input: {customerPatch: {contactId: $contactId, companyId: $companyId, eshopAccess: $eshopAccess, pricelistId: $pricelistId}, id: $id}
     ) {
         customer { 
             contactId
             companyId
             eshopAccess
             id
-            priceListId
+            pricelistId
             slug
         }
     }
@@ -36,14 +36,14 @@ const UPDATE = gql`
 `
 
 const CREATE = gql`
-  mutation CreateCustomer($contactId: Int, $companyId: Int, $eshopAccess: Boolean!, $priceListId: Int!, $slug: String!) {
-    createCustomer(input: {customer: {contactId: $contactId, companyId: $companyId, eshopAccess: $eshopAccess, priceListId: $priceListId, slug: $slug}}) {
+  mutation CreateCustomer($contactId: Int, $companyId: Int, $eshopAccess: Boolean!, $pricelistId: Int!, $slug: String!) {
+    createCustomer(input: {customer: {contactId: $contactId, companyId: $companyId, eshopAccess: $eshopAccess, pricelistId: $pricelistId, slug: $slug}}) {
         customer { 
             contactId
             companyId
             eshopAccess
             id
-            priceListId
+            pricelistId
             slug
         }
     }
@@ -86,10 +86,10 @@ const CustomerAdminView = () => {
         { key: 'eshopAccess', headerText: 'Eshop ?', widthPercent: 7, type: "boolean", editable: {
             validation: yup.string()
           }
-        }, { key: 'priceListId', headerText: 'Tarif', widthPercent: 15, type: "number", editable: {
+        }, { key: 'pricelistId', headerText: 'Tarif', widthPercent: 15, type: "number", editable: {
             validation: yup.number().typeError('Ce champ est requis.')
           }, relation: {
-            query: gql`query priceListsByName($search: String) {
+            query: gql`query pricelistsByName($search: String) {
                 filterPricelists(searchTerm: $search) {
                   nodes {
                       id
@@ -107,11 +107,11 @@ const CustomerAdminView = () => {
       columns={columns} 
       lines={rows}
       onCreate={async values => {
-        const result = await create({ variables: { contactId: values.contactId, companyId: values.companyId, eshopAccess: values.eshopAccess, priceListId: values.priceListId, slug: createSlug()} })
+        const result = await create({ variables: { contactId: values.contactId, companyId: values.companyId, eshopAccess: values.eshopAccess, pricelistId: values.pricelistId, slug: createSlug()} })
         return { data: result.data?.createCustomer?.customer, error: createError }
       }}
       onUpdate={async (values, line) => {
-        const result = await update({ variables: { contactId: values.contactId, companyId: values.companyId, eshopAccess: values.eshopAccess, priceListId: values.priceListId, id: line.id}})
+        const result = await update({ variables: { contactId: values.contactId, companyId: values.companyId, eshopAccess: values.eshopAccess, pricelistId: values.pricelistId, id: line.id}})
         return { error: updateError?.message || '', data: result.data?.updateCustomerById.customer }
       }}
       getDeleteMutation = {(paramIndex: string) => `deleteCustomerById(input: {id: $id${paramIndex}}){deletedCustomerId}`} />

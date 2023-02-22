@@ -29,7 +29,7 @@ const nodesMap: NodeData[] = [
     { id: '1', label: 'Paramètres', children: [
         { id: '1-1', label: 'Mon entreprise', path: '/admin/profile', component: <OwnerAdminView/> },
         { id: '1-2', label: 'Utilisateur', path: '/admin/user', component: <ProfileAdminView/> },
-        { id: '1-3', label: 'Méthode de livraison', path: '/admin/fulfilmentmethod', component: <FulfillmentMethodAdminView /> }
+        { id: '1-3', label: 'Méthode d\'acheminement', path: '/admin/fulfilmentmethod', component: <FulfillmentMethodAdminView /> }
     ] },
     { id: '2', label: 'Données' , children: [
         { id: '2-1', label: 'Entreprises', path: '/admin/company', component: <CompanyAdminView/> },
