@@ -3,7 +3,7 @@ import { parseUiError } from "lib/uiCommon"
 import Feedback from "../Feedback"
 import { AppContext, TOKEN_KEY } from './AppContextProvider'
 import { errorHandlerHolder } from './apolloErrorLink'
-import LoginForm from "./loginForm"
+import LoginForm from "./LoginForm"
 import Loader from "../Loader"
 
 interface Props {
