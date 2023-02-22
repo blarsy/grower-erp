@@ -1,8 +1,7 @@
 import { useRouter } from "next/router"
 import PricelistsDataGrid from "./pricelists/PricelistsDataGrid"
 import PricelistDetail from "./pricelists/PricelistDetail"
-import Loader from "lib/components/Loader"
-import { gql, useQuery } from "@apollo/client"
+import { gql } from "@apollo/client"
 
 const GET = gql`query PriceListAdminViewAllPriceListsQuery {
   allPricelists {
@@ -37,17 +36,7 @@ const CREATE = gql`
 const PriceListAdminView = () => {
   const router = useRouter()
   if(router.query.view && router.query.view.length > 1){
-    const { loading, error, data } = useQuery(gql`query PricelistById($id: Int!) {
-      pricelistById(id: $id) {
-        id
-        name
-        vatIncluded
-      }
-    }`, { variables: { id: Number(router.query.view[1]) }})
-
-    return <Loader loading={loading} error={error}>
-        { data && <PricelistDetail pricelist={data.pricelistById}/>}
-      </Loader>
+    return <PricelistDetail pricelistId={Number(router.query.view[1])} />
   } else {
     return <PricelistsDataGrid/>
   }

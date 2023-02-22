@@ -19,7 +19,6 @@ interface Props {
 }
 
 function RelationSelect(props: Props) {
-    const appContext = useContext(AppContext)
     const {query, onChange, value } = props
     const client = useApolloClient()
     const [options, setOptions] = useState([] as {id: string, name: string}[])
@@ -31,7 +30,7 @@ function RelationSelect(props: Props) {
     const loadOptions = async () => {
         try {
             setError('')
-            const res = await client.query({ query, variables: { search: filter } })
+            const res = await client.query({ query, variables: { search: filter }, fetchPolicy: 'network-only' })
             if(res.error) {
                 setError(parseUiError(res.error).message)
             } else {

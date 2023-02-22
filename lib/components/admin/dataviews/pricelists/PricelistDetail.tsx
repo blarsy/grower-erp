@@ -1,16 +1,13 @@
-import { gql } from "@apollo/client"
+import { gql, useQuery } from "@apollo/client"
 import { IconButton, Stack, Typography } from "@mui/material"
 import { useRouter } from "next/router"
 import BackIcon from '@mui/icons-material/ArrowBack'
 import * as yup from 'yup'
 import DatagridAdminView from "../DatagridAdminView"
+import Loader from "lib/components/Loader"
 
 interface Props {
-    pricelist: {
-        id: string
-        name: string
-        vatIncluded: boolean
-    }
+    pricelistId: number
 }
 const GET = gql`query ArticlespricesByPricelistId($id: Int!) {
   pricelistById(id: $id) {
@@ -50,38 +47,47 @@ const CREATE = gql`
         }
     }`
 
-const PricelistDetail = ({ pricelist }: Props) => {
+const PricelistDetail = ({ pricelistId }: Props) => {
     const router = useRouter()
-    const { id, name, vatIncluded } = pricelist
-    return <Stack>
-        <Stack direction="row" alignItems="center">
-            <IconButton onClick={() => router.push('/admin/pricelist')}><BackIcon /></IconButton>
-            <Typography>Tarifs</Typography>
-        </Stack>
-        <DatagridAdminView title={`Liste de prix "${name}"`} dataName="ArticlesPrice"
-            getQuery={GET} filter={{ id }} updateQuery={UPDATE} createQuery={CREATE} getFromQueried={data => data.pricelistById.articlesPricesByPriceListId.nodes}
-            columns={[
-                { key: 'id', headerText: 'ID', widthPercent: 5, type: "number"},
-                { key: 'articleId', headerText: 'Article', type: "number", widthPercent: 80, editable: {
-                    validation: yup.number().required('Ce champ est requis'), 
-                    }, relation: { query: gql`query ArticleByTerm($search: String) {
-                        filterArticles(searchTerm: $search) {
-                            nodes {
-                                id
-                                productName
-                                stockshapeName
-                                unitAbbreviation
-                                containerName
-                                quantityPerContainer
+    const { loading, error, data } = useQuery(gql`query PricelistById($id: Int!) {
+        pricelistById(id: $id) {
+          id
+          name
+          vatIncluded
+        }
+      }`, { variables: { id: pricelistId }})
+    
+    console.log(data)
+    return <Loader loading={loading} error={error}>
+        <Stack>
+            <Stack direction="row" alignItems="center">
+                <IconButton onClick={() => router.push('/admin/pricelist')}><BackIcon /></IconButton>
+                <Typography>Tarifs</Typography>
+            </Stack>
+            <DatagridAdminView title={`Liste de prix "${data && data.pricelistById.name}"`} dataName="ArticlesPrice"
+                getQuery={GET} filter={{ id: pricelistId }} updateQuery={UPDATE} createQuery={CREATE} getFromQueried={data => data.pricelistById.articlesPricesByPriceListId.nodes}
+                columns={[
+                    { key: 'id', headerText: 'ID', widthPercent: 5, type: "number"},
+                    { key: 'articleId', headerText: 'Article', type: "number", widthPercent: 80, editable: {
+                        validation: yup.number().required('Ce champ est requis'), 
+                        }, relation: { query: gql`query ArticleByTerm($search: String) {
+                            filterArticles(searchTerm: $search) {
+                                nodes {
+                                    id
+                                    productName
+                                    stockshapeName
+                                    unitAbbreviation
+                                    containerName
+                                    quantityPerContainer
+                                }
                             }
-                        }
-                    }`, getLabel: item => `${item.productName} / ${item.stockshapeName} (${item.containerName}, ${item.quantityPerContainer} ${item.unitAbbreviation})`}},
-                { key: 'price', headerText: `Prix ${vatIncluded ? 'TVAC': 'HTVA'}`, type: "number", editable: {
+                        }`, getLabel: item => `${item.productName} / ${item.stockshapeName} (${item.containerName}, ${item.quantityPerContainer} ${item.unitAbbreviation})`}},
+                    { key: 'price', headerText: `Prix ${data && data.pricelistById.vatIncluded ? 'TVAC': 'HTVA'}`, type: "number", editable: {
                         validation: yup.number().positive().required('Ce champ est requis')
                     }}
-            ]} />
-    </Stack>
-
+                ]} />
+        </Stack>
+    </Loader>
 }
 
 export default PricelistDetail
