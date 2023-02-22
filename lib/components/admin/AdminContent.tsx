@@ -11,10 +11,11 @@ import CustomerAdminView from "./dataviews/CustomerAdminView"
 import FulfillmentMethodAdminView from "./dataviews/FulfillmentMethodAdminView"
 import PriceListAdminView from "./dataviews/PriceListAdminView"
 import ProductAdminView from "./dataviews/ProductAdminView"
-import ProfileAdminView from "./dataviews/ProfileAdminView"
+import OwnerAdminView from "./dataviews/OwnerAdminView"
 import SalesScheduleAdminView from "./dataviews/SalesScheduleAdminView"
 import StockShapeAdminView from "./dataviews/StockShapeAdminView"
 import UnitAdminView from "./dataviews/UnitAdminView"
+import ProfileAdminView from "./dataviews/ProfileAdminView"
 
 interface NodeData {
     id: string
@@ -26,8 +27,9 @@ interface NodeData {
 
 const nodesMap: NodeData[] = [
     { id: '1', label: 'Paramètres', children: [
-        { id: '1-1', label: 'Mon entreprise', path: '/admin/profile', component: <ProfileAdminView/> },
-        { id: '1-2', label: 'Méthode de livraison', path: '/admin/fulfilmentmethod', component: <FulfillmentMethodAdminView /> }
+        { id: '1-1', label: 'Mon entreprise', path: '/admin/profile', component: <OwnerAdminView/> },
+        { id: '1-2', label: 'Utilisateur', path: '/admin/user', component: <ProfileAdminView/> },
+        { id: '1-3', label: 'Méthode de livraison', path: '/admin/fulfilmentmethod', component: <FulfillmentMethodAdminView /> }
     ] },
     { id: '2', label: 'Données' , children: [
         { id: '2-1', label: 'Entreprises', path: '/admin/company', component: <CompanyAdminView/> },

@@ -93,8 +93,11 @@ const CompanyAdminView = () => {
         validation: yup.number().nullable()
       }, relation: {
         query: filterContacts, getLabel: (rec) => {
-            if(rec.companyByCompanyId && rec.companyByCompanyId.name) return `${rec.firstName} ${rec.lastName} (${rec.companyByCompanyId.name})`
-            else return `${rec.firstName} ${rec.lastName}`
+            const words = []
+            if(rec.firstname) words.push(rec.firstname)
+            words.push(rec.lastname)
+            if(rec.companyByCompanyId && rec.companyByCompanyId.name) words.push(`(${rec.companyByCompanyId.name})`)
+            return words.join(' ')
         }
       }}
     ]} />

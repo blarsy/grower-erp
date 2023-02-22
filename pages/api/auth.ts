@@ -1,7 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { config } from 'lib/apiCommon'
-import { utils } from 'ethers'
 import { ErrorResponse, makeErrorResponse } from 'lib/apiCommon'
 import { ApolloClient, gql, InMemoryCache } from '@apollo/client'
 

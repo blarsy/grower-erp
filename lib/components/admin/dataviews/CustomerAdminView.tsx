@@ -71,8 +71,8 @@ const CustomerAdminView = () => {
           validation: yup.number().nullable()
         }, relation: {
           query: filterContacts, getLabel: (rec) => {
-            if(rec.companyByCompanyId && rec.companyByCompanyId.name) return `${rec.firstName} ${rec.lastName} (${rec.companyByCompanyId.name})`
-            else return `${rec.firstName} ${rec.lastName}`
+            if(rec.companyByCompanyId && rec.companyByCompanyId.name) return `${rec.firstname} ${rec.lastname} (${rec.companyByCompanyId.name})`
+            else return `${rec.firstname} ${rec.lastname}`
           }
         }},
         { key: 'companyId', headerText: 'Entreprise', widthPercent: 25, type: "number",  editable: {

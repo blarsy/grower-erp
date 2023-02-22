@@ -6,6 +6,7 @@ import { DocumentNode, useMutation } from "@apollo/client"
 import { useContext, useState } from "react"
 import { LoadingButton } from "@mui/lab"
 import { AppContext } from "./AppContextProvider"
+import ItemForm from "./ItemForm"
 
 interface Props {
     data: any,
@@ -44,21 +45,21 @@ const CompanyForm = ({data, updateQuery, createQuery}: Props) => {
         addressLine2: '', companyNumber: '', zipCode: '', city: '' })
     const [ error, setError ] = useState('')
     const appContext = useContext(AppContext)
-    return <Formik initialValues={ensureTextValuesNotNull(companyData)} validationSchema={yup.object().shape({
-        name: yup.string().required('Ce champ est requis'),
-        addressLine1: yup.string().nullable(),
-        addressLine2: yup.string().nullable(),
-        zipCode: yup.string().nullable().matches(/\w{4,7}/, 'Veuille entrer entre 4 et 7 caractères.'),
-        city: yup.string().nullable(),
-        companyNumber: yup.string().nullable().test({
-            test: val => {
-                if(!val) return true
-                return isValidVatNumber(val)
-            }, message: 'Format de numéro de TVA invalide'
-        })
-    })} onSubmit={async (values) => {
-        try {
-            setError('')
+
+    return <ItemForm initialValues={ensureTextValuesNotNull(companyData)}
+        validationSchema={yup.object().shape({
+            name: yup.string().required('Ce champ est requis'),
+            addressLine1: yup.string().nullable(),
+            addressLine2: yup.string().nullable(),
+            zipCode: yup.string().nullable().matches(/\w{4,7}/, 'Veuille entrer entre 4 et 7 caractères.'),
+            city: yup.string().nullable(),
+            companyNumber: yup.string().nullable().test({
+                test: val => {
+                    if(!val) return true
+                    return isValidVatNumber(val)
+                }, message: 'Format de numéro de TVA invalide'
+            })
+        })} onSubmit={async (values) => {
             if(values.id) {
                 const result = await update({ variables: { id: values.id, 
                     companyNumber: values.companyNumber, name: values.name, 
@@ -76,27 +77,15 @@ const CompanyForm = ({data, updateQuery, createQuery}: Props) => {
                     values.id = await (createQuery as (values: CompanyValues) => Promise<number>)(values)
                 }
             }
-            appContext?.changeCompanyName(values.name)
-        } catch(e: any) {
-            setError(parseUiError(e).message)
-        }
-
-    }}>
-    {({ isSubmitting, handleSubmit, errors, touched, handleChange, values }) => {
-        return <Stack spacing={2} margin="1rem" onSubmit={() => handleSubmit()}>
-            <Typography variant="h3">Données de l'entreprise</Typography>
-            <Typography variant="subtitle1">Utilisées sur les documents générés (bons de commande, de livraison, factures, ...), et dans les pages du webshop.</Typography>
-            <TextField id="name" label="Nom de l'entreprise" variant="standard" value={values.name} onChange={handleChange} error={touched.name && !!errors.name} helperText={touched.name && errors.name as string}/>
-            <TextField id="addressLine1" label="Addresse ligne 1" variant="standard" value={values.addressLine1} onChange={handleChange} error={touched.addressLine1 && !!errors.addressLine1} helperText={touched.addressLine1 && errors.addressLine1 as string}/>
-            <TextField id="addressLine2" label="Addresse ligne 2" variant="standard" value={values.addressLine2} onChange={handleChange} error={touched.addressLine2 && !!errors.addressLine2} helperText={touched.addressLine2 && errors.addressLine2 as string} />
-            <TextField id="zipCode" label="Code postal" variant="standard" value={values.zipCode} onChange={handleChange} error={touched.zipCode && !!errors.zipCode} helperText={touched.zipCode && errors.zipCode as string} />
-            <TextField id="city" label="Localité" variant="standard" value={values.city} onChange={handleChange} error={touched.city && !!errors.city} helperText={touched.city && errors.city as string} />
-            <TextField id="companyNumber" label="Numéro de TVA" variant="standard" value={values.companyNumber} onChange={handleChange} error={touched.companyNumber && !!errors.companyNumber} helperText={touched.companyNumber && errors.companyNumber as string} />
-            <LoadingButton loading={isSubmitting} variant="contained" sx={{alignSelf: 'center'}} onClick={() => handleSubmit()}>Sauver</LoadingButton>
-            {error && <Alert severity="error">{error}</Alert>}
-        </Stack>
-    }}
-    </Formik>
+            appContext?.changeSessionInfo(values.name)
+        }} title="Données de l'entreprise" makeControls={(errors, touched, values, handleChange) => [
+            <TextField key="name" id="name" label="Nom de l'entreprise" variant="standard" value={values.name} onChange={handleChange} error={touched.name && !!errors.name} helperText={touched.name && errors.name as string}/>,
+            <TextField key="addressLine1" id="addressLine1" label="Addresse ligne 1" variant="standard" value={values.addressLine1} onChange={handleChange} error={touched.addressLine1 && !!errors.addressLine1} helperText={touched.addressLine1 && errors.addressLine1 as string}/>,
+            <TextField key="addressLine2" id="addressLine2" label="Addresse ligne 2" variant="standard" value={values.addressLine2} onChange={handleChange} error={touched.addressLine2 && !!errors.addressLine2} helperText={touched.addressLine2 && errors.addressLine2 as string} />,
+            <TextField key="zipCode" id="zipCode" label="Code postal" variant="standard" value={values.zipCode} onChange={handleChange} error={touched.zipCode && !!errors.zipCode} helperText={touched.zipCode && errors.zipCode as string} />,
+            <TextField key="city" id="city" label="Localité" variant="standard" value={values.city} onChange={handleChange} error={touched.city && !!errors.city} helperText={touched.city && errors.city as string} />,
+            <TextField key="companyNumber" id="companyNumber" label="Numéro de TVA" variant="standard" value={values.companyNumber} onChange={handleChange} error={touched.companyNumber && !!errors.companyNumber} helperText={touched.companyNumber && errors.companyNumber as string} />
+        ]}/>
 }
 
 export default CompanyForm

@@ -679,6 +679,7 @@ type Query implements Node {
     """Read all values in the set after (below) this cursor."""
     after: Cursor
   ): UnitsConnection
+  getCurrentUser: Contact
 
   """Reads a single `Article` using its globally unique `ID`."""
   article(
@@ -1865,15 +1866,16 @@ type Contact implements Node {
   """
   nodeId: ID!
   id: Int!
-  firstName: String
-  lastName: String!
+  firstname: String
+  lastname: String!
   email: String
   phone: String
   addressLine1: String
   addressLine2: String
   zipCode: String
   city: String
-  publicKey: String
+  passwordHash: String
+  passwordSalt: String
   companyId: Int
 
   """Reads a single `Company` that is related to this `Contact`."""
@@ -1992,10 +1994,10 @@ enum ContactsOrderBy {
   NATURAL
   ID_ASC
   ID_DESC
-  FIRST_NAME_ASC
-  FIRST_NAME_DESC
-  LAST_NAME_ASC
-  LAST_NAME_DESC
+  FIRSTNAME_ASC
+  FIRSTNAME_DESC
+  LASTNAME_ASC
+  LASTNAME_DESC
   EMAIL_ASC
   EMAIL_DESC
   PHONE_ASC
@@ -2008,8 +2010,10 @@ enum ContactsOrderBy {
   ZIP_CODE_DESC
   CITY_ASC
   CITY_DESC
-  PUBLIC_KEY_ASC
-  PUBLIC_KEY_DESC
+  PASSWORD_HASH_ASC
+  PASSWORD_HASH_DESC
+  PASSWORD_SALT_ASC
+  PASSWORD_SALT_DESC
   COMPANY_ID_ASC
   COMPANY_ID_DESC
   PRIMARY_KEY_ASC
@@ -2023,11 +2027,11 @@ input ContactCondition {
   """Checks for equality with the object’s `id` field."""
   id: Int
 
-  """Checks for equality with the object’s `firstName` field."""
-  firstName: String
+  """Checks for equality with the object’s `firstname` field."""
+  firstname: String
 
-  """Checks for equality with the object’s `lastName` field."""
-  lastName: String
+  """Checks for equality with the object’s `lastname` field."""
+  lastname: String
 
   """Checks for equality with the object’s `email` field."""
   email: String
@@ -2047,8 +2051,11 @@ input ContactCondition {
   """Checks for equality with the object’s `city` field."""
   city: String
 
-  """Checks for equality with the object’s `publicKey` field."""
-  publicKey: String
+  """Checks for equality with the object’s `passwordHash` field."""
+  passwordHash: String
+
+  """Checks for equality with the object’s `passwordSalt` field."""
+  passwordSalt: String
 
   """Checks for equality with the object’s `companyId` field."""
   companyId: Int
@@ -3115,18 +3122,30 @@ type Mutation {
     """
     input: DeleteUnitByIdInput!
   ): DeleteUnitPayload
-  authenticatePubKey(
+  authenticate(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: AuthenticatePubKeyInput!
-  ): AuthenticatePubKeyPayload
+    input: AuthenticateInput!
+  ): AuthenticatePayload
+  changePassword(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: ChangePasswordInput!
+  ): ChangePasswordPayload
   createSalesScheduleWithDeps(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
     input: CreateSalesScheduleWithDepsInput!
   ): CreateSalesScheduleWithDepsPayload
+  registerUser(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: RegisterUserInput!
+  ): RegisterUserPayload
   updateSalesScheduleWithDeps(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -3324,15 +3343,16 @@ input CreateContactInput {
 """An input for mutations affecting `Contact`"""
 input ContactInput {
   id: Int
-  firstName: String
-  lastName: String!
+  firstname: String
+  lastname: String!
   email: String
   phone: String
   addressLine1: String
   addressLine2: String
   zipCode: String
   city: String
-  publicKey: String
+  passwordHash: String
+  passwordSalt: String
   companyId: Int
 }
 
@@ -4149,15 +4169,16 @@ Represents an update to a `Contact`. Fields that are set will be updated.
 """
 input ContactPatch {
   id: Int
-  firstName: String
-  lastName: String
+  firstname: String
+  lastname: String
   email: String
   phone: String
   addressLine1: String
   addressLine2: String
   zipCode: String
   city: String
-  publicKey: String
+  passwordHash: String
+  passwordSalt: String
   companyId: Int
 }
 
@@ -5641,8 +5662,8 @@ input DeleteUnitByIdInput {
   id: Int!
 }
 
-"""The output of our `authenticatePubKey` mutation."""
-type AuthenticatePubKeyPayload {
+"""The output of our `authenticate` mutation."""
+type AuthenticatePayload {
   """
   The exact same `clientMutationId` that was provided in the mutation input,
   unchanged and unused. May be used by a client to track mutations.
@@ -5662,14 +5683,41 @@ which securely represents claims between two parties.
 """
 scalar JwtToken
 
-"""All input for the `authenticatePubKey` mutation."""
-input AuthenticatePubKeyInput {
+"""All input for the `authenticate` mutation."""
+input AuthenticateInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
-  pubKey: String
+  login: String
+  password: String
+}
+
+"""The output of our `changePassword` mutation."""
+type ChangePasswordPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+}
+
+"""All input for the `changePassword` mutation."""
+input ChangePasswordInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  currentPassword: String
+  newPassword: String
+  contactId: Int
 }
 
 """The output of our `createSalesScheduleWithDeps` mutation."""
@@ -5709,6 +5757,48 @@ input CreateSalesScheduleWithDepsInput {
   disabled: Boolean
   fulfillmentMethods: [Int]
   pricelists: [Int]
+}
+
+"""The output of our `registerUser` mutation."""
+type RegisterUserPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+  contact: Contact
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Company` that is related to this `Contact`."""
+  companyByCompanyId: Company
+
+  """An edge for our `Contact`. May be used by Relay 1."""
+  contactEdge(
+    """The method to use when ordering `Contact`."""
+    orderBy: [ContactsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): ContactsEdge
+}
+
+"""All input for the `registerUser` mutation."""
+input RegisterUserInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  firstname: String
+  lastname: String
+  email: String
+  phone: String
+  addressline1: String
+  addressline2: String
+  zipcode: String
+  city: String
+  password: String
 }
 
 """The output of our `updateSalesScheduleWithDeps` mutation."""

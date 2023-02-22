@@ -19,7 +19,6 @@
     "apollo-link-http": "^1.5.17",
     "axios": "^1.2.2",
     "dayjs": "^1.11.7",
-    "ethers": "^5.7.2",
     "formik": "^2.2.9",
     "next": "latest",
     "postgraphile": "^4.12.12",

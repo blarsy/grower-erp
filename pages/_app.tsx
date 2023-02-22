@@ -2,7 +2,7 @@ import { Box, createTheme, GlobalStyles, ThemeProvider } from '@mui/material'
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink } from '@apollo/client'
+import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink, from } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 
 import { LocalizationProvider } from '@mui/x-date-pickers'
@@ -32,7 +32,12 @@ const authLink = setContext((_, { headers }) => {
 
 })
 const client = new ApolloClient({
-  link: apolloErrorLink.concat(authLink.concat(httpLink)),
+  link: from([
+    apolloErrorLink,
+    authLink,
+    httpLink
+  ]),
+//  link: apolloErrorLink.concat(authLink.concat(httpLink)),
   cache: new InMemoryCache()
 })
 

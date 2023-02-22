@@ -1,74 +1,50 @@
-import { useContext, useEffect } from "react"
-import { LoadingButton } from '@mui/lab'
-import LoginIcon from '@mui/icons-material/Login'
-import { ethers, providers } from "ethers"
-import axios from "axios"
-import { CircularProgress, Stack } from "@mui/material"
+import { useContext, useEffect, useState } from "react"
 import { parseUiError } from "lib/uiCommon"
 import Feedback from "../Feedback"
 import { AppContext, TOKEN_KEY } from './AppContextProvider'
 import { errorHandlerHolder } from './apolloErrorLink'
+import LoginForm from "./loginForm"
+import Loader from "../Loader"
 
 interface Props {
     children: JSX.Element
 }
 
-declare global {
-    interface Window {
-        ethereum?: providers.ExternalProvider;
-    }
-}
-
 const Connected = ({ children } : Props) => {
     const appContext = useContext(AppContext)
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        errorHandlerHolder.handle = (e) => {
-            console.log('graphql error trapped', e)
-        }
-        const token = localStorage.getItem(TOKEN_KEY)
-        if (token) {
-            appContext.loginComplete(token)
-        }
-    }, [])
-
-    const connect = async () => {
-        appContext.beginLogin()
-        if(window.ethereum) {
-            try {
-                const provider = new ethers.providers.Web3Provider(window.ethereum)
-                await provider.send("eth_requestAccounts", [])
-                const signer = provider.getSigner()
-                const message = new Date().toString()
-                const res = await axios.post('/api/auth', { message, signature: await signer.signMessage(message) })
-                appContext.loginComplete(res.data.token)
-            } catch (e: any) {
-                appContext.loginFailed(e)
+        const load = async() => {
+            errorHandlerHolder.handle = (e) => {
+                console.log('graphql error trapped', e)
             }
-        } else {
-            appContext.loginFailed(new Error('Metamask non détecté, est-il installé ?'))
+            const token = localStorage.getItem(TOKEN_KEY)
+            if (token) {
+                await appContext.loginComplete(token)
+            }
+            setLoading(false)
         }
-    }
+        load()
+    }, [appContext.data.auth.token])
 
-    if(appContext.data.authState.loading){
-        return <CircularProgress/>
-    } else if (appContext.data.authState.token) {
-        return children
+    let content
+    if (appContext.data.auth.token) {
+        content = children
     } else {
-        let message
-        if(appContext.data.authState.error) {
-            const errorFeedback = parseUiError(appContext.data.authState.error)
+        let message, detail
+        if(appContext.data.auth.error) {
+            const errorFeedback = parseUiError(appContext.data.auth.error)
             message = errorFeedback.message
+            detail = errorFeedback.detail
+            content = <Feedback severity="error" message={message} detail={detail} onClose={() => {}}/>
+        } else {
+            content = <Loader loading={loading}>
+                <LoginForm/>
+            </Loader>
         }
-        return <Stack alignItems="center" padding="0.5rem 0">
-            <LoadingButton loading={appContext.data.authState.loading}
-            loadingPosition="start"
-            startIcon={<LoginIcon />}
-            variant="contained"
-            onClick={connect}>Login</LoadingButton>
-            {message && <Feedback severity="error" message={message} onClose={() => {}}/>}
-        </Stack>
     }
+    return content
 }
 
 export default Connected

@@ -29,11 +29,34 @@ export const owner = gql`query Owner {
     filterContacts(searchTerm: $search) {
       nodes {
         id
-        firstName
-        lastName
+        firstname
+        lastname
         companyByCompanyId {
           name
         }
+      }
+    }
+  }`
+
+  export const updateContact =  gql`mutation UpdateContact($addressLine1: String, $addressLine2: String, 
+    $city: String, $companyId: Int, $firstname: String!, $email: String, $id: Int!, 
+    $lastname: String!, $phone: String, $zipCode: String) {
+    updateContactById(
+        input: {contactPatch: {addressLine1: $addressLine1, addressLine2: $addressLine2, 
+            city: $city, email: $email, firstname: $firstname, lastname: $lastname, 
+            phone: $phone, zipCode: $zipCode, companyId: $companyId}, id: $id}
+    ){
+      contact {
+        addressLine1
+        addressLine2
+        city
+        companyId
+        email
+        firstname
+        id
+        lastname
+        phone
+        zipCode
       }
     }
   }`
