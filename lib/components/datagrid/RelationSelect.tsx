@@ -1,9 +1,8 @@
-import { useApolloClient } from "@apollo/client"
+import { FetchPolicy, useQuery } from "@apollo/client"
 import { Autocomplete, Stack, SxProps, TextField, Theme, Typography } from "@mui/material"
 import { DocumentNode } from "graphql"
 import { parseUiError } from "lib/uiCommon"
-import { useContext, useEffect, useState } from "react"
-import { AppContext } from "../admin/AppContextProvider"
+import { useEffect, useState } from "react"
 
 interface Props {
     query: DocumentNode,
@@ -15,48 +14,39 @@ interface Props {
     name: string
     error: boolean,
     helperText: React.ReactNode
-    getLabel?: (item: any) => string
+    getLabel?: (item: any) => string,
+    overrideFetchPolicy?: FetchPolicy
 }
 
-function RelationSelect(props: Props) {
-    const {query, onChange, value } = props
-    const client = useApolloClient()
-    const [options, setOptions] = useState([] as {id: string, name: string}[])
+function RelationSelect({query, onChange, value, overrideFetchPolicy, sx, name, size, error, helperText, selectSx, getLabel }: Props) {
+    const {loading, error: errorFetch, data, refetch} = useQuery(query, { variables: { search: '' }, fetchPolicy: 'network-only', nextFetchPolicy: overrideFetchPolicy || 'cache-first' })
     const [open, setOpen] = useState(false)
     const [filter, setFilter] = useState('')
-    const [error, setError] = useState('')
-    const loading = open && options.length === 0
-
-    const loadOptions = async () => {
-        try {
-            setError('')
-            const res = await client.query({ query, variables: { search: filter }, fetchPolicy: 'network-only' })
-            if(res.error) {
-                setError(parseUiError(res.error).message)
-            } else {
-                setOptions(res.data[Object.getOwnPropertyNames(res.data)[0]].nodes)
-            }
-        } catch(e: any) {
-            setError(parseUiError(e).message)
-        }
-    }
 
     useEffect(() => {
-        const timeoutId = setTimeout(loadOptions, 500)
+        const timeoutId = setTimeout(() => refetch({ search: filter}), 500)
         return () => clearTimeout(timeoutId)
     }, [loading, filter])
 
-    return <Stack sx={props.sx}>
+    let message
+    if(errorFetch) {
+        const errorFeedback = parseUiError(errorFetch)
+        message = errorFeedback.message
+    }
+
+    const options = data ? data[Object.getOwnPropertyNames(data)[0]].nodes : []
+
+    return <Stack sx={sx}>
         <Autocomplete
-            id={props.name}
-            size={props.size}
+            id={name}
+            size={size}
             options={options}
             renderInput={params => <TextField {...params} 
                 value={filter} 
                 onChange={e => setFilter(e.target.value)}
-                error={props.error}
-                helperText={props.helperText}/>}
-            sx={props.selectSx}
+                error={error}
+                helperText={helperText}/>}
+            sx={selectSx}
             open={open}
             onOpen={() => {
                 setOpen(true);
@@ -65,11 +55,11 @@ function RelationSelect(props: Props) {
                 setOpen(false);
             }}
             filterOptions={x => x}
-            value={options.find(option => option.id === value) || null}
+            value={options.find((option: any) => option.id === value) || null}
             onChange={(_, val) => onChange(val ? val : null)}
-            getOptionLabel={props.getLabel ? props.getLabel : (selected) => selected.name}
+            getOptionLabel={getLabel ? getLabel : (selected) => selected.name}
         />
-        <Typography variant="caption" color="error.main">{error}</Typography>
+        {message && <Typography variant="caption" color="error.main">{message}</Typography>}
     </Stack>
 }
 
