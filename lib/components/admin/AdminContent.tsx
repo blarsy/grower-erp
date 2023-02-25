@@ -1,8 +1,7 @@
-import { useApolloClient } from "@apollo/client"
 import { TreeItem, TreeView } from "@mui/lab"
 import { Stack, Paper } from "@mui/material"
 import { useRouter } from "next/router"
-import { ReactNode, useEffect, useState } from "react"
+import { ReactNode, useContext, useEffect, useState } from "react"
 import ArticleAdminView from "./dataviews/ArticleAdminView"
 import CompanyAdminView from "./dataviews/CompanyAdminView"
 import ContactAdminView from "./dataviews/ContactAdminView"
@@ -16,12 +15,15 @@ import SalesScheduleAdminView from "./dataviews/SalesScheduleAdminView"
 import StockShapeAdminView from "./dataviews/StockShapeAdminView"
 import UnitAdminView from "./dataviews/UnitAdminView"
 import ProfileAdminView from "./dataviews/ProfileAdminView"
+import AdministratorsAdminView from "./dataviews/AdministratorsAdminView"
+import { AppContext } from "./AppContextProvider"
 
 interface NodeData {
     id: string
     label: string
     path?: string
     component?: ReactNode
+    requiredRole?: string
     children?: NodeData[]
   }
 
@@ -29,7 +31,8 @@ const nodesMap: NodeData[] = [
     { id: '1', label: 'Paramètres', children: [
         { id: '1-1', label: 'Mon entreprise', path: '/admin/profile', component: <OwnerAdminView/> },
         { id: '1-2', label: 'Utilisateur', path: '/admin/user', component: <ProfileAdminView/> },
-        { id: '1-3', label: 'Méthode d\'acheminement', path: '/admin/fulfilmentmethod', component: <FulfillmentMethodAdminView /> }
+        { id: '1-3', label: 'Administrateurs', path: '/admin/administrator', component: <AdministratorsAdminView/>, requiredRole: 'administrator' },
+        { id: '1-4', label: 'Méthode d\'acheminement', path: '/admin/fulfilmentmethod', component: <FulfillmentMethodAdminView /> }
     ] },
     { id: '2', label: 'Données' , children: [
         { id: '2-1', label: 'Entreprises', path: '/admin/company', component: <CompanyAdminView/> },
@@ -73,7 +76,7 @@ interface TreeData {
 
 const AdminContent = () => {
     const router = useRouter()
-    const client = useApolloClient()
+    const appContext = useContext(AppContext)
     const [tree, setTree] = useState({nodes: nodesMap, state: {expanded: [] as string[], selected: null as NodeData | null}} as TreeData)
 
 
@@ -100,10 +103,13 @@ const AdminContent = () => {
         return {...treeData}
     }
 
-    const createTreeItem = (nodeData : NodeData): JSX.Element => {
-        return <TreeItem key={nodeData.id} nodeId={nodeData.id} label={nodeData.label} onClick={async () => {
+    const createTreeItem = (nodeData : NodeData): JSX.Element | undefined => {
+        if(nodeData.requiredRole && (!appContext.data.user.role || appContext.data.user.role !== nodeData.requiredRole)) {
+            return undefined
+        }
+        return <TreeItem key={nodeData.id} nodeId={nodeData.id} label={nodeData.label} onClick={() => {
                 let newState = tree
-                if(nodeData.path){
+                if(nodeData.path) {
                     newState = setSelected(nodeData, newState)
                     router.push(nodeData.path)
                 } else {

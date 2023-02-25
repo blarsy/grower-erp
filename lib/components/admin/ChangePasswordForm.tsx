@@ -3,7 +3,7 @@ import * as yup from 'yup'
 import { TextField } from "@mui/material"
 import { ApolloError, gql, useMutation } from "@apollo/client"
 import { useContext } from "react"
-import { parseUiError } from "lib/uiCommon"
+import { isValidPassword, parseUiError } from "lib/uiCommon"
 import ItemForm from "./ItemForm"
 
 const CHANGE_PASSWORD = gql`mutation ChangePassword($contactId: Int!, $currentPassword: String!, $newPassword: String!) {
@@ -26,7 +26,7 @@ const ChangePasswordForm = ({ userId }: Props) => {
             repeatCurrentPassword: yup.string().required('Ce champ est requis')
                 .test('CurrentPasswordRepeated', 'Le mot de passe actuel et le mot de passe actuel répétés ne sont pas identiques', (val, ctx) => !val || val === ctx.parent.currentPassword),
             newPassword: yup.string().required('Ce champ est requis')
-                .test('PasswordSecureEnough', 'Le mot de passe doit comporter minimum 8 caractères, au moins une majuscule ou un chiffre, et un caractère spécial', val => !!val && val.length >= 8 && !!/[^\w]/.exec(val) && /[^\w]/.exec(val)!.length > 0 && !!/[A-Z]/.exec(val) && /[A-Z]/.exec(val)!.length > 0)
+                .test('PasswordSecureEnough', 'Le mot de passe doit comporter minimum 8 caractères, au moins une majuscule ou un chiffre, et un caractère spécial', isValidPassword)
                 .test('NewPasswordIsDifferent', 'Le nouveau mot de passe doit être différent de l\'ancien', (val, ctx) => val !== ctx.parent.currentPassword)
         })} onSubmit={async (values) => {
                 await changePassword({ variables: { contactId: userId, 

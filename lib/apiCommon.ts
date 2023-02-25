@@ -14,7 +14,6 @@ export const makeErrorResponse = (e: any): ErrorResponse => {
     return { error: `${e}` }
 }
 
-const authorizedPublicKeys = process.env.AUTHORIZED_PUBLIC_KEYS!
 const dateTimeFormat = process.env.NEXT_PUBLIC_DATETIME_FORMAT!
 const jwtSecret = process.env.JWT_SECRET!
 const db = process.env.POSTGRES_DB!
@@ -26,7 +25,6 @@ const jwtType = process.env.JWT_TYPE!
 const graphQlUrl = process.env.NEXT_PUBLIC_GRAPHQL_URL!
 
 interface ServerConfig {
-    authorizedPublicKeys: string[],
     dateTimeFormat: string,
     jwtSecret: string,
     db: string,
@@ -39,7 +37,6 @@ interface ServerConfig {
     [prop: string]: any
 }
 export const config = <ServerConfig> {
-    authorizedPublicKeys: JSON.parse(authorizedPublicKeys),
     dateTimeFormat,
     jwtSecret,
     db,

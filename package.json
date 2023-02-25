@@ -16,6 +16,7 @@
     "@mui/lab": "^5.0.0-alpha.114",
     "@mui/material": "^5.11.3",
     "@mui/x-date-pickers": "^5.0.17",
+    "@sendgrid/mail": "^7.7.0",
     "apollo-link-http": "^1.5.17",
     "axios": "^1.2.2",
     "dayjs": "^1.11.7",

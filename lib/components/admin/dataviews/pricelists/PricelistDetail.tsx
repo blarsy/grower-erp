@@ -64,7 +64,7 @@ const PricelistDetail = ({ pricelistId }: Props) => {
                 <Typography>Tarifs</Typography>
             </Stack>
             <DatagridAdminView title={`Liste de prix "${data && data.pricelistById.name}"`} dataName="ArticlesPrice"
-                getQuery={GET} filter={{ id: pricelistId }} updateQuery={UPDATE} createQuery={CREATE} getFromQueried={data => data.pricelistById.articlesPricesByPriceListId.nodes}
+                getQuery={GET} filter={{ id: pricelistId }} updateQuery={UPDATE} createQuery={CREATE} getFromQueried={data => data && data.pricelistById.articlesPricesByPriceListId.nodes}
                 columns={[
                     { key: 'id', headerText: 'ID', widthPercent: 5, type: "number"},
                     { key: 'articleId', headerText: 'Article', type: "number", widthPercent: 80, editable: {

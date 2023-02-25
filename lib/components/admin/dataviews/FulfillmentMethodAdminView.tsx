@@ -46,7 +46,7 @@ const GET = gql`query FulfillmentMethodAdminViewAllFulfillmentMethodsQuery {
 
 const FulfillmentMethodAdminView = () => {
     return <DatagridAdminView dataName="FulfillmentMethod"
-      title="Méthodes d\'acheminement" getQuery={GET} createQuery={CREATE} updateQuery={UPDATE}
+      title="Méthodes d'acheminement" getQuery={GET} createQuery={CREATE} updateQuery={UPDATE}
       columns={[
         { key: 'id', headerText: 'Id', widthPercent: 5, type: "number"},
         { key: 'name', headerText: 'Nom', widthPercent: 40, type: "string",  editable: {

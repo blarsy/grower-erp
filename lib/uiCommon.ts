@@ -52,6 +52,8 @@ export const isValidVatNumber = (vatNumber: string): boolean => {
     return false
 }
 
+export const isValidPassword = (password?: string) => !!password && password.length > 7 && !!password.match(/[A-Z]/) && !!password.match(/[^\w]/)
+
 const dateTimeFormat = process.env.NEXT_PUBLIC_DATETIME_FORMAT!
 const graphQlUrl = process.env.NEXT_PUBLIC_CLIENT_GRAPHQL_URL!
 

@@ -1,10 +1,7 @@
-import { Stack, Typography, TextField, Alert } from "@mui/material"
-import { Formik } from "formik"
+import { TextField } from "@mui/material"
 import * as yup from 'yup'
-import { parseUiError, isValidVatNumber } from "lib/uiCommon"
 import { DocumentNode, useMutation } from "@apollo/client"
 import { useContext, useState } from "react"
-import { LoadingButton } from "@mui/lab"
 import { AppContext } from "./AppContextProvider"
 import ItemForm from "./ItemForm"
 
@@ -43,7 +40,6 @@ const ContactForm = ({data, updateQuery }: Props) => {
     
     const [ contactData, setcontactData ] = useState(data || { firstname: '', lastname: '', phone: '', email: '', 
         addressLine1: '', addressLine2: '', zipCode: '', city: '' })
-    const [ error, setError ] = useState('')
     const appContext = useContext(AppContext)
 
     return <ItemForm initialValues={ensureTextValuesNotNull(contactData)} validationSchema={yup.object().shape({
@@ -62,7 +58,7 @@ const ContactForm = ({data, updateQuery }: Props) => {
                 addressLine1: values.addressLine1, addressLine2: values.addressLine2,
                 zipCode: values.zipCode, city: values.city }})
             setcontactData(result.data.updateContactById)
-            appContext?.changeSessionInfo(undefined, values.firstname, values.lastname, values.email)
+            appContext?.changeSessionInfo(undefined, undefined, values.id, values.firstname, values.lastname, values.email)
     }} title="Vos données personnelles" makeControls={(errors, touched, values, handleChange) => [
         <TextField key="firstname" id="firstname" label="Prénom" variant="standard" value={values.firstname} onChange={handleChange} error={touched.firstname && !!errors.firstname} helperText={touched.firstname && errors.firstname as string}/>,
         <TextField key="lastname" id="lastname" label="Nom de famille" variant="standard" value={values.lastname} onChange={handleChange} error={touched.lastname && !!errors.lastname} helperText={touched.lastname && errors.lastname as string}/>,

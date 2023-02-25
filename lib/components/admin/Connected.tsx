@@ -5,6 +5,7 @@ import { AppContext, TOKEN_KEY } from './AppContextProvider'
 import { errorHandlerHolder } from './apolloErrorLink'
 import LoginForm from "./LoginForm"
 import Loader from "../Loader"
+import { ApolloError } from "@apollo/client"
 
 interface Props {
     children: JSX.Element
@@ -17,7 +18,9 @@ const Connected = ({ children } : Props) => {
     useEffect(() => {
         const load = async() => {
             errorHandlerHolder.handle = (e) => {
-                console.log('graphql error trapped', e)
+                if(e.graphQLErrors && e.graphQLErrors.length > 0 && e.graphQLErrors.some(error => error.message === 'jwt expired')){
+                    localStorage.removeItem(TOKEN_KEY)
+                }
             }
             const token = localStorage.getItem(TOKEN_KEY)
             if (token) {

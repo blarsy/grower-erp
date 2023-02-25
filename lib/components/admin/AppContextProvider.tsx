@@ -9,9 +9,11 @@ interface AppStateData {
   },
   user: {
     id: number,
+    contactId: number,
     firstname: string,
     lastname: string,
-    email: string
+    email: string,
+    role: string
   },
   auth: {
     token: string,
@@ -23,7 +25,7 @@ export const TOKEN_KEY = 'token'
 
 export interface AppContext {
   data: AppStateData,
-  changeSessionInfo: (companyName?: string, userFirstname?: string, userLastname?: string, userEmail?: string) => void
+  changeSessionInfo: (companyName?: string, userId?: number, contactId?: number, userFirstname?: string, userLastname?: string, userEmail?: string) => void
   loginComplete: (token: string) => Promise<void>
   authExpired: () => void
 }
@@ -45,16 +47,13 @@ const GET_SESSION = gql`query LogeedIn {
       }
     }
   }
-  getCurrentUser {
-    id
+  getSessionData {
+    contactId
+    email
     firstname
     lastname
-    phone
-    email
-    addressLine1
-    addressLine2
-    zipCode
-    city
+    role
+    userId
   }
 }`
 
@@ -65,9 +64,11 @@ const blankAppContext = { data: {
     },
     user: {
       id: 0,
+      contactId: 0,
       firstname: '',
       lastname: '',
-      email: ''
+      email: '',
+      role: ''
     },
     auth: {
       token: '',
@@ -84,16 +85,18 @@ const AppContextProvider = ({ children }: Props) => {
     const [appState, setAppState] = useState(blankAppContext.data)
     const [loadSessionInfo] = useLazyQuery(GET_SESSION)
 
-    const changeSessionInfo = (companyName?: string, userFirstname?: string, userLastname?: string, userEmail?: string) => setAppState({ ...appState, ...{ 
+    const changeSessionInfo = (companyName?: string, userId?: number, contactId?: number, userFirstname?: string, userLastname?: string, userEmail?: string, userRole?: string) => setAppState({ ...appState, ...{ 
       company: {
         id: appState.company.id,
         name: companyName || appState.company.name
       },
       user: {
-        id: appState.user.id,
+        id: userId || appState.user.id,
+        contactId: contactId || appState.user.contactId,
         firstname: userFirstname || appState.user.firstname,
         lastname: userLastname || appState.user.lastname,
-        email: userEmail || appState.user.email
+        email: userEmail || appState.user.email,
+        role: userRole || appState.user.role
       },
     auth: appState.auth } })
 
@@ -103,12 +106,14 @@ const AppContextProvider = ({ children }: Props) => {
         const result = await loadSessionInfo()
         if(result.data && result.data.allSettings.nodes && result.data.allSettings.nodes.length > 0 && result.data.allSettings.nodes[0].companyByOwnerId) {
           const companyData = result.data.allSettings.nodes[0].companyByOwnerId
-          const userData = result.data.getCurrentUser
+          const sessionData = result.data.getSessionData
           setAppState({...appState, ...{ 
             company: { name: companyData.name, id: companyData.id },
-            user: { id: userData.id, firstname: userData.firstname, 
-              lastname: userData.lastname, 
-              email:userData.emaail },
+            user: { id: sessionData.userId, contactId: sessionData.contactId, 
+              firstname: sessionData.firstname, 
+              lastname: sessionData.lastname, 
+              email: sessionData.email,
+              role: sessionData.role },
             auth: { error: undefined, token}
           }})
         } else {

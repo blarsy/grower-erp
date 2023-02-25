@@ -1,9 +1,7 @@
 import { useQuery, useMutation, DocumentNode } from "@apollo/client"
-import { CircularProgress } from "@mui/material"
 import { FormikValues } from "formik"
-import { parseUiError } from "lib/uiCommon"
 import Datagrid, { Column, LineData, LineOperation } from "lib/components/datagrid/Datagrid"
-import Feedback from "lib/components/Feedback"
+import Loader from "lib/components/Loader"
 
 interface Props {
     title: string
@@ -15,19 +13,19 @@ interface Props {
     createQuery?: DocumentNode
     getFromQueried?: (data: any) => any
     lineOps?: LineOperation[]
-    fixedMutationVariables?: Object
+    fixedMutationVariables?: Object | (() => Object)
 }
 
-const updateVariablesFromValues = (values: FormikValues, columns: Column[], fixedVariables: object, line: LineData): {variables: {[id: string]: any}} => {
-    const variables: {[id: string]: any} = fixedVariables
+const updateVariablesFromValues = (values: FormikValues, columns: Column[], fixedVariables: Object | (() => Object), line: LineData): {variables: {[id: string]: any}} => {
+    const variables: {[id: string]: any} = typeof fixedVariables === 'function' ? fixedVariables() : fixedVariables
     columns.forEach(col => variables[col.key] = values[col.key])
     variables.id = line.id
     return { variables}
 }
-const createVariablesFromValues = (values: FormikValues, columns: Column[], fixedVariables: object): {variables: {[id: string]: any}} => {
-    const variables: {[id: string]: any} = fixedVariables
+const createVariablesFromValues = (values: FormikValues, columns: Column[], fixedVariables: Object | (() => Object)): {variables: {[id: string]: any}} => {
+    const variables: {[id: string]: any} = typeof fixedVariables === 'function' ? fixedVariables() : fixedVariables
     columns.forEach(col => {
-        if(col.key !== 'id') {
+        if(col.key !== 'id' && values[col.key]) {
             variables[col.key] = values[col.key]
         }
     })
@@ -70,24 +68,21 @@ const createDataChangesHelper = (columns: Column[], dataName: string, fixedVaria
     }
 }
 
-const DatagridAdminView = ({title, dataName, columns, getQuery, filter, updateQuery, createQuery, getFromQueried=(data) => data[`all${dataName}s`].nodes, lineOps, fixedMutationVariables}: Props) => {
+const DatagridAdminView = ({title, dataName, columns, getQuery, filter, updateQuery, createQuery, getFromQueried=(data) => data && data[`all${dataName}s`].nodes, lineOps, fixedMutationVariables}: Props) => {
     const { loading, error, data } = useQuery(getQuery, { variables: filter, fetchPolicy: 'cache-and-network' })
     const dataChanges = createDataChangesHelper(columns, dataName, fixedMutationVariables, updateQuery, createQuery)
 
-    if(loading) return <CircularProgress />
-    if(error){
-        const {message, detail} = parseUiError(error)
-        return <Feedback onClose={() => {}} message={message} detail={detail} severity="error" />
-    }
     const rows = getFromQueried(data)
     const editable = columns.some(col => col.editable)
 
-    return <Datagrid title={title}
-        columns={columns} 
-        lines={rows}
-        lineOps={lineOps}
-        getDeleteMutation = {editable ? (paramIndex: string) => `delete${dataName}ById(input: {id: $id${paramIndex}}){deleted${dataName}Id}` : undefined}
-        {...dataChanges.datagridProps} />
+    return <Loader loading={loading} error={error}>
+        <Datagrid title={title}
+            columns={columns} 
+            lines={rows}
+            lineOps={lineOps}
+            getDeleteMutation = {editable ? (paramIndex: string) => `delete${dataName}ById(input: {id: $id${paramIndex}}){deleted${dataName}Id}` : undefined}
+            {...dataChanges.datagridProps} />
+    </Loader>
 }
 
 export default DatagridAdminView

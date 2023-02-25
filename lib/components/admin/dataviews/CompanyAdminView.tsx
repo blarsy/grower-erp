@@ -60,7 +60,7 @@ $companyNumber: String, $city: String, $addressLine2: String, $addressLine1: Str
 
 const CompanyAdminView = () => {
     return <DatagridAdminView title="Entreprises" dataName="Company" getQuery={GET} createQuery={CREATE}
-    updateQuery={UPDATE} getFromQueried={(data) => data[`allCompanies`].nodes} columns={[
+    updateQuery={UPDATE} getFromQueried={(data) => data && data[`allCompanies`].nodes} columns={[
       { key: 'id', headerText: 'ID', widthPercent: 5, type: "number"},
       { key: 'name', headerText: 'Nom', widthPercent: 20, type: "string",  editable: {
         validation: yup.string().required('Ce champ est requis') 

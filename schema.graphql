@@ -455,6 +455,64 @@ type Query implements Node {
     """
     condition: UnitCondition
   ): UnitsConnection
+
+  """Reads and enables pagination through a set of `User`."""
+  allUsers(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `User`."""
+    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: UserCondition
+  ): UsersConnection
+
+  """Reads and enables pagination through a set of `UsersInvitation`."""
+  allUsersInvitations(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `UsersInvitation`."""
+    orderBy: [UsersInvitationsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: UsersInvitationCondition
+  ): UsersInvitationsConnection
   articleById(id: Int!): Article
   articlesPriceById(id: Int!): ArticlesPrice
   articlesPriceByArticleIdAndPriceListId(articleId: Int!, priceListId: Int!): ArticlesPrice
@@ -472,6 +530,10 @@ type Query implements Node {
   settingById(id: Int!): Setting
   stockShapeById(id: Int!): StockShape
   unitById(id: Int!): Unit
+  userById(id: Int!): User
+  userByContactIdAndRole(contactId: Int!, role: String!): User
+  usersInvitationById(id: Int!): UsersInvitation
+  usersInvitationByCode(code: String!): UsersInvitation
 
   """Reads and enables pagination through a set of `Customer`."""
   customerBySlug(
@@ -680,6 +742,7 @@ type Query implements Node {
     after: Cursor
   ): UnitsConnection
   getCurrentUser: Contact
+  getSessionData: SessionDatum
 
   """Reads a single `Article` using its globally unique `ID`."""
   article(
@@ -786,6 +849,20 @@ type Query implements Node {
     """The globally unique `ID` to be used in selecting a single `Unit`."""
     nodeId: ID!
   ): Unit
+
+  """Reads a single `User` using its globally unique `ID`."""
+  user(
+    """The globally unique `ID` to be used in selecting a single `User`."""
+    nodeId: ID!
+  ): User
+
+  """Reads a single `UsersInvitation` using its globally unique `ID`."""
+  usersInvitation(
+    """
+    The globally unique `ID` to be used in selecting a single `UsersInvitation`.
+    """
+    nodeId: ID!
+  ): UsersInvitation
 }
 
 """An object with a globally unique `ID`."""
@@ -1909,6 +1986,35 @@ type Contact implements Node {
     """
     condition: CompanyCondition
   ): CompaniesConnection!
+
+  """Reads and enables pagination through a set of `User`."""
+  usersByContactId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `User`."""
+    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: UserCondition
+  ): UsersConnection!
 }
 
 """Methods to use when ordering `Company`."""
@@ -1961,6 +2067,212 @@ input CompanyCondition {
 
   """Checks for equality with the object’s `mainContactId` field."""
   mainContactId: Int
+}
+
+"""A connection to a list of `User` values."""
+type UsersConnection {
+  """A list of `User` objects."""
+  nodes: [User!]!
+
+  """
+  A list of edges which contains the `User` and cursor to aid in pagination.
+  """
+  edges: [UsersEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `User` you could get from the connection."""
+  totalCount: Int!
+}
+
+type User implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  contactId: Int!
+  role: String!
+
+  """Reads a single `Contact` that is related to this `User`."""
+  contactByContactId: Contact
+
+  """Reads and enables pagination through a set of `UsersInvitation`."""
+  usersInvitationsByGrantor(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `UsersInvitation`."""
+    orderBy: [UsersInvitationsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: UsersInvitationCondition
+  ): UsersInvitationsConnection!
+}
+
+"""A connection to a list of `UsersInvitation` values."""
+type UsersInvitationsConnection {
+  """A list of `UsersInvitation` objects."""
+  nodes: [UsersInvitation!]!
+
+  """
+  A list of edges which contains the `UsersInvitation` and cursor to aid in pagination.
+  """
+  edges: [UsersInvitationsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `UsersInvitation` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+type UsersInvitation implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  code: String!
+  role: String!
+  email: String!
+  createDate: Datetime!
+  expirationDate: Datetime!
+  acceptedDate: Datetime
+  grantor: Int
+  invitationMailLastSent: Datetime
+  timesInvitationMailSent: Int!
+
+  """Reads a single `User` that is related to this `UsersInvitation`."""
+  userByGrantor: User
+}
+
+"""A `UsersInvitation` edge in the connection."""
+type UsersInvitationsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `UsersInvitation` at the end of the edge."""
+  node: UsersInvitation!
+}
+
+"""Methods to use when ordering `UsersInvitation`."""
+enum UsersInvitationsOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  CODE_ASC
+  CODE_DESC
+  ROLE_ASC
+  ROLE_DESC
+  EMAIL_ASC
+  EMAIL_DESC
+  CREATE_DATE_ASC
+  CREATE_DATE_DESC
+  EXPIRATION_DATE_ASC
+  EXPIRATION_DATE_DESC
+  ACCEPTED_DATE_ASC
+  ACCEPTED_DATE_DESC
+  GRANTOR_ASC
+  GRANTOR_DESC
+  INVITATION_MAIL_LAST_SENT_ASC
+  INVITATION_MAIL_LAST_SENT_DESC
+  TIMES_INVITATION_MAIL_SENT_ASC
+  TIMES_INVITATION_MAIL_SENT_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `UsersInvitation` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input UsersInvitationCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `code` field."""
+  code: String
+
+  """Checks for equality with the object’s `role` field."""
+  role: String
+
+  """Checks for equality with the object’s `email` field."""
+  email: String
+
+  """Checks for equality with the object’s `createDate` field."""
+  createDate: Datetime
+
+  """Checks for equality with the object’s `expirationDate` field."""
+  expirationDate: Datetime
+
+  """Checks for equality with the object’s `acceptedDate` field."""
+  acceptedDate: Datetime
+
+  """Checks for equality with the object’s `grantor` field."""
+  grantor: Int
+
+  """Checks for equality with the object’s `invitationMailLastSent` field."""
+  invitationMailLastSent: Datetime
+
+  """Checks for equality with the object’s `timesInvitationMailSent` field."""
+  timesInvitationMailSent: Int
+}
+
+"""A `User` edge in the connection."""
+type UsersEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `User` at the end of the edge."""
+  node: User!
+}
+
+"""Methods to use when ordering `User`."""
+enum UsersOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  CONTACT_ID_ASC
+  CONTACT_ID_DESC
+  ROLE_ASC
+  ROLE_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `User` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input UserCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `contactId` field."""
+  contactId: Int
+
+  """Checks for equality with the object’s `role` field."""
+  role: String
 }
 
 """A connection to a list of `Contact` values."""
@@ -2501,6 +2813,15 @@ type StockShapeDisplaysEdge {
   node: StockShapeDisplay!
 }
 
+type SessionDatum {
+  contactId: Int
+  firstname: String
+  email: String
+  role: String
+  userId: Int
+  lastname: String
+}
+
 """
 The root mutation type which contains root level fields which mutate data.
 """
@@ -2624,6 +2945,14 @@ type Mutation {
     """
     input: CreateUnitInput!
   ): CreateUnitPayload
+
+  """Creates a single `User`."""
+  createUser(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateUserInput!
+  ): CreateUserPayload
 
   """Updates a single `Article` using its globally unique id and a patch."""
   updateArticle(
@@ -2879,6 +3208,30 @@ type Mutation {
     input: UpdateUnitByIdInput!
   ): UpdateUnitPayload
 
+  """Updates a single `User` using its globally unique id and a patch."""
+  updateUser(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateUserInput!
+  ): UpdateUserPayload
+
+  """Updates a single `User` using a unique key and a patch."""
+  updateUserById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateUserByIdInput!
+  ): UpdateUserPayload
+
+  """Updates a single `User` using a unique key and a patch."""
+  updateUserByContactIdAndRole(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateUserByContactIdAndRoleInput!
+  ): UpdateUserPayload
+
   """Deletes a single `Article` using its globally unique id."""
   deleteArticle(
     """
@@ -3122,6 +3475,30 @@ type Mutation {
     """
     input: DeleteUnitByIdInput!
   ): DeleteUnitPayload
+
+  """Deletes a single `User` using its globally unique id."""
+  deleteUser(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteUserInput!
+  ): DeleteUserPayload
+
+  """Deletes a single `User` using a unique key."""
+  deleteUserById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteUserByIdInput!
+  ): DeleteUserPayload
+
+  """Deletes a single `User` using a unique key."""
+  deleteUserByContactIdAndRole(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteUserByContactIdAndRoleInput!
+  ): DeleteUserPayload
   authenticate(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -3864,6 +4241,51 @@ input UnitInput {
   id: Int
   name: String!
   abbreviation: String!
+}
+
+"""The output of our create `User` mutation."""
+type CreateUserPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `User` that was created by this mutation."""
+  user: User
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Contact` that is related to this `User`."""
+  contactByContactId: Contact
+
+  """An edge for our `User`. May be used by Relay 1."""
+  userEdge(
+    """The method to use when ordering `User`."""
+    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
+  ): UsersEdge
+}
+
+"""All input for the create `User` mutation."""
+input CreateUserInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `User` to be created by this mutation."""
+  user: UserInput!
+}
+
+"""An input for mutations affecting `User`"""
+input UserInput {
+  id: Int
+  contactId: Int!
+  role: String!
 }
 
 """The output of our update `Article` mutation."""
@@ -4904,6 +5326,89 @@ input UpdateUnitByIdInput {
   id: Int!
 }
 
+"""The output of our update `User` mutation."""
+type UpdateUserPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `User` that was updated by this mutation."""
+  user: User
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Contact` that is related to this `User`."""
+  contactByContactId: Contact
+
+  """An edge for our `User`. May be used by Relay 1."""
+  userEdge(
+    """The method to use when ordering `User`."""
+    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
+  ): UsersEdge
+}
+
+"""All input for the `updateUser` mutation."""
+input UpdateUserInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `User` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `User` being updated.
+  """
+  userPatch: UserPatch!
+}
+
+"""Represents an update to a `User`. Fields that are set will be updated."""
+input UserPatch {
+  id: Int
+  contactId: Int
+  role: String
+}
+
+"""All input for the `updateUserById` mutation."""
+input UpdateUserByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `User` being updated.
+  """
+  userPatch: UserPatch!
+  id: Int!
+}
+
+"""All input for the `updateUserByContactIdAndRole` mutation."""
+input UpdateUserByContactIdAndRoleInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `User` being updated.
+  """
+  userPatch: UserPatch!
+  contactId: Int!
+  role: String!
+}
+
 """The output of our delete `Article` mutation."""
 type DeleteArticlePayload {
   """
@@ -5662,6 +6167,68 @@ input DeleteUnitByIdInput {
   id: Int!
 }
 
+"""The output of our delete `User` mutation."""
+type DeleteUserPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `User` that was deleted by this mutation."""
+  user: User
+  deletedUserId: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Contact` that is related to this `User`."""
+  contactByContactId: Contact
+
+  """An edge for our `User`. May be used by Relay 1."""
+  userEdge(
+    """The method to use when ordering `User`."""
+    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
+  ): UsersEdge
+}
+
+"""All input for the `deleteUser` mutation."""
+input DeleteUserInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `User` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""All input for the `deleteUserById` mutation."""
+input DeleteUserByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+}
+
+"""All input for the `deleteUserByContactIdAndRole` mutation."""
+input DeleteUserByContactIdAndRoleInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  contactId: Int!
+  role: String!
+}
+
 """The output of our `authenticate` mutation."""
 type AuthenticatePayload {
   """
@@ -5766,21 +6333,11 @@ type RegisterUserPayload {
   unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
-  contact: Contact
 
   """
   Our root query field type. Allows us to run any query from our mutation payload.
   """
   query: Query
-
-  """Reads a single `Company` that is related to this `Contact`."""
-  companyByCompanyId: Company
-
-  """An edge for our `Contact`. May be used by Relay 1."""
-  contactEdge(
-    """The method to use when ordering `Contact`."""
-    orderBy: [ContactsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): ContactsEdge
 }
 
 """All input for the `registerUser` mutation."""
@@ -5792,12 +6349,7 @@ input RegisterUserInput {
   clientMutationId: String
   firstname: String
   lastname: String
-  email: String
-  phone: String
-  addressline1: String
-  addressline2: String
-  zipcode: String
-  city: String
+  invitationId: Int
   password: String
 }
 

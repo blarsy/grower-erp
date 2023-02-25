@@ -5,7 +5,7 @@
 -- Dumped from database version 15.2 (Debian 15.2-1.pgdg110+1)
 -- Dumped by pg_dump version 15.1
 
--- Started on 2023-02-22 09:18:42 CET
+-- Started on 2023-02-25 09:13:12 CET
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -19,7 +19,7 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- TOC entry 7 (class 2615 OID 17131)
+-- TOC entry 7 (class 2615 OID 17657)
 -- Name: postgraphile_watch; Type: SCHEMA; Schema: -; Owner: postgres
 --
 
@@ -37,7 +37,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
 
 
 --
--- TOC entry 3540 (class 0 OID 0)
+-- TOC entry 3571 (class 0 OID 0)
 -- Dependencies: 2
 -- Name: EXTENSION pgcrypto; Type: COMMENT; Schema: -; Owner: 
 --
@@ -46,7 +46,7 @@ COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
 
 
 --
--- TOC entry 922 (class 1247 OID 16427)
+-- TOC entry 928 (class 1247 OID 16427)
 -- Name: article_display; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -63,14 +63,14 @@ CREATE TYPE public.article_display AS (
 ALTER TYPE public.article_display OWNER TO postgres;
 
 --
--- TOC entry 925 (class 1247 OID 16430)
+-- TOC entry 988 (class 1247 OID 17455)
 -- Name: jwt_token; Type: TYPE; Schema: public; Owner: postgres
 --
 
 CREATE TYPE public.jwt_token AS (
 	role character varying,
-	"contactId" integer,
-	"customerId" integer,
+	user_id integer,
+	customer_id integer,
 	expiration integer
 );
 
@@ -78,7 +78,24 @@ CREATE TYPE public.jwt_token AS (
 ALTER TYPE public.jwt_token OWNER TO postgres;
 
 --
--- TOC entry 928 (class 1247 OID 16433)
+-- TOC entry 985 (class 1247 OID 17447)
+-- Name: session_data; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public.session_data AS (
+	contact_id integer,
+	firstname character varying,
+	email character varying,
+	role character varying,
+	user_id integer,
+	lastname character varying
+);
+
+
+ALTER TYPE public.session_data OWNER TO postgres;
+
+--
+-- TOC entry 931 (class 1247 OID 16433)
 -- Name: stock_shape_display; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -93,7 +110,7 @@ CREATE TYPE public.stock_shape_display AS (
 ALTER TYPE public.stock_shape_display OWNER TO postgres;
 
 --
--- TOC entry 309 (class 1255 OID 17132)
+-- TOC entry 315 (class 1255 OID 17658)
 -- Name: notify_watchers_ddl(); Type: FUNCTION; Schema: postgraphile_watch; Owner: postgres
 --
 
@@ -117,7 +134,7 @@ $$;
 ALTER FUNCTION postgraphile_watch.notify_watchers_ddl() OWNER TO postgres;
 
 --
--- TOC entry 310 (class 1255 OID 17133)
+-- TOC entry 316 (class 1255 OID 17659)
 -- Name: notify_watchers_drop(); Type: FUNCTION; Schema: postgraphile_watch; Owner: postgres
 --
 
@@ -141,24 +158,24 @@ $$;
 ALTER FUNCTION postgraphile_watch.notify_watchers_drop() OWNER TO postgres;
 
 --
--- TOC entry 283 (class 1255 OID 16436)
+-- TOC entry 313 (class 1255 OID 17493)
 -- Name: authenticate(character varying, character varying); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
 CREATE FUNCTION public.authenticate(login character varying, password character varying) RETURNS public.jwt_token
     LANGUAGE plpgsql SECURITY DEFINER
     AS $$
-declare
-  account public.contacts;
+declare user_id INTEGER;
+declare "role" TEXT;
 begin
-  select a.* into account
-    from public.contacts as a
+  select u.id, u.role into user_id, "role"
+    from public.contacts as a left join "users" u on a.id = u.contact_id
     where a.email = login and a."passwordHash" = crypt(password, a."passwordSalt");
 
-  if account.id IS NOT NULL then
+  if user_id IS NOT NULL then
     return (
-      'administrator',
-      account.id,
+      "role",
+      user_id,
 	  null,
       extract(epoch from now() + interval '1 day')
     )::public.jwt_token;
@@ -172,7 +189,7 @@ $$;
 ALTER FUNCTION public.authenticate(login character varying, password character varying) OWNER TO postgres;
 
 --
--- TOC entry 308 (class 1255 OID 16951)
+-- TOC entry 312 (class 1255 OID 16951)
 -- Name: change_password(character varying, character varying, integer); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -207,7 +224,7 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- TOC entry 219 (class 1259 OID 16437)
+-- TOC entry 218 (class 1259 OID 16437)
 -- Name: sales_schedules; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -226,8 +243,8 @@ CREATE TABLE public.sales_schedules (
 ALTER TABLE public.sales_schedules OWNER TO postgres;
 
 --
--- TOC entry 3541 (class 0 OID 0)
--- Dependencies: 219
+-- TOC entry 3572 (class 0 OID 0)
+-- Dependencies: 218
 -- Name: TABLE sales_schedules; Type: COMMENT; Schema: public; Owner: postgres
 --
 
@@ -235,7 +252,7 @@ COMMENT ON TABLE public.sales_schedules IS '@omit delete,update';
 
 
 --
--- TOC entry 296 (class 1255 OID 16443)
+-- TOC entry 300 (class 1255 OID 16443)
 -- Name: create_sales_schedule_with_deps(timestamp without time zone, character varying, timestamp without time zone, money, money, timestamp without time zone, boolean, integer[], integer[]); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -270,14 +287,14 @@ $$;
 ALTER FUNCTION public.create_sales_schedule_with_deps(fulfillment_date timestamp without time zone, name character varying, order_closure_date timestamp without time zone, delivery_price money, free_delivery_turnover money, begin_sales_date timestamp without time zone, disabled boolean, fulfillment_methods integer[], pricelists integer[]) OWNER TO postgres;
 
 --
--- TOC entry 220 (class 1259 OID 16444)
+-- TOC entry 219 (class 1259 OID 16444)
 -- Name: customers; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.customers (
     id integer NOT NULL,
     slug character varying NOT NULL,
-    "priceListId" integer NOT NULL,
+    "pricelistId" integer NOT NULL,
     "eshopAccess" boolean DEFAULT true NOT NULL,
     "contactId" integer,
     "companyId" integer
@@ -287,7 +304,7 @@ CREATE TABLE public.customers (
 ALTER TABLE public.customers OWNER TO postgres;
 
 --
--- TOC entry 297 (class 1255 OID 16450)
+-- TOC entry 301 (class 1255 OID 16450)
 -- Name: customer_by_slug(character varying); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -301,7 +318,7 @@ WHERE customers.slug = customer_by_slug.slug$$;
 ALTER FUNCTION public.customer_by_slug(slug character varying) OWNER TO postgres;
 
 --
--- TOC entry 298 (class 1255 OID 16451)
+-- TOC entry 302 (class 1255 OID 16451)
 -- Name: filter_articles(character varying); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -321,7 +338,7 @@ $$;
 ALTER FUNCTION public.filter_articles(search_term character varying) OWNER TO postgres;
 
 --
--- TOC entry 221 (class 1259 OID 16452)
+-- TOC entry 220 (class 1259 OID 16452)
 -- Name: companies_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -337,7 +354,7 @@ CREATE SEQUENCE public.companies_id_seq
 ALTER TABLE public.companies_id_seq OWNER TO postgres;
 
 --
--- TOC entry 222 (class 1259 OID 16453)
+-- TOC entry 221 (class 1259 OID 16453)
 -- Name: companies; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -356,7 +373,7 @@ CREATE TABLE public.companies (
 ALTER TABLE public.companies OWNER TO postgres;
 
 --
--- TOC entry 299 (class 1255 OID 16459)
+-- TOC entry 303 (class 1255 OID 16459)
 -- Name: filter_companies(character varying); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -374,7 +391,7 @@ $$;
 ALTER FUNCTION public.filter_companies(search_term character varying) OWNER TO postgres;
 
 --
--- TOC entry 223 (class 1259 OID 16460)
+-- TOC entry 222 (class 1259 OID 16460)
 -- Name: contacts; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -397,7 +414,7 @@ CREATE TABLE public.contacts (
 ALTER TABLE public.contacts OWNER TO postgres;
 
 --
--- TOC entry 305 (class 1255 OID 16465)
+-- TOC entry 309 (class 1255 OID 16465)
 -- Name: filter_contacts(character varying); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -415,7 +432,7 @@ $$;
 ALTER FUNCTION public.filter_contacts(search_term character varying) OWNER TO postgres;
 
 --
--- TOC entry 224 (class 1259 OID 16466)
+-- TOC entry 223 (class 1259 OID 16466)
 -- Name: containers; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -429,7 +446,7 @@ CREATE TABLE public.containers (
 ALTER TABLE public.containers OWNER TO postgres;
 
 --
--- TOC entry 300 (class 1255 OID 16471)
+-- TOC entry 304 (class 1255 OID 16471)
 -- Name: filter_containers(character varying); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -443,7 +460,7 @@ CREATE FUNCTION public.filter_containers(search_term character varying) RETURNS 
 ALTER FUNCTION public.filter_containers(search_term character varying) OWNER TO postgres;
 
 --
--- TOC entry 225 (class 1259 OID 16472)
+-- TOC entry 224 (class 1259 OID 16472)
 -- Name: pricelists; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -457,7 +474,7 @@ CREATE TABLE public.pricelists (
 ALTER TABLE public.pricelists OWNER TO postgres;
 
 --
--- TOC entry 301 (class 1255 OID 16478)
+-- TOC entry 305 (class 1255 OID 16478)
 -- Name: filter_pricelists(character varying); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -473,7 +490,7 @@ $$;
 ALTER FUNCTION public.filter_pricelists(search_term character varying) OWNER TO postgres;
 
 --
--- TOC entry 226 (class 1259 OID 16479)
+-- TOC entry 225 (class 1259 OID 16479)
 -- Name: products; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -488,7 +505,7 @@ CREATE TABLE public.products (
 ALTER TABLE public.products OWNER TO postgres;
 
 --
--- TOC entry 302 (class 1255 OID 16484)
+-- TOC entry 306 (class 1255 OID 16484)
 -- Name: filter_products(character varying); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -504,7 +521,7 @@ $$;
 ALTER FUNCTION public.filter_products(search_term character varying) OWNER TO postgres;
 
 --
--- TOC entry 303 (class 1255 OID 16485)
+-- TOC entry 307 (class 1255 OID 16485)
 -- Name: filter_stockshapes(character varying); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -520,7 +537,7 @@ WHERE ss.name ILIKE '%' || search_term || '%' OR p.name ILIKE '%' || search_term
 ALTER FUNCTION public.filter_stockshapes(search_term character varying) OWNER TO postgres;
 
 --
--- TOC entry 227 (class 1259 OID 16486)
+-- TOC entry 226 (class 1259 OID 16486)
 -- Name: units; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -534,7 +551,7 @@ CREATE TABLE public.units (
 ALTER TABLE public.units OWNER TO postgres;
 
 --
--- TOC entry 304 (class 1255 OID 16491)
+-- TOC entry 308 (class 1255 OID 16491)
 -- Name: filter_units(character varying); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -548,47 +565,79 @@ CREATE FUNCTION public.filter_units(search_term character varying) RETURNS SETOF
 ALTER FUNCTION public.filter_units(search_term character varying) OWNER TO postgres;
 
 --
--- TOC entry 284 (class 1255 OID 16795)
+-- TOC entry 310 (class 1255 OID 16795)
 -- Name: get_current_user(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
 CREATE FUNCTION public.get_current_user() RETURNS public.contacts
     LANGUAGE sql STABLE
     AS $$SELECT * FROM contacts WHERE id=
-(SELECT NULLIF(current_setting('jwt.claims.contactId', true), '')::integer)$$;
+(SELECT contact_id FROM users WHERE id =
+(SELECT NULLIF(current_setting('jwt.claims.user_id', true), '')::integer)
+)$$;
 
 
 ALTER FUNCTION public.get_current_user() OWNER TO postgres;
 
 --
--- TOC entry 307 (class 1255 OID 16492)
--- Name: register_user(character varying, character varying, character varying, character varying, character varying, character varying, character varying, character varying, character varying); Type: FUNCTION; Schema: public; Owner: postgres
+-- TOC entry 288 (class 1255 OID 17476)
+-- Name: get_session_data(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
-CREATE FUNCTION public.register_user(firstname character varying, lastname character varying, email character varying, phone character varying, addressline1 character varying, addressline2 character varying, zipcode character varying, city character varying, password character varying) RETURNS public.contacts
+CREATE FUNCTION public.get_session_data() RETURNS public.session_data
+    LANGUAGE sql STABLE
+    AS $$
+SELECT ct.id, ct.firstname, ct.email, u.role, u.id, ct.lastname
+FROM users u INNER JOIN contacts ct ON u.contact_id = ct.id
+WHERE u.id = (SELECT NULLIF(current_setting('jwt.claims.user_id', true), '')::integer)
+$$;
+
+
+ALTER FUNCTION public.get_session_data() OWNER TO postgres;
+
+--
+-- TOC entry 314 (class 1255 OID 17532)
+-- Name: register_user(character varying, character varying, integer, character varying); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.register_user(firstname character varying, lastname character varying, invitation_id integer, password character varying) RETURNS void
     LANGUAGE plpgsql SECURITY DEFINER
     AS $$
 declare salt text;
-declare res contacts;
-declare ssid INTEGER;
+declare invite users_invitations;
+declare cid INTEGER;
 begin
+	SELECT * INTO invite
+	FROM users_invitations
+	WHERE id = invitation_id;
+	
+	IF invite.accepted_date IS NOT NULL THEN
+		RAISE EXCEPTION 'Invitation invalid';
+	ELSE
+		IF invite.expiration_date < NOW() THEN
+			RAISE EXCEPTION 'Invitation expired';
+		END IF;
+	END IF;
+	
 	SELECT gen_salt('md5') INTO salt;
 	INSERT INTO public.contacts(
-		firstname, lastname, email, phone, "addressLine1", "addressLine2", "zipCode", city, "passwordHash", "passwordSalt")
-		VALUES (firstname, lastname, email, phone, addressLine1, addressLine2, zipCode, city, crypt(password, salt), salt)
-	RETURNING id INTO ssid;
-
-	SELECT * INTO res FROM contacts WHERE id = ssid;
-
-	RETURN res;
+		firstname, lastname, email, "passwordHash", "passwordSalt")
+		VALUES (firstname, lastname, invite.email, crypt("password", salt), salt)
+	RETURNING id INTO cid;
+	
+	INSERT INTO public.users(contact_id, "role")
+	VALUES (cid, invite.role);
+	
+	UPDATE public.users_invitations SET accepted_date = NOW()
+	WHERE id = invitation_id;
 end;
 $$;
 
 
-ALTER FUNCTION public.register_user(firstname character varying, lastname character varying, email character varying, phone character varying, addressline1 character varying, addressline2 character varying, zipcode character varying, city character varying, password character varying) OWNER TO postgres;
+ALTER FUNCTION public.register_user(firstname character varying, lastname character varying, invitation_id integer, password character varying) OWNER TO postgres;
 
 --
--- TOC entry 306 (class 1255 OID 16493)
+-- TOC entry 311 (class 1255 OID 16493)
 -- Name: update_sales_schedule_with_deps(integer, timestamp without time zone, character varying, timestamp without time zone, money, money, timestamp without time zone, boolean, integer[], integer[]); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -634,7 +683,7 @@ $$;
 ALTER FUNCTION public.update_sales_schedule_with_deps(ssid integer, pfulfillment_date timestamp without time zone, pname character varying, porder_closure_date timestamp without time zone, pdelivery_price money, pfree_delivery_turnover money, pbegin_sales_date timestamp without time zone, pdisabled boolean, pfulfillment_methods integer[], ppricelists integer[]) OWNER TO postgres;
 
 --
--- TOC entry 228 (class 1259 OID 16494)
+-- TOC entry 227 (class 1259 OID 16494)
 -- Name: articles; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -649,7 +698,7 @@ CREATE TABLE public.articles (
 ALTER TABLE public.articles OWNER TO postgres;
 
 --
--- TOC entry 229 (class 1259 OID 16499)
+-- TOC entry 228 (class 1259 OID 16499)
 -- Name: articles_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -665,8 +714,8 @@ CREATE SEQUENCE public.articles_id_seq
 ALTER TABLE public.articles_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3553 (class 0 OID 0)
--- Dependencies: 229
+-- TOC entry 3583 (class 0 OID 0)
+-- Dependencies: 228
 -- Name: articles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -674,7 +723,7 @@ ALTER SEQUENCE public.articles_id_seq OWNED BY public.articles.id;
 
 
 --
--- TOC entry 230 (class 1259 OID 16500)
+-- TOC entry 229 (class 1259 OID 16500)
 -- Name: articles_prices; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -689,7 +738,7 @@ CREATE TABLE public.articles_prices (
 ALTER TABLE public.articles_prices OWNER TO postgres;
 
 --
--- TOC entry 231 (class 1259 OID 16503)
+-- TOC entry 230 (class 1259 OID 16503)
 -- Name: contacts_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -705,8 +754,8 @@ CREATE SEQUENCE public.contacts_id_seq
 ALTER TABLE public.contacts_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3556 (class 0 OID 0)
--- Dependencies: 231
+-- TOC entry 3586 (class 0 OID 0)
+-- Dependencies: 230
 -- Name: contacts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -714,7 +763,7 @@ ALTER SEQUENCE public.contacts_id_seq OWNED BY public.contacts.id;
 
 
 --
--- TOC entry 232 (class 1259 OID 16504)
+-- TOC entry 231 (class 1259 OID 16504)
 -- Name: containers_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -730,8 +779,8 @@ CREATE SEQUENCE public.containers_id_seq
 ALTER TABLE public.containers_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3558 (class 0 OID 0)
--- Dependencies: 232
+-- TOC entry 3588 (class 0 OID 0)
+-- Dependencies: 231
 -- Name: containers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -739,7 +788,7 @@ ALTER SEQUENCE public.containers_id_seq OWNED BY public.containers.id;
 
 
 --
--- TOC entry 233 (class 1259 OID 16505)
+-- TOC entry 232 (class 1259 OID 16505)
 -- Name: customers_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -755,8 +804,8 @@ CREATE SEQUENCE public.customers_id_seq
 ALTER TABLE public.customers_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3560 (class 0 OID 0)
--- Dependencies: 233
+-- TOC entry 3590 (class 0 OID 0)
+-- Dependencies: 232
 -- Name: customers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -764,7 +813,7 @@ ALTER SEQUENCE public.customers_id_seq OWNED BY public.customers.id;
 
 
 --
--- TOC entry 234 (class 1259 OID 16506)
+-- TOC entry 233 (class 1259 OID 16506)
 -- Name: fulfillment_methods; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -779,7 +828,7 @@ CREATE TABLE public.fulfillment_methods (
 ALTER TABLE public.fulfillment_methods OWNER TO postgres;
 
 --
--- TOC entry 235 (class 1259 OID 16511)
+-- TOC entry 234 (class 1259 OID 16511)
 -- Name: fulfillment_method_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -795,8 +844,8 @@ CREATE SEQUENCE public.fulfillment_method_id_seq
 ALTER TABLE public.fulfillment_method_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3563 (class 0 OID 0)
--- Dependencies: 235
+-- TOC entry 3593 (class 0 OID 0)
+-- Dependencies: 234
 -- Name: fulfillment_method_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -804,7 +853,7 @@ ALTER SEQUENCE public.fulfillment_method_id_seq OWNED BY public.fulfillment_meth
 
 
 --
--- TOC entry 236 (class 1259 OID 16512)
+-- TOC entry 235 (class 1259 OID 16512)
 -- Name: pricelists_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -820,8 +869,8 @@ CREATE SEQUENCE public.pricelists_id_seq
 ALTER TABLE public.pricelists_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3565 (class 0 OID 0)
--- Dependencies: 236
+-- TOC entry 3595 (class 0 OID 0)
+-- Dependencies: 235
 -- Name: pricelists_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -829,7 +878,7 @@ ALTER SEQUENCE public.pricelists_id_seq OWNED BY public.pricelists.id;
 
 
 --
--- TOC entry 237 (class 1259 OID 16513)
+-- TOC entry 236 (class 1259 OID 16513)
 -- Name: product_prices_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -845,8 +894,8 @@ CREATE SEQUENCE public.product_prices_id_seq
 ALTER TABLE public.product_prices_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3567 (class 0 OID 0)
--- Dependencies: 237
+-- TOC entry 3597 (class 0 OID 0)
+-- Dependencies: 236
 -- Name: product_prices_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -854,7 +903,7 @@ ALTER SEQUENCE public.product_prices_id_seq OWNED BY public.articles_prices.id;
 
 
 --
--- TOC entry 238 (class 1259 OID 16514)
+-- TOC entry 237 (class 1259 OID 16514)
 -- Name: products_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -870,8 +919,8 @@ CREATE SEQUENCE public.products_id_seq
 ALTER TABLE public.products_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3569 (class 0 OID 0)
--- Dependencies: 238
+-- TOC entry 3599 (class 0 OID 0)
+-- Dependencies: 237
 -- Name: products_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -879,7 +928,7 @@ ALTER SEQUENCE public.products_id_seq OWNED BY public.products.id;
 
 
 --
--- TOC entry 239 (class 1259 OID 16515)
+-- TOC entry 238 (class 1259 OID 16515)
 -- Name: sales_schedules_fulfillment_methods; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -892,7 +941,7 @@ CREATE TABLE public.sales_schedules_fulfillment_methods (
 ALTER TABLE public.sales_schedules_fulfillment_methods OWNER TO postgres;
 
 --
--- TOC entry 240 (class 1259 OID 16518)
+-- TOC entry 239 (class 1259 OID 16518)
 -- Name: sales_schedules_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -908,8 +957,8 @@ CREATE SEQUENCE public.sales_schedules_id_seq
 ALTER TABLE public.sales_schedules_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3572 (class 0 OID 0)
--- Dependencies: 240
+-- TOC entry 3602 (class 0 OID 0)
+-- Dependencies: 239
 -- Name: sales_schedules_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -917,7 +966,7 @@ ALTER SEQUENCE public.sales_schedules_id_seq OWNED BY public.sales_schedules.id;
 
 
 --
--- TOC entry 241 (class 1259 OID 16519)
+-- TOC entry 240 (class 1259 OID 16519)
 -- Name: sales_schedules_pricelists; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -930,7 +979,7 @@ CREATE TABLE public.sales_schedules_pricelists (
 ALTER TABLE public.sales_schedules_pricelists OWNER TO postgres;
 
 --
--- TOC entry 242 (class 1259 OID 16522)
+-- TOC entry 241 (class 1259 OID 16522)
 -- Name: settings_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -946,7 +995,7 @@ CREATE SEQUENCE public.settings_id_seq
 ALTER TABLE public.settings_id_seq OWNER TO postgres;
 
 --
--- TOC entry 243 (class 1259 OID 16523)
+-- TOC entry 242 (class 1259 OID 16523)
 -- Name: settings; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -959,7 +1008,7 @@ CREATE TABLE public.settings (
 ALTER TABLE public.settings OWNER TO postgres;
 
 --
--- TOC entry 244 (class 1259 OID 16527)
+-- TOC entry 243 (class 1259 OID 16527)
 -- Name: stock_shapes; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -975,7 +1024,7 @@ CREATE TABLE public.stock_shapes (
 ALTER TABLE public.stock_shapes OWNER TO postgres;
 
 --
--- TOC entry 245 (class 1259 OID 16533)
+-- TOC entry 244 (class 1259 OID 16533)
 -- Name: stock_shapes_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -991,8 +1040,8 @@ CREATE SEQUENCE public.stock_shapes_id_seq
 ALTER TABLE public.stock_shapes_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3578 (class 0 OID 0)
--- Dependencies: 245
+-- TOC entry 3608 (class 0 OID 0)
+-- Dependencies: 244
 -- Name: stock_shapes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -1000,7 +1049,7 @@ ALTER SEQUENCE public.stock_shapes_id_seq OWNED BY public.stock_shapes.id;
 
 
 --
--- TOC entry 246 (class 1259 OID 16534)
+-- TOC entry 245 (class 1259 OID 16534)
 -- Name: units_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -1016,8 +1065,8 @@ CREATE SEQUENCE public.units_id_seq
 ALTER TABLE public.units_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3580 (class 0 OID 0)
--- Dependencies: 246
+-- TOC entry 3610 (class 0 OID 0)
+-- Dependencies: 245
 -- Name: units_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -1025,7 +1074,101 @@ ALTER SEQUENCE public.units_id_seq OWNED BY public.units.id;
 
 
 --
--- TOC entry 3325 (class 2604 OID 16535)
+-- TOC entry 247 (class 1259 OID 17397)
+-- Name: users; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.users (
+    id integer NOT NULL,
+    contact_id integer NOT NULL,
+    role character varying NOT NULL
+);
+
+
+ALTER TABLE public.users OWNER TO postgres;
+
+--
+-- TOC entry 246 (class 1259 OID 17396)
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.users_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.users_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 3613 (class 0 OID 0)
+-- Dependencies: 246
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
+
+
+--
+-- TOC entry 249 (class 1259 OID 17414)
+-- Name: users_invitations; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.users_invitations (
+    id integer NOT NULL,
+    code character varying NOT NULL,
+    role character varying NOT NULL,
+    email character varying NOT NULL,
+    create_date timestamp without time zone DEFAULT now() NOT NULL,
+    expiration_date timestamp without time zone NOT NULL,
+    accepted_date timestamp without time zone,
+    grantor integer,
+    "Invitation_mail_last_sent" timestamp without time zone,
+    times_invitation_mail_sent integer DEFAULT 0 NOT NULL
+);
+
+
+ALTER TABLE public.users_invitations OWNER TO postgres;
+
+--
+-- TOC entry 3614 (class 0 OID 0)
+-- Dependencies: 249
+-- Name: TABLE users_invitations; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON TABLE public.users_invitations IS '@omit create,update,delete';
+
+
+--
+-- TOC entry 248 (class 1259 OID 17413)
+-- Name: users_invitations_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.users_invitations_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.users_invitations_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 3616 (class 0 OID 0)
+-- Dependencies: 248
+-- Name: users_invitations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.users_invitations_id_seq OWNED BY public.users_invitations.id;
+
+
+--
+-- TOC entry 3340 (class 2604 OID 16535)
 -- Name: articles id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1033,7 +1176,7 @@ ALTER TABLE ONLY public.articles ALTER COLUMN id SET DEFAULT nextval('public.art
 
 
 --
--- TOC entry 3326 (class 2604 OID 16536)
+-- TOC entry 3341 (class 2604 OID 16536)
 -- Name: articles_prices id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1041,7 +1184,7 @@ ALTER TABLE ONLY public.articles_prices ALTER COLUMN id SET DEFAULT nextval('pub
 
 
 --
--- TOC entry 3319 (class 2604 OID 16537)
+-- TOC entry 3334 (class 2604 OID 16537)
 -- Name: contacts id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1049,7 +1192,7 @@ ALTER TABLE ONLY public.contacts ALTER COLUMN id SET DEFAULT nextval('public.con
 
 
 --
--- TOC entry 3320 (class 2604 OID 16538)
+-- TOC entry 3335 (class 2604 OID 16538)
 -- Name: containers id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1057,7 +1200,7 @@ ALTER TABLE ONLY public.containers ALTER COLUMN id SET DEFAULT nextval('public.c
 
 
 --
--- TOC entry 3316 (class 2604 OID 16539)
+-- TOC entry 3331 (class 2604 OID 16539)
 -- Name: customers id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1065,7 +1208,7 @@ ALTER TABLE ONLY public.customers ALTER COLUMN id SET DEFAULT nextval('public.cu
 
 
 --
--- TOC entry 3327 (class 2604 OID 16540)
+-- TOC entry 3342 (class 2604 OID 16540)
 -- Name: fulfillment_methods id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1073,7 +1216,7 @@ ALTER TABLE ONLY public.fulfillment_methods ALTER COLUMN id SET DEFAULT nextval(
 
 
 --
--- TOC entry 3321 (class 2604 OID 16541)
+-- TOC entry 3336 (class 2604 OID 16541)
 -- Name: pricelists id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1081,7 +1224,7 @@ ALTER TABLE ONLY public.pricelists ALTER COLUMN id SET DEFAULT nextval('public.p
 
 
 --
--- TOC entry 3323 (class 2604 OID 16542)
+-- TOC entry 3338 (class 2604 OID 16542)
 -- Name: products id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1089,7 +1232,7 @@ ALTER TABLE ONLY public.products ALTER COLUMN id SET DEFAULT nextval('public.pro
 
 
 --
--- TOC entry 3314 (class 2604 OID 16543)
+-- TOC entry 3329 (class 2604 OID 16543)
 -- Name: sales_schedules id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1097,7 +1240,7 @@ ALTER TABLE ONLY public.sales_schedules ALTER COLUMN id SET DEFAULT nextval('pub
 
 
 --
--- TOC entry 3329 (class 2604 OID 16544)
+-- TOC entry 3344 (class 2604 OID 16544)
 -- Name: stock_shapes id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1105,7 +1248,7 @@ ALTER TABLE ONLY public.stock_shapes ALTER COLUMN id SET DEFAULT nextval('public
 
 
 --
--- TOC entry 3324 (class 2604 OID 16545)
+-- TOC entry 3339 (class 2604 OID 16545)
 -- Name: units id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1113,7 +1256,23 @@ ALTER TABLE ONLY public.units ALTER COLUMN id SET DEFAULT nextval('public.units_
 
 
 --
--- TOC entry 3353 (class 2606 OID 16547)
+-- TOC entry 3346 (class 2604 OID 17400)
+-- Name: users id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+
+
+--
+-- TOC entry 3347 (class 2604 OID 17417)
+-- Name: users_invitations id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.users_invitations ALTER COLUMN id SET DEFAULT nextval('public.users_invitations_id_seq'::regclass);
+
+
+--
+-- TOC entry 3372 (class 2606 OID 16547)
 -- Name: articles articles_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1122,7 +1281,7 @@ ALTER TABLE ONLY public.articles
 
 
 --
--- TOC entry 3336 (class 2606 OID 16549)
+-- TOC entry 3355 (class 2606 OID 16549)
 -- Name: companies companies_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1131,7 +1290,7 @@ ALTER TABLE ONLY public.companies
 
 
 --
--- TOC entry 3341 (class 2606 OID 16551)
+-- TOC entry 3360 (class 2606 OID 16551)
 -- Name: contacts contacts_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1140,7 +1299,7 @@ ALTER TABLE ONLY public.contacts
 
 
 --
--- TOC entry 3344 (class 2606 OID 16553)
+-- TOC entry 3363 (class 2606 OID 16553)
 -- Name: containers containers_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1149,7 +1308,7 @@ ALTER TABLE ONLY public.containers
 
 
 --
--- TOC entry 3334 (class 2606 OID 16555)
+-- TOC entry 3353 (class 2606 OID 16555)
 -- Name: customers customers_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1158,7 +1317,7 @@ ALTER TABLE ONLY public.customers
 
 
 --
--- TOC entry 3362 (class 2606 OID 16557)
+-- TOC entry 3381 (class 2606 OID 16557)
 -- Name: fulfillment_methods fulfillment_method_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1167,7 +1326,7 @@ ALTER TABLE ONLY public.fulfillment_methods
 
 
 --
--- TOC entry 3346 (class 2606 OID 16559)
+-- TOC entry 3365 (class 2606 OID 16559)
 -- Name: pricelists pricelists_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1176,7 +1335,7 @@ ALTER TABLE ONLY public.pricelists
 
 
 --
--- TOC entry 3358 (class 2606 OID 16561)
+-- TOC entry 3377 (class 2606 OID 16561)
 -- Name: articles_prices product_prices_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1185,7 +1344,7 @@ ALTER TABLE ONLY public.articles_prices
 
 
 --
--- TOC entry 3349 (class 2606 OID 16563)
+-- TOC entry 3368 (class 2606 OID 16563)
 -- Name: products products_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1194,7 +1353,7 @@ ALTER TABLE ONLY public.products
 
 
 --
--- TOC entry 3366 (class 2606 OID 16565)
+-- TOC entry 3385 (class 2606 OID 16565)
 -- Name: sales_schedules_fulfillment_methods sales_schedules_fulfillment_methods_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1203,7 +1362,7 @@ ALTER TABLE ONLY public.sales_schedules_fulfillment_methods
 
 
 --
--- TOC entry 3332 (class 2606 OID 16567)
+-- TOC entry 3351 (class 2606 OID 16567)
 -- Name: sales_schedules sales_schedules_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1212,7 +1371,7 @@ ALTER TABLE ONLY public.sales_schedules
 
 
 --
--- TOC entry 3370 (class 2606 OID 16569)
+-- TOC entry 3389 (class 2606 OID 16569)
 -- Name: sales_schedules_pricelists sales_schedules_pricelists_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1221,7 +1380,7 @@ ALTER TABLE ONLY public.sales_schedules_pricelists
 
 
 --
--- TOC entry 3373 (class 2606 OID 16571)
+-- TOC entry 3392 (class 2606 OID 16571)
 -- Name: settings settings_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1230,7 +1389,7 @@ ALTER TABLE ONLY public.settings
 
 
 --
--- TOC entry 3377 (class 2606 OID 16573)
+-- TOC entry 3396 (class 2606 OID 16573)
 -- Name: stock_shapes stock_shapes_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1239,7 +1398,7 @@ ALTER TABLE ONLY public.stock_shapes
 
 
 --
--- TOC entry 3360 (class 2606 OID 16575)
+-- TOC entry 3379 (class 2606 OID 16575)
 -- Name: articles_prices unique_articlesprices_articlepricelist; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1248,7 +1407,7 @@ ALTER TABLE ONLY public.articles_prices
 
 
 --
--- TOC entry 3339 (class 2606 OID 16577)
+-- TOC entry 3358 (class 2606 OID 16577)
 -- Name: companies unique_companyNumber; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1257,7 +1416,25 @@ ALTER TABLE ONLY public.companies
 
 
 --
--- TOC entry 3351 (class 2606 OID 16579)
+-- TOC entry 3399 (class 2606 OID 17412)
+-- Name: users unique_role; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT unique_role UNIQUE (contact_id, role);
+
+
+--
+-- TOC entry 3404 (class 2606 OID 17495)
+-- Name: users_invitations unique_users_invitations_code; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.users_invitations
+    ADD CONSTRAINT unique_users_invitations_code UNIQUE (code);
+
+
+--
+-- TOC entry 3370 (class 2606 OID 16579)
 -- Name: units units_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1266,7 +1443,25 @@ ALTER TABLE ONLY public.units
 
 
 --
--- TOC entry 3354 (class 1259 OID 16580)
+-- TOC entry 3406 (class 2606 OID 17422)
+-- Name: users_invitations users_invitations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.users_invitations
+    ADD CONSTRAINT users_invitations_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3401 (class 2606 OID 17404)
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3373 (class 1259 OID 16580)
 -- Name: fki_fk_article_container; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1274,7 +1469,7 @@ CREATE INDEX fki_fk_article_container ON public.articles USING btree ("container
 
 
 --
--- TOC entry 3355 (class 1259 OID 16581)
+-- TOC entry 3374 (class 1259 OID 16581)
 -- Name: fki_fk_article_stockshape; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1282,7 +1477,7 @@ CREATE INDEX fki_fk_article_stockshape ON public.articles USING btree ("stockSha
 
 
 --
--- TOC entry 3356 (class 1259 OID 16582)
+-- TOC entry 3375 (class 1259 OID 16582)
 -- Name: fki_fk_articlesPrice_pricelists; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1290,7 +1485,7 @@ CREATE INDEX "fki_fk_articlesPrice_pricelists" ON public.articles_prices USING b
 
 
 --
--- TOC entry 3337 (class 1259 OID 16583)
+-- TOC entry 3356 (class 1259 OID 16583)
 -- Name: fki_fk_companies_contact; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1298,7 +1493,7 @@ CREATE INDEX fki_fk_companies_contact ON public.companies USING btree ("mainCont
 
 
 --
--- TOC entry 3342 (class 1259 OID 16733)
+-- TOC entry 3361 (class 1259 OID 16733)
 -- Name: fki_fk_companies_contacts; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1306,7 +1501,7 @@ CREATE INDEX fki_fk_companies_contacts ON public.contacts USING btree ("companyI
 
 
 --
--- TOC entry 3347 (class 1259 OID 16584)
+-- TOC entry 3366 (class 1259 OID 16584)
 -- Name: fki_fk_product_product; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1314,7 +1509,7 @@ CREATE INDEX fki_fk_product_product ON public.products USING btree ("parentProdu
 
 
 --
--- TOC entry 3363 (class 1259 OID 16585)
+-- TOC entry 3382 (class 1259 OID 16585)
 -- Name: fki_fk_sales_schedules_fulfillment_methods_fulfillment_method; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1322,7 +1517,7 @@ CREATE INDEX fki_fk_sales_schedules_fulfillment_methods_fulfillment_method ON pu
 
 
 --
--- TOC entry 3364 (class 1259 OID 16586)
+-- TOC entry 3383 (class 1259 OID 16586)
 -- Name: fki_fk_sales_schedules_fulfillment_methods_sales_schedule; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1330,7 +1525,7 @@ CREATE INDEX fki_fk_sales_schedules_fulfillment_methods_sales_schedule ON public
 
 
 --
--- TOC entry 3367 (class 1259 OID 16587)
+-- TOC entry 3386 (class 1259 OID 16587)
 -- Name: fki_fk_sales_schedules_pricelists_pricelists; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1338,7 +1533,7 @@ CREATE INDEX fki_fk_sales_schedules_pricelists_pricelists ON public.sales_schedu
 
 
 --
--- TOC entry 3368 (class 1259 OID 16588)
+-- TOC entry 3387 (class 1259 OID 16588)
 -- Name: fki_fk_sales_schedules_pricelists_sales_schedules; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1346,7 +1541,7 @@ CREATE INDEX fki_fk_sales_schedules_pricelists_sales_schedules ON public.sales_s
 
 
 --
--- TOC entry 3371 (class 1259 OID 16589)
+-- TOC entry 3390 (class 1259 OID 16589)
 -- Name: fki_fk_settings_companies; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1354,7 +1549,7 @@ CREATE INDEX fki_fk_settings_companies ON public.settings USING btree ("ownerId"
 
 
 --
--- TOC entry 3374 (class 1259 OID 16590)
+-- TOC entry 3393 (class 1259 OID 16590)
 -- Name: fki_fk_stock_shapes_products; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1362,7 +1557,7 @@ CREATE INDEX fki_fk_stock_shapes_products ON public.stock_shapes USING btree ("p
 
 
 --
--- TOC entry 3375 (class 1259 OID 16591)
+-- TOC entry 3394 (class 1259 OID 16591)
 -- Name: fki_fk_stock_shapes_units; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1370,7 +1565,23 @@ CREATE INDEX fki_fk_stock_shapes_units ON public.stock_shapes USING btree ("unit
 
 
 --
--- TOC entry 3382 (class 2606 OID 16592)
+-- TOC entry 3397 (class 1259 OID 17410)
+-- Name: fki_fk_users_contacts; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX fki_fk_users_contacts ON public.users USING btree (contact_id);
+
+
+--
+-- TOC entry 3402 (class 1259 OID 17428)
+-- Name: fki_fk_users_invitations_contacts; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX fki_fk_users_invitations_contacts ON public.users_invitations USING btree (grantor);
+
+
+--
+-- TOC entry 3411 (class 2606 OID 16592)
 -- Name: articles fk_article_container; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1379,7 +1590,7 @@ ALTER TABLE ONLY public.articles
 
 
 --
--- TOC entry 3383 (class 2606 OID 16597)
+-- TOC entry 3412 (class 2606 OID 16597)
 -- Name: articles fk_article_stockshape; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1388,7 +1599,7 @@ ALTER TABLE ONLY public.articles
 
 
 --
--- TOC entry 3384 (class 2606 OID 16602)
+-- TOC entry 3413 (class 2606 OID 16602)
 -- Name: articles_prices fk_articles_prices_articles; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1397,7 +1608,7 @@ ALTER TABLE ONLY public.articles_prices
 
 
 --
--- TOC entry 3385 (class 2606 OID 16607)
+-- TOC entry 3414 (class 2606 OID 16607)
 -- Name: articles_prices fk_articles_prices_pricelists; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1406,7 +1617,7 @@ ALTER TABLE ONLY public.articles_prices
 
 
 --
--- TOC entry 3379 (class 2606 OID 16612)
+-- TOC entry 3408 (class 2606 OID 16612)
 -- Name: companies fk_companies_contact; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1415,7 +1626,7 @@ ALTER TABLE ONLY public.companies
 
 
 --
--- TOC entry 3380 (class 2606 OID 16728)
+-- TOC entry 3409 (class 2606 OID 16728)
 -- Name: contacts fk_companies_contacts; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1424,16 +1635,16 @@ ALTER TABLE ONLY public.contacts
 
 
 --
--- TOC entry 3378 (class 2606 OID 16617)
+-- TOC entry 3407 (class 2606 OID 16617)
 -- Name: customers fk_customer_priceList; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.customers
-    ADD CONSTRAINT "fk_customer_priceList" FOREIGN KEY ("priceListId") REFERENCES public.pricelists(id) NOT VALID;
+    ADD CONSTRAINT "fk_customer_priceList" FOREIGN KEY ("pricelistId") REFERENCES public.pricelists(id) NOT VALID;
 
 
 --
--- TOC entry 3381 (class 2606 OID 16622)
+-- TOC entry 3410 (class 2606 OID 16622)
 -- Name: products fk_product_product; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1442,7 +1653,7 @@ ALTER TABLE ONLY public.products
 
 
 --
--- TOC entry 3386 (class 2606 OID 16627)
+-- TOC entry 3415 (class 2606 OID 16627)
 -- Name: sales_schedules_fulfillment_methods fk_sales_schedules_fulfillment_methods_fulfillment_method; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1451,7 +1662,7 @@ ALTER TABLE ONLY public.sales_schedules_fulfillment_methods
 
 
 --
--- TOC entry 3387 (class 2606 OID 16632)
+-- TOC entry 3416 (class 2606 OID 16632)
 -- Name: sales_schedules_fulfillment_methods fk_sales_schedules_fulfillment_methods_sales_schedule; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1460,7 +1671,7 @@ ALTER TABLE ONLY public.sales_schedules_fulfillment_methods
 
 
 --
--- TOC entry 3388 (class 2606 OID 16637)
+-- TOC entry 3417 (class 2606 OID 16637)
 -- Name: sales_schedules_pricelists fk_sales_schedules_pricelists_pricelists; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1469,7 +1680,7 @@ ALTER TABLE ONLY public.sales_schedules_pricelists
 
 
 --
--- TOC entry 3389 (class 2606 OID 16642)
+-- TOC entry 3418 (class 2606 OID 16642)
 -- Name: sales_schedules_pricelists fk_sales_schedules_pricelists_sales_schedules; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1478,7 +1689,7 @@ ALTER TABLE ONLY public.sales_schedules_pricelists
 
 
 --
--- TOC entry 3390 (class 2606 OID 16647)
+-- TOC entry 3419 (class 2606 OID 16647)
 -- Name: settings fk_settings_companies; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1487,7 +1698,7 @@ ALTER TABLE ONLY public.settings
 
 
 --
--- TOC entry 3391 (class 2606 OID 16652)
+-- TOC entry 3420 (class 2606 OID 16652)
 -- Name: stock_shapes fk_stock_shapes_products; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1496,7 +1707,7 @@ ALTER TABLE ONLY public.stock_shapes
 
 
 --
--- TOC entry 3392 (class 2606 OID 16657)
+-- TOC entry 3421 (class 2606 OID 16657)
 -- Name: stock_shapes fk_stock_shapes_units; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1505,8 +1716,26 @@ ALTER TABLE ONLY public.stock_shapes
 
 
 --
--- TOC entry 3542 (class 0 OID 0)
--- Dependencies: 219
+-- TOC entry 3422 (class 2606 OID 17405)
+-- Name: users fk_users_contacts; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT fk_users_contacts FOREIGN KEY (contact_id) REFERENCES public.contacts(id) NOT VALID;
+
+
+--
+-- TOC entry 3423 (class 2606 OID 17423)
+-- Name: users_invitations fk_users_invitations_users; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.users_invitations
+    ADD CONSTRAINT fk_users_invitations_users FOREIGN KEY (grantor) REFERENCES public.users(id) NOT VALID;
+
+
+--
+-- TOC entry 3573 (class 0 OID 0)
+-- Dependencies: 218
 -- Name: TABLE sales_schedules; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1514,8 +1743,8 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.sales_schedules TO administrat
 
 
 --
--- TOC entry 3543 (class 0 OID 0)
--- Dependencies: 220
+-- TOC entry 3574 (class 0 OID 0)
+-- Dependencies: 219
 -- Name: TABLE customers; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1523,8 +1752,8 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.customers TO administrator;
 
 
 --
--- TOC entry 3544 (class 0 OID 0)
--- Dependencies: 221
+-- TOC entry 3575 (class 0 OID 0)
+-- Dependencies: 220
 -- Name: SEQUENCE companies_id_seq; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1532,8 +1761,8 @@ GRANT USAGE ON SEQUENCE public.companies_id_seq TO administrator;
 
 
 --
--- TOC entry 3545 (class 0 OID 0)
--- Dependencies: 222
+-- TOC entry 3576 (class 0 OID 0)
+-- Dependencies: 221
 -- Name: TABLE companies; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1541,8 +1770,8 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.companies TO administrator;
 
 
 --
--- TOC entry 3546 (class 0 OID 0)
--- Dependencies: 223
+-- TOC entry 3577 (class 0 OID 0)
+-- Dependencies: 222
 -- Name: TABLE contacts; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1550,8 +1779,8 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.contacts TO administrator;
 
 
 --
--- TOC entry 3547 (class 0 OID 0)
--- Dependencies: 224
+-- TOC entry 3578 (class 0 OID 0)
+-- Dependencies: 223
 -- Name: TABLE containers; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1559,8 +1788,8 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.containers TO administrator;
 
 
 --
--- TOC entry 3548 (class 0 OID 0)
--- Dependencies: 225
+-- TOC entry 3579 (class 0 OID 0)
+-- Dependencies: 224
 -- Name: TABLE pricelists; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1568,8 +1797,8 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.pricelists TO administrator;
 
 
 --
--- TOC entry 3549 (class 0 OID 0)
--- Dependencies: 226
+-- TOC entry 3580 (class 0 OID 0)
+-- Dependencies: 225
 -- Name: TABLE products; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1577,8 +1806,8 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.products TO administrator;
 
 
 --
--- TOC entry 3550 (class 0 OID 0)
--- Dependencies: 227
+-- TOC entry 3581 (class 0 OID 0)
+-- Dependencies: 226
 -- Name: TABLE units; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1586,18 +1815,8 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.units TO administrator;
 
 
 --
--- TOC entry 3551 (class 0 OID 0)
--- Dependencies: 307
--- Name: FUNCTION register_user(firstname character varying, lastname character varying, email character varying, phone character varying, addressline1 character varying, addressline2 character varying, zipcode character varying, city character varying, password character varying); Type: ACL; Schema: public; Owner: postgres
---
-
-REVOKE ALL ON FUNCTION public.register_user(firstname character varying, lastname character varying, email character varying, phone character varying, addressline1 character varying, addressline2 character varying, zipcode character varying, city character varying, password character varying) FROM PUBLIC;
-GRANT ALL ON FUNCTION public.register_user(firstname character varying, lastname character varying, email character varying, phone character varying, addressline1 character varying, addressline2 character varying, zipcode character varying, city character varying, password character varying) TO administrator;
-
-
---
--- TOC entry 3552 (class 0 OID 0)
--- Dependencies: 228
+-- TOC entry 3582 (class 0 OID 0)
+-- Dependencies: 227
 -- Name: TABLE articles; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1605,8 +1824,8 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.articles TO administrator;
 
 
 --
--- TOC entry 3554 (class 0 OID 0)
--- Dependencies: 229
+-- TOC entry 3584 (class 0 OID 0)
+-- Dependencies: 228
 -- Name: SEQUENCE articles_id_seq; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1614,8 +1833,8 @@ GRANT USAGE ON SEQUENCE public.articles_id_seq TO administrator;
 
 
 --
--- TOC entry 3555 (class 0 OID 0)
--- Dependencies: 230
+-- TOC entry 3585 (class 0 OID 0)
+-- Dependencies: 229
 -- Name: TABLE articles_prices; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1623,8 +1842,8 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.articles_prices TO administrat
 
 
 --
--- TOC entry 3557 (class 0 OID 0)
--- Dependencies: 231
+-- TOC entry 3587 (class 0 OID 0)
+-- Dependencies: 230
 -- Name: SEQUENCE contacts_id_seq; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1632,8 +1851,8 @@ GRANT USAGE ON SEQUENCE public.contacts_id_seq TO administrator;
 
 
 --
--- TOC entry 3559 (class 0 OID 0)
--- Dependencies: 232
+-- TOC entry 3589 (class 0 OID 0)
+-- Dependencies: 231
 -- Name: SEQUENCE containers_id_seq; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1641,8 +1860,8 @@ GRANT USAGE ON SEQUENCE public.containers_id_seq TO administrator;
 
 
 --
--- TOC entry 3561 (class 0 OID 0)
--- Dependencies: 233
+-- TOC entry 3591 (class 0 OID 0)
+-- Dependencies: 232
 -- Name: SEQUENCE customers_id_seq; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1650,8 +1869,8 @@ GRANT USAGE ON SEQUENCE public.customers_id_seq TO administrator;
 
 
 --
--- TOC entry 3562 (class 0 OID 0)
--- Dependencies: 234
+-- TOC entry 3592 (class 0 OID 0)
+-- Dependencies: 233
 -- Name: TABLE fulfillment_methods; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1659,8 +1878,8 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.fulfillment_methods TO adminis
 
 
 --
--- TOC entry 3564 (class 0 OID 0)
--- Dependencies: 235
+-- TOC entry 3594 (class 0 OID 0)
+-- Dependencies: 234
 -- Name: SEQUENCE fulfillment_method_id_seq; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1668,8 +1887,8 @@ GRANT USAGE ON SEQUENCE public.fulfillment_method_id_seq TO administrator;
 
 
 --
--- TOC entry 3566 (class 0 OID 0)
--- Dependencies: 236
+-- TOC entry 3596 (class 0 OID 0)
+-- Dependencies: 235
 -- Name: SEQUENCE pricelists_id_seq; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1677,8 +1896,8 @@ GRANT USAGE ON SEQUENCE public.pricelists_id_seq TO administrator;
 
 
 --
--- TOC entry 3568 (class 0 OID 0)
--- Dependencies: 237
+-- TOC entry 3598 (class 0 OID 0)
+-- Dependencies: 236
 -- Name: SEQUENCE product_prices_id_seq; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1686,8 +1905,8 @@ GRANT USAGE ON SEQUENCE public.product_prices_id_seq TO administrator;
 
 
 --
--- TOC entry 3570 (class 0 OID 0)
--- Dependencies: 238
+-- TOC entry 3600 (class 0 OID 0)
+-- Dependencies: 237
 -- Name: SEQUENCE products_id_seq; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1695,8 +1914,8 @@ GRANT USAGE ON SEQUENCE public.products_id_seq TO administrator;
 
 
 --
--- TOC entry 3571 (class 0 OID 0)
--- Dependencies: 239
+-- TOC entry 3601 (class 0 OID 0)
+-- Dependencies: 238
 -- Name: TABLE sales_schedules_fulfillment_methods; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1704,8 +1923,8 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.sales_schedules_fulfillment_me
 
 
 --
--- TOC entry 3573 (class 0 OID 0)
--- Dependencies: 240
+-- TOC entry 3603 (class 0 OID 0)
+-- Dependencies: 239
 -- Name: SEQUENCE sales_schedules_id_seq; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1713,8 +1932,8 @@ GRANT USAGE ON SEQUENCE public.sales_schedules_id_seq TO administrator;
 
 
 --
--- TOC entry 3574 (class 0 OID 0)
--- Dependencies: 241
+-- TOC entry 3604 (class 0 OID 0)
+-- Dependencies: 240
 -- Name: TABLE sales_schedules_pricelists; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1722,8 +1941,8 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.sales_schedules_pricelists TO 
 
 
 --
--- TOC entry 3575 (class 0 OID 0)
--- Dependencies: 242
+-- TOC entry 3605 (class 0 OID 0)
+-- Dependencies: 241
 -- Name: SEQUENCE settings_id_seq; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1731,8 +1950,8 @@ GRANT USAGE ON SEQUENCE public.settings_id_seq TO administrator;
 
 
 --
--- TOC entry 3576 (class 0 OID 0)
--- Dependencies: 243
+-- TOC entry 3606 (class 0 OID 0)
+-- Dependencies: 242
 -- Name: TABLE settings; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1740,8 +1959,8 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.settings TO administrator;
 
 
 --
--- TOC entry 3577 (class 0 OID 0)
--- Dependencies: 244
+-- TOC entry 3607 (class 0 OID 0)
+-- Dependencies: 243
 -- Name: TABLE stock_shapes; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1749,8 +1968,8 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.stock_shapes TO administrator;
 
 
 --
--- TOC entry 3579 (class 0 OID 0)
--- Dependencies: 245
+-- TOC entry 3609 (class 0 OID 0)
+-- Dependencies: 244
 -- Name: SEQUENCE stock_shapes_id_seq; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1758,8 +1977,8 @@ GRANT USAGE ON SEQUENCE public.stock_shapes_id_seq TO administrator;
 
 
 --
--- TOC entry 3581 (class 0 OID 0)
--- Dependencies: 246
+-- TOC entry 3611 (class 0 OID 0)
+-- Dependencies: 245
 -- Name: SEQUENCE units_id_seq; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -1767,7 +1986,26 @@ GRANT USAGE ON SEQUENCE public.units_id_seq TO administrator;
 
 
 --
--- TOC entry 2170 (class 826 OID 16662)
+-- TOC entry 3612 (class 0 OID 0)
+-- Dependencies: 247
+-- Name: TABLE users; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON TABLE public.users TO administrator;
+
+
+--
+-- TOC entry 3615 (class 0 OID 0)
+-- Dependencies: 249
+-- Name: TABLE users_invitations; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON TABLE public.users_invitations TO administrator;
+GRANT SELECT ON TABLE public.users_invitations TO anonymous;
+
+
+--
+-- TOC entry 2185 (class 826 OID 16662)
 -- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: public; Owner: postgres
 --
 
@@ -1775,7 +2013,7 @@ ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT SELECT,INSERT,
 
 
 --
--- TOC entry 3312 (class 3466 OID 17134)
+-- TOC entry 3327 (class 3466 OID 17660)
 -- Name: postgraphile_watch_ddl; Type: EVENT TRIGGER; Schema: -; Owner: postgres
 --
 
@@ -1787,7 +2025,7 @@ CREATE EVENT TRIGGER postgraphile_watch_ddl ON ddl_command_end
 ALTER EVENT TRIGGER postgraphile_watch_ddl OWNER TO postgres;
 
 --
--- TOC entry 3313 (class 3466 OID 17135)
+-- TOC entry 3328 (class 3466 OID 17661)
 -- Name: postgraphile_watch_drop; Type: EVENT TRIGGER; Schema: -; Owner: postgres
 --
 
@@ -1797,7 +2035,7 @@ CREATE EVENT TRIGGER postgraphile_watch_drop ON sql_drop
 
 ALTER EVENT TRIGGER postgraphile_watch_drop OWNER TO postgres;
 
--- Completed on 2023-02-22 09:18:42 CET
+-- Completed on 2023-02-25 09:13:13 CET
 
 --
 -- PostgreSQL database dump complete

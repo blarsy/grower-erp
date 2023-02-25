@@ -28,10 +28,10 @@ const ProfileAdminView = () => {
     const client = useApolloClient()
     const { loading, error, data } = useQuery(GET)
     return <Loader loading={loading} error={error}>
-        <Stack>
+        { data && <Stack>
             <ContactForm data={ data.getCurrentUser } updateQuery={updateContact}/>
             <ChangePasswordForm userId={ data.getCurrentUser.id }/>
-        </Stack>
+        </Stack>}
     </Loader>
 }
 
