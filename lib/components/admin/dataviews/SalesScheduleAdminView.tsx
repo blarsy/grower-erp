@@ -78,7 +78,7 @@ const SalesScheduleAdminView = () => {
     const router = useRouter()
     const [ create ] = useMutation(CREATE)
     const [ update ] = useMutation(UPDATE)
-    const [salesScheduleById,{ loading, error}] = useLazyQuery(GET)
+    const [salesScheduleById,{ loading }] = useLazyQuery(GET)
     const [salesScheduleDataInfo, setSalesScheduleDataInfo] = useState({data: null as any, error: undefined as Error | undefined})
 
     useEffect(() => {

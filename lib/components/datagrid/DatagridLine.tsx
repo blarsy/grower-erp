@@ -1,5 +1,5 @@
-import { Box, CircularProgress, IconButton, Stack, TextField, Typography, Checkbox, Autocomplete, FormControlLabel, Tooltip } from "@mui/material"
-import { Form, Formik, FormikErrors, FormikHelpers, FormikTouched, FormikValues } from "formik"
+import { Box, CircularProgress, IconButton, Stack, TextField, Typography, Checkbox, FormControlLabel, Tooltip } from "@mui/material"
+import { Form, Formik, FormikErrors, FormikTouched, FormikValues } from "formik"
 import DeleteIcon from '@mui/icons-material/Close'
 import CheckIcon from '@mui/icons-material/Check'
 import SaveIcon from '@mui/icons-material/SaveAlt'
@@ -58,44 +58,43 @@ const DatagridLine = ({ line, columns, canDelete, readonly, onUpdate, onCreate, 
         setFieldValue: (field: string, value: any, shouldValidate?: boolean | undefined) => void,
         touched: FormikTouched<FormikValues>,
         errors: FormikErrors<FormikValues>,
-        working: boolean,
-        onDismissNewLine: () => void,
-        submitForm: () => Promise<void>): JSX.Element => {
+        working: boolean): JSX.Element => {
 
         let flex = '1'
         if(!isLastCol) flex = `0 0 ${Math.round(col.widthPercent! * 100) / 100}%`
+        const colSx = { flex, overflow: 'hidden'}
 
         if(!col.editable || col.key === keyOfIdCol){
             if(col.key === keyOfIdCol) {
                 if(working) {
-                    return <Box key={col.key} sx={{ flex }}>
+                    return <Box key={col.key} sx={colSx}>
                         <CircularProgress size="1rem" />
                     </Box>
                 }
                 return <Box key={col.key}
-                        sx={{ flex }}>
+                        sx={colSx}>
                         <Typography variant="body1">
                             {(line[col.key] as number) !== NEW_LINE_KEY && line[col.key]?.toString()}
                         </Typography>
                 </Box>
             } else if(col.type === "boolean") {
-                return <Checkbox key={col.key} sx={{ flex }} disabled value={line[col.key]} />
+                return <Checkbox key={col.key} sx={colSx} disabled value={line[col.key]} />
             } else if(col.type === "datetime") {
-                return <Typography key={col.key} variant="body2" sx={{ flex }}>{ line[col.key] ? dayjs(line[col.key] as Date).format(config.dateTimeFormat):'' }</Typography>
+                return <Typography key={col.key} variant="body2" sx={colSx}>{ line[col.key] ? dayjs(line[col.key] as Date).format(config.dateTimeFormat):'' }</Typography>
             } else if(col.valueForNew && line[keyOfIdCol] === NEW_LINE_KEY) {
                 return <Typography
                     key={col.key}
-                    sx={{ flex, fontStyle: "italic" }}
+                    sx={{ fontStyle: "italic", ...colSx }}
                     variant="body2">
                     {col.valueForNew}
                 </Typography>
             } else if (col.type === "custom"){
                 if(!col.customDisplay) throw new Error(`Column ${col.key} is of type 'custom', but no 'customDisplay' property value was provided.`)
-                return <Typography key={col.key} sx={{ flex }} variant="body2">{col.customDisplay(line[col.key])}</Typography>
+                return <Typography key={col.key} sx={colSx} variant="body2">{col.customDisplay(line[col.key])}</Typography>
             } else {
                 return <Typography
                     key={col.key}
-                    sx={{ flex }}
+                    sx={colSx}
                     variant="body2">
                     {(line[col.key] as string)}
                 </Typography>
@@ -113,7 +112,7 @@ const DatagridLine = ({ line, columns, canDelete, readonly, onUpdate, onCreate, 
                         '& .MuiInputBase-input' : {
                             padding: `0 ${cellInnerPaddingLeftRight}`
                         },
-                        flex }}
+                        ...colSx }}
                     type={type}
                     value={values[col.key]}
                     onChange={handleChange}
@@ -123,7 +122,7 @@ const DatagridLine = ({ line, columns, canDelete, readonly, onUpdate, onCreate, 
             if(col.relation) {
                 return <RelationSelect size="small" 
                     name={col.key}
-                    sx={{ flex }}
+                    sx={colSx}
                     selectSx={{
                         '& .MuiAutocomplete-hasPopupIcon.MuiAutocomplete-hasClearIcon': {
                             '.MuiAutocomplete-inputRoot.MuiOutlinedInput-root': {
@@ -165,8 +164,8 @@ const DatagridLine = ({ line, columns, canDelete, readonly, onUpdate, onCreate, 
                     disabled={working}
                     sx={{
                         padding: 0,
-                        flex,
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        ...colSx
                     }}
                     onChange={handleChange} />
                 
@@ -255,9 +254,7 @@ const DatagridLine = ({ line, columns, canDelete, readonly, onUpdate, onCreate, 
                         setFieldValue,
                         touched, 
                         errors, 
-                        working, 
-                        onDismissNewLine,
-                        submitForm))}
+                        working))}
                 </Stack>
                 { lineOps && <Box display="flex" flex={`0 0 ${Math.max(lineOps.length * 2, 4)}rem`}>{
                     lineOps.map((op, idx) => {

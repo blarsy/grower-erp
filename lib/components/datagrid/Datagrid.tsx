@@ -37,14 +37,21 @@ export interface LineOperation {
     makeIcon: () => ReactNode
 }
 
+export interface CustomOperation {
+    name: string
+    makeIcon: () => ReactNode
+    fn: () => void
+}
+
 interface Props {
     title: string,
     columns: Column[],
     lines: LineData[],
-    lineOps?:  LineOperation[]
+    lineOps?: LineOperation[]
     onUpdate?: (values: FormikValues, line: LineData) => Promise<{error?: string, data: any}>,
     onCreate?: (values: FormikValues) => Promise<{ data: any, error?: Error}>,
-    getDeleteMutation? : (paramIndex: string) => string
+    getDeleteMutation? : (paramIndex: string) => string,
+    customOps?: CustomOperation[]
 }
 
 export const cellInnerPaddingLeftRight = '0.5rem'
@@ -57,11 +64,11 @@ export const getLeftButtonsFlex = (canDelete: boolean, readonly: boolean) => {
     return `0 0 ${width}rem`
 } 
 
-const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation, lineOps}: Props) => {
+const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation, lineOps, customOps}: Props) => {
     const client = useApolloClient()
     const [displayedLines, setDisplayedLines] = useState(lines)
     const [linesMarkedForDeletion, setLinesMarkedForDeletion] = useState([] as string[])
-    const [deleteOpStatus, setDeleteOpStatus] = useState({ opened: false, question: '', processing: false })
+    const [deleteOpStatus, setDeleteOpStatus] = useState({ opened: false, question: '' })
     const [feedback, setFeedback] = useState({} as {severity?: "success" | "error", message?: string, detail?: string})
     const adjustColumnsWidths = (columns: Column[]): Column[] => {
 
@@ -103,7 +110,7 @@ const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation
             if(linesMarkedForDeletion.length === 1){
                 question = `Etes-vous sûr(e) de vouloir effacer cette ligne ?`
             }
-            setDeleteOpStatus({ opened: true, question, processing: false })
+            setDeleteOpStatus({ opened: true, question })
         }
     }
 
@@ -136,7 +143,7 @@ const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation
         } catch (e: any) {
             setFeedback({severity: 'error', ...parseUiError(e)})
         } finally {
-            setDeleteOpStatus({ opened:false, question: '', processing: false })
+            setDeleteOpStatus({ opened:false, question: '' })
         }
     }
 
@@ -190,6 +197,7 @@ const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation
             <Typography variant="h4">{title}</Typography>
             {onCreate && <Button variant="outlined" size="small" startIcon={<AddIcon />} onClick={addRow}>Nouveau</Button>}
             {getDeleteMutation && <Button variant="outlined" size="small" startIcon={<DeleteIcon />} onClick={confirmDeleteLines}>Effacer sélection</Button>}
+            {customOps && customOps.map((op, idx) => (<Button key={idx} variant="outlined" size="small" startIcon={op.makeIcon()} onClick={op.fn}>{op.name}</Button>))}
         </Stack>
         { feedback.severity && <Feedback onClose={() => { setFeedback({})}} message={feedback.message!}
             detail={feedback.detail} severity={feedback.severity} /> }
@@ -199,6 +207,7 @@ const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation
                 adjustedCols.map(col => (<Typography 
                     key={col.key}
                     flex={`0 0 ${Math.round(col.widthPercent! * 100) / 100}%`}
+                    overflow='hidden'
                     variant="overline">
                     {col.headerText}
                 </Typography>))
@@ -219,21 +228,17 @@ const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation
             linesMarkedForDeletion={linesMarkedForDeletion}
             onLinesMarkedForDeletionChanged={setLinesMarkedForDeletion} />)
         }
-        <ConfirmDialog onClose={answer => {
+        <ConfirmDialog onClose={async answer => {
                 if(answer) {
-                    setDeleteOpStatus({ opened: false, question: '', processing: true })
-                    deleteSelected()
+                    setDeleteOpStatus({ opened: false, question: '' })
+                    await deleteSelected()
                 } else {
-                    setDeleteOpStatus({ opened: false, question: '', processing: false })
+                    setDeleteOpStatus({ opened: false, question: '' })
                 }
             }}
             opened={deleteOpStatus.opened}
             question={deleteOpStatus.question}
             title="Effacer les données"/>
-        <Backdrop
-            open={deleteOpStatus.processing}>
-            <CircularProgress sx={{ color: 'primary.light'}} />
-        </Backdrop>
     </Stack>
 }
 

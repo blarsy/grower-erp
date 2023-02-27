@@ -1,13 +1,14 @@
 import { LoadingButton } from "@mui/lab"
-import { Stack, TextField } from "@mui/material"
+import { Button, Stack, TextField } from "@mui/material"
 import { Form, Formik } from "formik"
-import { parseUiError } from "lib/uiCommon"
 import LoginIcon from '@mui/icons-material/Login'
 import * as yup from 'yup'
-import Feedback from "../Feedback"
 import { gql, useMutation } from "@apollo/client"
 import { useContext, useState } from "react"
 import { AppContext } from "./AppContextProvider"
+import Feedback from "../Feedback"
+import { parseUiError } from "lib/uiCommon"
+import ForgotPasswordDialog from "./ForgotPasswordDialog"
 
 interface Values {
     email: string
@@ -24,6 +25,7 @@ export const LoginForm = () => {
     const [authenticate] = useMutation(GET_JWT)
     const appContext = useContext(AppContext)
     const [errorInfo, setErrorInfo] = useState({ message: '', detail: '' })
+    const [forgotPassword, setForgotPassword] = useState(false)
 
     return <Formik initialValues={{
         email: '',
@@ -52,9 +54,12 @@ export const LoginForm = () => {
                 <LoadingButton loading={isSubmitting}
                     loadingPosition="start"
                     startIcon={<LoginIcon />}
+                    type="submit"
                     variant="contained"
                     onClick={() => handleSubmit()}>Connection</LoadingButton>
                 {errorInfo.message && <Feedback severity="error" message={errorInfo.message} detail={errorInfo.detail} onClose={() => setErrorInfo({ message: '', detail: '' })}/>}
+                <Button variant="text" onClick={() => { setForgotPassword(true) }}>Mot de passe oublié</Button>
+                <ForgotPasswordDialog onClose={() => setForgotPassword(false)} opened={forgotPassword}/>
             </Stack>}
         }
     </Formik>

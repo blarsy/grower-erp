@@ -1,6 +1,6 @@
 import { useQuery, useMutation, DocumentNode } from "@apollo/client"
 import { FormikValues } from "formik"
-import Datagrid, { Column, LineData, LineOperation } from "lib/components/datagrid/Datagrid"
+import Datagrid, { Column, CustomOperation, LineData, LineOperation } from "lib/components/datagrid/Datagrid"
 import Loader from "lib/components/Loader"
 
 interface Props {
@@ -14,6 +14,7 @@ interface Props {
     getFromQueried?: (data: any) => any
     lineOps?: LineOperation[]
     fixedMutationVariables?: Object | (() => Object)
+    customOps? : CustomOperation[]
 }
 
 const updateVariablesFromValues = (values: FormikValues, columns: Column[], fixedVariables: Object | (() => Object), line: LineData): {variables: {[id: string]: any}} => {
@@ -68,7 +69,7 @@ const createDataChangesHelper = (columns: Column[], dataName: string, fixedVaria
     }
 }
 
-const DatagridAdminView = ({title, dataName, columns, getQuery, filter, updateQuery, createQuery, getFromQueried=(data) => data && data[`all${dataName}s`].nodes, lineOps, fixedMutationVariables}: Props) => {
+const DatagridAdminView = ({title, dataName, columns, getQuery, filter, updateQuery, createQuery, getFromQueried=(data) => data && data[`all${dataName}s`].nodes, lineOps, fixedMutationVariables, customOps}: Props) => {
     const { loading, error, data } = useQuery(getQuery, { variables: filter, fetchPolicy: 'cache-and-network' })
     const dataChanges = createDataChangesHelper(columns, dataName, fixedMutationVariables, updateQuery, createQuery)
 
@@ -81,7 +82,8 @@ const DatagridAdminView = ({title, dataName, columns, getQuery, filter, updateQu
             lines={rows}
             lineOps={lineOps}
             getDeleteMutation = {editable ? (paramIndex: string) => `delete${dataName}ById(input: {id: $id${paramIndex}}){deleted${dataName}Id}` : undefined}
-            {...dataChanges.datagridProps} />
+            {...dataChanges.datagridProps} 
+            customOps={customOps}/>
     </Loader>
 }
 

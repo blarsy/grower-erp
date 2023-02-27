@@ -33,7 +33,7 @@ interface Props {
   children: JSX.Element
 }
 
-const GET_SESSION = gql`query LogeedIn {
+const GET_SESSION = gql`query LoggedIn {
   allSettings {
     nodes {
       companyByOwnerId {
@@ -104,23 +104,21 @@ const AppContextProvider = ({ children }: Props) => {
       localStorage.setItem(TOKEN_KEY, token)
       try {
         const result = await loadSessionInfo()
+        let newAppState: any = {}
         if(result.data && result.data.allSettings.nodes && result.data.allSettings.nodes.length > 0 && result.data.allSettings.nodes[0].companyByOwnerId) {
           const companyData = result.data.allSettings.nodes[0].companyByOwnerId
-          const sessionData = result.data.getSessionData
-          setAppState({...appState, ...{ 
-            company: { name: companyData.name, id: companyData.id },
-            user: { id: sessionData.userId, contactId: sessionData.contactId, 
-              firstname: sessionData.firstname, 
-              lastname: sessionData.lastname, 
-              email: sessionData.email,
-              role: sessionData.role },
-            auth: { error: undefined, token}
-          }})
-        } else {
-          setAppState({...appState, ...{ 
-            auth: { error: undefined, token}
-          }})
+          newAppState.company = { name: companyData.name, id: companyData.id }
         }
+        const sessionData = result.data.getSessionData
+        newAppState.user = { id: sessionData.userId, contactId: sessionData.contactId, 
+          firstname: sessionData.firstname, 
+          lastname: sessionData.lastname, 
+          email: sessionData.email,
+          role: sessionData.role 
+        }
+        newAppState.auth = { error: undefined, token}
+
+        setAppState({...appState, ...newAppState})
       } catch(error: any) {
         setAppState({...appState, ...{
           auth: { error, token: ''}

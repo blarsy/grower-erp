@@ -1,7 +1,7 @@
 import { LoadingButton } from "@mui/lab"
 import { Alert, Stack, TextField, Typography } from "@mui/material"
 import { Form, Formik } from "formik"
-import { parseUiError } from "lib/uiCommon"
+import { isValidPassword, parseUiError } from "lib/uiCommon"
 import { useState } from "react"
 import * as yup from 'yup'
 import RegisterIcon from '@mui/icons-material/HowToReg'
@@ -11,7 +11,7 @@ import { useRouter } from "next/router"
 
 const REGISTER_USER = gql`mutation RegisterUser($firstname: String!, $invitationId: Int!, $lastname: String!, $password: String!) {
     registerUser(
-      input: {firstname: $firstname, invitationId: $invitationId, lastname: $lastname, password: $password}
+      input: {updatedFirstname: $firstname, invitationId: $invitationId, updatedLastname: $lastname, password: $password}
     ) {
         clientMutationId
     }
@@ -23,7 +23,9 @@ interface Props {
         expirationDate: Date,
         role: string,
         email: string,
-        id: number
+        id: number,
+        firstname: string,
+        lastname: string
     }
 }
 
@@ -37,7 +39,7 @@ const translateRole = (role: string)=> {
 }
 
 const RegisterUserForm = ({ invitation }: Props) => {
-    const { acceptedDate, expirationDate, role,  email, id } = invitation
+    const { acceptedDate, expirationDate, role,  email, id, firstname, lastname } = invitation
     const [registerUser] = useMutation(REGISTER_USER)
     const [errorInfo, setErrorInfo] = useState({ message: '', detail: '' })
     const router = useRouter()
@@ -48,10 +50,10 @@ const RegisterUserForm = ({ invitation }: Props) => {
     return <Formik initialValues={{
         password: '',
         repeatPassword: '',
-        firstname: '',
-        lastname: ''
+        firstname,
+        lastname
     }} validationSchema={yup.object().shape({
-        password: yup.string().required('Ce champ est requis').test('passwordStrongEnough', 'Le mot de passe doit comporter au moins 8 caractères, dont au moins une majuscule ou chiffre, et un caractére spécial.', val => !!val && val.length > 7 && !!val.match(/[A-Z]/) && !!val.match(/[^\w]/)),
+        password: yup.string().required('Ce champ est requis').test('passwordStrongEnough', 'Le mot de passe doit comporter au moins 8 caractères, dont au moins une majuscule ou chiffre, et un caractére spécial.', isValidPassword),
         repeatPassword: yup.string().required('Ce champ est requis').test('passwordRepeatedMustBeSameAsPassword', 'Le mot de passe n\est pas identique.', (val, ctx) => val == ctx.parent.password),
         firstname: yup.string(),
         lastname: yup.string().required('Ce champ est requis'),

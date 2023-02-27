@@ -519,6 +519,7 @@ type Query implements Node {
   companyById(id: Int!): Company
   companyByCompanyNumber(companyNumber: String!): Company
   contactById(id: Int!): Contact
+  contactByEmail(email: String!): Contact
   containerById(id: Int!): Container
   customerById(id: Int!): Customer
   fulfillmentMethodById(id: Int!): FulfillmentMethod
@@ -743,6 +744,8 @@ type Query implements Node {
   ): UnitsConnection
   getCurrentUser: Contact
   getSessionData: SessionDatum
+  passwordRecoveryByCode(recoveryCode: String): PasswordRecovery
+  usersInvitationContactByCode(invitationCode: String): UsersInvitationContact
 
   """Reads a single `Article` using its globally unique `ID`."""
   article(
@@ -1951,8 +1954,6 @@ type Contact implements Node {
   addressLine2: String
   zipCode: String
   city: String
-  passwordHash: String
-  passwordSalt: String
   companyId: Int
 
   """Reads a single `Company` that is related to this `Contact`."""
@@ -2094,6 +2095,8 @@ type User implements Node {
   id: Int!
   contactId: Int!
   role: String!
+  passwordHash: String!
+  salt: String!
 
   """Reads a single `Contact` that is related to this `User`."""
   contactByContactId: Contact
@@ -2257,6 +2260,10 @@ enum UsersOrderBy {
   CONTACT_ID_DESC
   ROLE_ASC
   ROLE_DESC
+  PASSWORD_HASH_ASC
+  PASSWORD_HASH_DESC
+  SALT_ASC
+  SALT_DESC
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
 }
@@ -2273,6 +2280,12 @@ input UserCondition {
 
   """Checks for equality with the object’s `role` field."""
   role: String
+
+  """Checks for equality with the object’s `passwordHash` field."""
+  passwordHash: String
+
+  """Checks for equality with the object’s `salt` field."""
+  salt: String
 }
 
 """A connection to a list of `Contact` values."""
@@ -2322,10 +2335,6 @@ enum ContactsOrderBy {
   ZIP_CODE_DESC
   CITY_ASC
   CITY_DESC
-  PASSWORD_HASH_ASC
-  PASSWORD_HASH_DESC
-  PASSWORD_SALT_ASC
-  PASSWORD_SALT_DESC
   COMPANY_ID_ASC
   COMPANY_ID_DESC
   PRIMARY_KEY_ASC
@@ -2362,12 +2371,6 @@ input ContactCondition {
 
   """Checks for equality with the object’s `city` field."""
   city: String
-
-  """Checks for equality with the object’s `passwordHash` field."""
-  passwordHash: String
-
-  """Checks for equality with the object’s `passwordSalt` field."""
-  passwordSalt: String
 
   """Checks for equality with the object’s `companyId` field."""
   companyId: Int
@@ -2822,6 +2825,29 @@ type SessionDatum {
   lastname: String
 }
 
+type PasswordRecovery implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  email: String!
+  creationDate: Datetime!
+  expirationDate: Datetime!
+  code: String!
+  recoveryDate: Datetime
+}
+
+type UsersInvitationContact {
+  id: Int
+  role: String
+  expirationDate: Datetime
+  acceptedDate: Datetime
+  email: String
+  firstname: String
+  lastname: String
+}
+
 """
 The root mutation type which contains root level fields which mutate data.
 """
@@ -3034,6 +3060,14 @@ type Mutation {
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
     input: UpdateContactByIdInput!
+  ): UpdateContactPayload
+
+  """Updates a single `Contact` using a unique key and a patch."""
+  updateContactByEmail(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateContactByEmailInput!
   ): UpdateContactPayload
 
   """Updates a single `Container` using its globally unique id and a patch."""
@@ -3312,6 +3346,14 @@ type Mutation {
     input: DeleteContactByIdInput!
   ): DeleteContactPayload
 
+  """Deletes a single `Contact` using a unique key."""
+  deleteContactByEmail(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteContactByEmailInput!
+  ): DeleteContactPayload
+
   """Deletes a single `Container` using its globally unique id."""
   deleteContainer(
     """
@@ -3511,12 +3553,48 @@ type Mutation {
     """
     input: ChangePasswordInput!
   ): ChangePasswordPayload
+  createPasswordRecovery(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreatePasswordRecoveryInput!
+  ): CreatePasswordRecoveryPayload
   createSalesScheduleWithDeps(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
     input: CreateSalesScheduleWithDepsInput!
   ): CreateSalesScheduleWithDepsPayload
+  createUserInvitation(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateUserInvitationInput!
+  ): CreateUserInvitationPayload
+  demoteUser(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DemoteUserInput!
+  ): DemoteUserPayload
+  getPasswordHashSalt(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: GetPasswordHashSaltInput!
+  ): GetPasswordHashSaltPayload
+  promoteUser(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: PromoteUserInput!
+  ): PromoteUserPayload
+  recoverPassword(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: RecoverPasswordInput!
+  ): RecoverPasswordPayload
   registerUser(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -3728,8 +3806,6 @@ input ContactInput {
   addressLine2: String
   zipCode: String
   city: String
-  passwordHash: String
-  passwordSalt: String
   companyId: Int
 }
 
@@ -4286,6 +4362,8 @@ input UserInput {
   id: Int
   contactId: Int!
   role: String!
+  passwordHash: String!
+  salt: String!
 }
 
 """The output of our update `Article` mutation."""
@@ -4599,8 +4677,6 @@ input ContactPatch {
   addressLine2: String
   zipCode: String
   city: String
-  passwordHash: String
-  passwordSalt: String
   companyId: Int
 }
 
@@ -4617,6 +4693,21 @@ input UpdateContactByIdInput {
   """
   contactPatch: ContactPatch!
   id: Int!
+}
+
+"""All input for the `updateContactByEmail` mutation."""
+input UpdateContactByEmailInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `Contact` being updated.
+  """
+  contactPatch: ContactPatch!
+  email: String!
 }
 
 """The output of our update `Container` mutation."""
@@ -5376,6 +5467,8 @@ input UserPatch {
   id: Int
   contactId: Int
   role: String
+  passwordHash: String
+  salt: String
 }
 
 """All input for the `updateUserById` mutation."""
@@ -5640,6 +5733,16 @@ input DeleteContactByIdInput {
   """
   clientMutationId: String
   id: Int!
+}
+
+"""All input for the `deleteContactByEmail` mutation."""
+input DeleteContactByEmailInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  email: String!
 }
 
 """The output of our delete `Container` mutation."""
@@ -6284,7 +6387,32 @@ input ChangePasswordInput {
   clientMutationId: String
   currentPassword: String
   newPassword: String
-  contactId: Int
+  userId: Int
+}
+
+"""The output of our `createPasswordRecovery` mutation."""
+type CreatePasswordRecoveryPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+  string: String
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+}
+
+"""All input for the `createPasswordRecovery` mutation."""
+input CreatePasswordRecoveryInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  recoveryEmail: String
 }
 
 """The output of our `createSalesScheduleWithDeps` mutation."""
@@ -6326,6 +6454,156 @@ input CreateSalesScheduleWithDepsInput {
   pricelists: [Int]
 }
 
+"""The output of our `createUserInvitation` mutation."""
+type CreateUserInvitationPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+  usersInvitation: UsersInvitation
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `User` that is related to this `UsersInvitation`."""
+  userByGrantor: User
+
+  """An edge for our `UsersInvitation`. May be used by Relay 1."""
+  usersInvitationEdge(
+    """The method to use when ordering `UsersInvitation`."""
+    orderBy: [UsersInvitationsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): UsersInvitationsEdge
+}
+
+"""All input for the `createUserInvitation` mutation."""
+input CreateUserInvitationInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  emailInvited: String
+  role: String
+}
+
+"""The output of our `demoteUser` mutation."""
+type DemoteUserPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+}
+
+"""All input for the `demoteUser` mutation."""
+input DemoteUserInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  userId: Int
+}
+
+"""The output of our `getPasswordHashSalt` mutation."""
+type GetPasswordHashSaltPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+  result: GetPasswordHashSaltRecord
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+}
+
+"""The return type of our `getPasswordHashSalt` mutation."""
+type GetPasswordHashSaltRecord {
+  hash: String
+  salt: String
+}
+
+"""All input for the `getPasswordHashSalt` mutation."""
+input GetPasswordHashSaltInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  password: String
+}
+
+"""The output of our `promoteUser` mutation."""
+type PromoteUserPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+  usersInvitation: UsersInvitation
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `User` that is related to this `UsersInvitation`."""
+  userByGrantor: User
+
+  """An edge for our `UsersInvitation`. May be used by Relay 1."""
+  usersInvitationEdge(
+    """The method to use when ordering `UsersInvitation`."""
+    orderBy: [UsersInvitationsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): UsersInvitationsEdge
+}
+
+"""All input for the `promoteUser` mutation."""
+input PromoteUserInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  emailInvited: String
+  role: String
+}
+
+"""The output of our `recoverPassword` mutation."""
+type RecoverPasswordPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+}
+
+"""All input for the `recoverPassword` mutation."""
+input RecoverPasswordInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  recoveryCode: String
+  newPassword: String
+}
+
 """The output of our `registerUser` mutation."""
 type RegisterUserPayload {
   """
@@ -6347,8 +6625,8 @@ input RegisterUserInput {
   payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
-  firstname: String
-  lastname: String
+  updatedFirstname: String
+  updatedLastname: String
   invitationId: Int
   password: String
 }

@@ -1,15 +1,10 @@
 import { gql, useQuery } from "@apollo/client"
-import { LoadingButton } from "@mui/lab"
 import { DateTimePicker } from '@mui/x-date-pickers'
-import { Stack, Typography, TextField, FormControl, FormControlLabel, Checkbox, InputLabel, Select, MenuItem, ListItemText } from "@mui/material"
-import { Formik, ErrorMessage, FieldArray } from "formik"
+import { Typography, TextField, FormControl, FormControlLabel, Checkbox, InputLabel, Select, MenuItem, ListItemText } from "@mui/material"
+import { ErrorMessage, FieldArray } from "formik"
 import * as yup from 'yup'
 import Loader from "lib/components/Loader"
-import { parseUiError } from "lib/uiCommon"
 import { useRouter } from "next/router"
-import { useContext, useState } from "react"
-import Feedback from "lib/components/Feedback"
-import { AppContext } from "../../AppContextProvider"
 import ItemForm from "../../ItemForm"
 
 interface Values {
@@ -49,9 +44,7 @@ interface Props {
 
 const SalesScheduleForm = ({ initial, submit }: Props) => {
     const router = useRouter()
-    const appContext = useContext(AppContext)
     const {loading, error, data} = useQuery(depsQuery) 
-    const [ submitError, setSubmitError ] = useState({message: '', detail: ''})
 
     const anyFmRequiresCustomerAddress = (fulfillmentMethodIds: {id: number}[]) => {
         const ids = fulfillmentMethodIds.map(fm => fm.id)

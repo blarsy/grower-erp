@@ -37,7 +37,7 @@ function ItemForm<T extends FormikValues> ({initialValues, validationSchema, onS
     }}>
     {({ isSubmitting, handleSubmit, errors, touched, handleChange, values, getFieldProps, setFieldValue }) => {
         return <Stack component={Form} spacing={2} margin="1rem">
-            <Typography variant="h3">{title}</Typography>
+            <Typography variant="h4">{title}</Typography>
             {makeControls(errors, touched, values, handleChange, getFieldProps, setFieldValue)}
             <LoadingButton loading={isSubmitting} variant="contained" sx={{alignSelf: 'center'}} onClick={() => handleSubmit()}>{buttonText || 'Changer'}</LoadingButton>
             {submitStatus.error && <Alert severity="error">{submitStatus.error}</Alert>}
