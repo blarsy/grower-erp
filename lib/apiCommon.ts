@@ -23,6 +23,8 @@ const user = process.env.POSTGRES_USER!
 const dbPassword = process.env.POSTGRES_PASSWORD!
 const jwtType = process.env.JWT_TYPE!
 const graphQlUrl = process.env.NEXT_PUBLIC_GRAPHQL_URL!
+const mailApiKey = process.env.SENDGRID_API_KEY!
+const nodeEnv = process.env.NODE_ENV!
 
 interface ServerConfig {
     dateTimeFormat: string,
@@ -34,6 +36,8 @@ interface ServerConfig {
     dbPassword: string,
     jwtType: string,
     graphQlUrl: string,
+    mailApiKey: string,
+    production: boolean
     [prop: string]: any
 }
 export const config = <ServerConfig> {
@@ -45,7 +49,9 @@ export const config = <ServerConfig> {
     user,
     dbPassword,
     graphQlUrl,
-    jwtType
+    jwtType,
+    mailApiKey,
+    production: nodeEnv.toLowerCase() === 'production'
 }
 
 export const setConfig = (data: {[prop: string]:any}): void => {

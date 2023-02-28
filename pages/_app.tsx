@@ -8,9 +8,9 @@ import { setContext } from '@apollo/client/link/context'
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { config } from 'lib/uiCommon'
 import apolloErrorLink from 'lib/components/admin/apolloErrorLink'
+import { PRODUCT_NAME, TOKEN_KEY } from 'lib/constants'
 
 const theme = createTheme()
-const TOKEN_KEY = 'token'
 const httpLink = createHttpLink({
   uri: config.graphQlUrl,
 })
@@ -37,7 +37,6 @@ const client = new ApolloClient({
     authLink,
     httpLink
   ]),
-//  link: apolloErrorLink.concat(authLink.concat(httpLink)),
   cache: new InMemoryCache()
 })
 
@@ -48,7 +47,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
           <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh'}}>
             <GlobalStyles styles={{ body: { margin: 0, overflow: 'visible' } }} />
             <Head>
-              <title>Grower ERP</title>
+              <title>{PRODUCT_NAME} ERP</title>
               <link rel="icon" href="/favicon.ico" />
             </Head>
             <Component {...pageProps} />

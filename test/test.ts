@@ -1,13 +1,10 @@
-import axios from "axios"
+/**
+ * @jest-environment node
+ */
 
-test('Baserow query content', async () => {
-    const res = await axios({
-        method: "GET",
-        url: "https://api.baserow.io/api/database/fields/table/128487/",
-        headers: {
-            Authorization: "Token 880HCXfU5hM7TK9ehtSq4pcY0O6uhxvM"
-        }
-    })
-    console.log(res)
+import { sendMail } from "../lib/mailing"
+
+test('send mail', async () => {
+    await sendMail('bertrand.larsy@gmail.com', 'salvador.a5bce098@nicoric.com', 'Test email', 'Test email from Grower ERP', '<strong>Test email from Grower ERP</strong>')
 })
 export default {}

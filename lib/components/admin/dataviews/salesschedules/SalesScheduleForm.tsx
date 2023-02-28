@@ -71,7 +71,6 @@ const SalesScheduleForm = ({ initial, submit }: Props) => {
             id: yup.number()
         })).min(1, 'Veuillez sélectionner au moins un tarif auquel la vente s\'applique')
     })} onSubmit={async (values) => {
-        console.log('submitting', values)
             await submit(values)
             router.push('/admin/salesschedule')
     }} title={initial.id ? 'Détails de la vente' : 'Nouvelle vente'}

@@ -1,4 +1,5 @@
 import { gql, useLazyQuery } from "@apollo/client"
+import { TOKEN_KEY } from "lib/constants"
 import { createContext, useState } from "react"
 import { owner } from "../queriesLib"
 
@@ -20,8 +21,6 @@ interface AppStateData {
     error?: Error
   }
 }
-
-export const TOKEN_KEY = 'token'
 
 export interface AppContext {
   data: AppStateData,
