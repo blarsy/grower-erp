@@ -31,7 +31,7 @@ export {pool as pg}
 
 export default postgraphile(
     pool,
-    "public",
+    "erp",
     { ...pgConfig, ...{
         // Settings common to all environments
         subscriptions: true,

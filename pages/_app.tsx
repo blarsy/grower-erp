@@ -47,7 +47,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
           <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh'}}>
             <GlobalStyles styles={{ body: { margin: 0, overflow: 'visible' } }} />
             <Head>
-              <title>{PRODUCT_NAME} ERP</title>
+              <title>{`${PRODUCT_NAME} ERP`}</title>
               <link rel="icon" href="/favicon.ico" />
             </Head>
             <Component {...pageProps} />

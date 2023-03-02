@@ -1,11 +1,11 @@
 import { useContext, useEffect, useState } from "react"
 import { parseUiError } from "lib/uiCommon"
 import Feedback from "../Feedback"
-import { AppContext, TOKEN_KEY } from './AppContextProvider'
+import { AppContext } from './AppContextProvider'
 import { errorHandlerHolder } from './apolloErrorLink'
 import LoginForm from "./LoginForm"
 import Loader from "../Loader"
-import { ApolloError } from "@apollo/client"
+import { TOKEN_KEY } from "lib/constants"
 
 interface Props {
     children: JSX.Element

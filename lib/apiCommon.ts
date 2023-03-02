@@ -25,6 +25,8 @@ const jwtType = process.env.JWT_TYPE!
 const graphQlUrl = process.env.NEXT_PUBLIC_GRAPHQL_URL!
 const mailApiKey = process.env.SENDGRID_API_KEY!
 const nodeEnv = process.env.NODE_ENV!
+const noreplyEmail = process.env.NOREPLY_EMAIL!
+const websiteUrl = process.env.PUBLIC_WEBSITE_URL!
 
 interface ServerConfig {
     dateTimeFormat: string,
@@ -37,7 +39,9 @@ interface ServerConfig {
     jwtType: string,
     graphQlUrl: string,
     mailApiKey: string,
-    production: boolean
+    production: boolean,
+    noreplyEmail: string,
+    websiteUrl: string,
     [prop: string]: any
 }
 export const config = <ServerConfig> {
@@ -51,6 +55,8 @@ export const config = <ServerConfig> {
     graphQlUrl,
     jwtType,
     mailApiKey,
+    noreplyEmail,
+    websiteUrl,
     production: nodeEnv.toLowerCase() === 'production'
 }
 
