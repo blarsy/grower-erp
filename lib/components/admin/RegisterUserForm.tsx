@@ -50,8 +50,8 @@ const RegisterUserForm = ({ invitation }: Props) => {
     return <Formik initialValues={{
         password: '',
         repeatPassword: '',
-        firstname,
-        lastname
+        firstname: firstname || '',
+        lastname: lastname || ''
     }} validationSchema={yup.object().shape({
         password: yup.string().required('Ce champ est requis').test('passwordStrongEnough', 'Le mot de passe doit comporter au moins 8 caractères, dont au moins une majuscule ou chiffre, et un caractére spécial.', isValidPassword),
         repeatPassword: yup.string().required('Ce champ est requis').test('passwordRepeatedMustBeSameAsPassword', 'Le mot de passe n\est pas identique.', (val, ctx) => val == ctx.parent.password),

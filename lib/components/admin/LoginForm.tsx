@@ -41,7 +41,7 @@ export const LoginForm = () => {
                 setErrorInfo({ message: 'Echec lors de la connexion.', detail: '' })
                 return 
             }
-            appContext.loginComplete(res.data.authenticate.jwtToken)
+            await appContext.loginComplete(res.data.authenticate.jwtToken)
         } catch(error: any) {
             const errorInfo = parseUiError(error)
             setErrorInfo({ message: errorInfo.message, detail: errorInfo.detail })

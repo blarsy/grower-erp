@@ -23,10 +23,11 @@ interface AppStateData {
 }
 
 export interface AppContext {
-  data: AppStateData,
+  data: AppStateData
   changeSessionInfo: (companyName?: string, userId?: number, contactId?: number, userFirstname?: string, userLastname?: string, userEmail?: string) => void
   loginComplete: (token: string) => Promise<void>
   authExpired: () => void
+  logout: () => void
 }
 interface Props {
   children: JSX.Element
@@ -76,7 +77,8 @@ const blankAppContext = { data: {
   },
   changeSessionInfo: () => {},
   loginComplete: () => { return Promise.resolve()},
-  authExpired: () => {}
+  authExpired: () => {},
+  logout: () => {}
 } as AppContext
 export const AppContext = createContext<AppContext>(blankAppContext)
 
@@ -124,12 +126,17 @@ const AppContextProvider = ({ children }: Props) => {
         }})
       }
     }
-   const authExpired = () => {
+    const logout = () => {
+      localStorage.removeItem(TOKEN_KEY)
+      setAppState(blankAppContext.data)
+    }
+
+    const authExpired = () => {
       localStorage.removeItem(TOKEN_KEY)
       setAppState({...appState, ...{ authState: { error: new Error(`Votre jeton d'accès a expiré, veuillez vous reconnecter.`), token: '' }}})
     }
 
-    return <AppContext.Provider value={{ data: appState, changeSessionInfo, loginComplete, authExpired}}>
+    return <AppContext.Provider value={{ data: appState, changeSessionInfo, loginComplete, authExpired, logout}}>
         {children}
     </AppContext.Provider>
 }
