@@ -1,10 +1,8 @@
-import { Stack, Typography, TextField, Alert } from "@mui/material"
-import { Formik } from "formik"
+import { TextField } from "@mui/material"
 import * as yup from 'yup'
-import { parseUiError, isValidVatNumber } from "lib/uiCommon"
+import { isValidVatNumber } from "lib/uiCommon"
 import { DocumentNode, useMutation } from "@apollo/client"
 import { useContext, useState } from "react"
-import { LoadingButton } from "@mui/lab"
 import { AppContext } from "./AppContextProvider"
 import ItemForm from "./ItemForm"
 
@@ -43,7 +41,6 @@ const CompanyForm = ({data, updateQuery, createQuery}: Props) => {
     
     const [ companyData, setCompanyData ] = useState(data || { name: '', addressLine1: '', 
         addressLine2: '', companyNumber: '', zipCode: '', city: '' })
-    const [ error, setError ] = useState('')
     const appContext = useContext(AppContext)
 
     return <ItemForm initialValues={ensureTextValuesNotNull(companyData)}

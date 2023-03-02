@@ -53,11 +53,11 @@ const FulfillmentMethodAdminView = () => {
           validation: yup.string().required('Ce champ est requis') 
         }},
         { key: 'needsCustomerAddress', headerText: 'Requiert l\'adresse de livraison ?', widthPercent: 27.5, type: "boolean", editable: {
-            validation: yup.boolean()
+            validation: yup.boolean().required()
           }
         },
         { key: 'needsPickupAddress', headerText: 'Requiert point d\'enlèvement ?', type: "boolean", editable: {
-            validation: yup.boolean()
+            validation: yup.boolean().required()
           }
         }
     ]} />

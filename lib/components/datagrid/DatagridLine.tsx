@@ -228,8 +228,8 @@ const DatagridLine = ({ line, columns, canDelete, readonly, onUpdate, onCreate, 
                     else tools.push(<Tooltip key={`status-${line[columns[0].key]}`} title="Données synchronisée avec le serveur"><CheckIcon/></Tooltip>)
                 }
             } else {
-                tools.push(<Tooltip title={SAVENOW_TIP}><IconButton sx={{padding: 0}} onClick={submitForm}><SaveIcon /></IconButton></Tooltip>)
-                tools.push(<Tooltip title="Annuler la création"><IconButton sx={{padding: 0}} onClick={onDismissNewLine}><DeleteIcon /></IconButton></Tooltip>)
+                tools.push(<Tooltip key={`saveButton-${line[columns[0].key]}`} title={SAVENOW_TIP}><IconButton sx={{padding: 0}} onClick={submitForm}><SaveIcon /></IconButton></Tooltip>)
+                tools.push(<Tooltip key={`cancelButton-${line[columns[0].key]}`} title="Annuler la création"><IconButton sx={{padding: 0}} onClick={onDismissNewLine}><DeleteIcon /></IconButton></Tooltip>)
             }
 
             return <Stack direction="row">

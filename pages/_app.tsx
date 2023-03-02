@@ -37,7 +37,12 @@ const client = new ApolloClient({
     authLink,
     httpLink
   ]),
-  cache: new InMemoryCache()
+  cache: new InMemoryCache(),
+  defaultOptions: {
+    watchQuery: {
+      fetchPolicy: 'cache-and-network'
+    }
+  }
 })
 
 export default function MyApp({ Component, pageProps }: AppProps) {

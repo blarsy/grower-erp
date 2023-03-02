@@ -32,21 +32,21 @@ const nodesMap: NodeData[] = [
         { id: '1-1', label: 'Mon entreprise', path: '/admin/profile', component: <OwnerAdminView/> },
         { id: '1-2', label: 'Utilisateur', path: '/admin/user', component: <ProfileAdminView/> },
         { id: '1-3', label: 'Administrateurs', path: '/admin/administrator', component: <AdministratorsAdminView/>, requiredRole: 'administrator' },
-        { id: '1-4', label: 'Méthode d\'acheminement', path: '/admin/fulfilmentmethod', component: <FulfillmentMethodAdminView /> }
+        { id: '1-4', label: 'Méthode d\'acheminement', path: '/admin/fulfilmentmethod', component: <FulfillmentMethodAdminView /> },
+        { id: '1-5', label: 'Tarifs', path: '/admin/pricelist', component: <PriceListAdminView/> },
+        { id: '1-6', label: 'Unités', path: '/admin/unit', component: <UnitAdminView/> },
+        { id: '1-7', label: 'Contenants', path: '/admin/container', component: <ContainerAdminView/> },
     ] },
     { id: '2', label: 'Données' , children: [
         { id: '2-1', label: 'Entreprises', path: '/admin/company', component: <CompanyAdminView/> },
         { id: '2-2', label: 'Personnes', path: '/admin/contact', component: <ContactAdminView/> },
         { id: '2-3', label: 'Clients', path: '/admin/customer', component: <CustomerAdminView/> },
-        { id: '2-4', label: 'Articles', path: '/admin/article', component: <ArticleAdminView/> },
-        { id: '2-5', label: 'Produits', path: '/admin/product', component: <ProductAdminView/> },
-        { id: '2-6', label: 'Stocks', path: '/admin/stock', component: <StockShapeAdminView/> },
-        { id: '2-7', label: 'Tarifs', path: '/admin/pricelist', component: <PriceListAdminView/> },
-        { id: '2-8', label: 'Unités', path: '/admin/unit', component: <UnitAdminView/> },
-        { id: '2-9', label: 'Contenants', path: '/admin/container', component: <ContainerAdminView/> },
+        { id: '2-4', label: 'Produits', path: '/admin/product', component: <ProductAdminView/> },
+        { id: '2-5', label: 'Stocks', path: '/admin/stock', component: <StockShapeAdminView/> },
+        { id: '2-6', label: 'Articles', path: '/admin/article', component: <ArticleAdminView/> },
     ]},
     { id: '3', label: "Ventes", children: [
-        { id: '3-1', label: 'Planification', path: '/admin/salesschedule', component: <SalesScheduleAdminView/>}
+        { id: '3-1', label: 'Planification', path: '/admin/salesschedule', component: <SalesScheduleAdminView/>},
     ] }
 ]
 

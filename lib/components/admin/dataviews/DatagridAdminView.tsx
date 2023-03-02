@@ -26,7 +26,7 @@ const updateVariablesFromValues = (values: FormikValues, columns: Column[], fixe
 const createVariablesFromValues = (values: FormikValues, columns: Column[], fixedVariables: Object | (() => Object)): {variables: {[id: string]: any}} => {
     const variables: {[id: string]: any} = typeof fixedVariables === 'function' ? fixedVariables() : fixedVariables
     columns.forEach(col => {
-        if(col.key !== 'id' && values[col.key]) {
+        if(col.key !== 'id' && !variables[col.key]) {
             variables[col.key] = values[col.key]
         }
     })
@@ -70,7 +70,7 @@ const createDataChangesHelper = (columns: Column[], dataName: string, fixedVaria
 }
 
 const DatagridAdminView = ({title, dataName, columns, getQuery, filter, updateQuery, createQuery, getFromQueried=(data) => data && data[`all${dataName}s`].nodes, lineOps, fixedMutationVariables, customOps}: Props) => {
-    const { loading, error, data } = useQuery(getQuery, { variables: filter, fetchPolicy: 'cache-and-network' })
+    const { loading, error, data } = useQuery(getQuery, { variables: filter })
     const dataChanges = createDataChangesHelper(columns, dataName, fixedMutationVariables, updateQuery, createQuery)
 
     const rows = getFromQueried(data)

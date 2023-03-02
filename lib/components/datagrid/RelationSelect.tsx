@@ -58,6 +58,7 @@ function RelationSelect({query, onChange, value, overrideFetchPolicy, sx, name, 
             value={options.find((option: any) => option.id === value) || null}
             onChange={(_, val) => onChange(val ? val : null)}
             getOptionLabel={getLabel ? getLabel : (selected) => selected.name}
+            autoSelect={true}
         />
         {message && <Typography variant="caption" color="error.main">{message}</Typography>}
     </Stack>
