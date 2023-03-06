@@ -35,7 +35,6 @@ const ForgotPasswordDialog = ({ opened, onClose }: Props) => {
                     try {
                         setStatus({ processing: false, error: undefined })
                         const res = await recoverPassword({ variables: { recoveryEmail: values.email } })
-                        console.log('shoud send code by mail', res.data.createPasswordRecovery.string)
                         onClose()
                     } catch(e: any) {
                         setStatus({ processing: false, error: e as Error })

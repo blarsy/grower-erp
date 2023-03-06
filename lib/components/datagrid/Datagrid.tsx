@@ -1,8 +1,9 @@
-import { Typography, Stack, Box, Button, Backdrop, CircularProgress } from "@mui/material"
+import { Typography, Stack, Box, Button } from "@mui/material"
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
 import { FormikValues } from "formik"
-import { ReactNode, useState } from "react"
+import { createRef, MutableRefObject, ReactNode, useEffect, useRef, useState } from "react"
+import { useHotkeysContext, useHotkeys } from "react-hotkeys-hook"
 import DatagridLine from "./DatagridLine"
 import ConfirmDialog from "../ConfirmDialog"
 import { useApolloClient, gql, DocumentNode } from "@apollo/client"
@@ -66,10 +67,22 @@ export const getLeftButtonsFlex = (canDelete: boolean, readonly: boolean) => {
 
 const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation, lineOps, customOps}: Props) => {
     const client = useApolloClient()
+    const { enableScope, disableScope, enabledScopes } = useHotkeysContext()
     const [displayedLines, setDisplayedLines] = useState(lines)
     const [linesMarkedForDeletion, setLinesMarkedForDeletion] = useState([] as string[])
     const [deleteOpStatus, setDeleteOpStatus] = useState({ opened: false, question: '' })
     const [feedback, setFeedback] = useState({} as {severity?: "success" | "error", message?: string, detail?: string})
+
+    useHotkeys('ctrl+n', () => addLine(), { scopes: 'gridEdit' })
+    useEffect(() => {
+        if(onCreate) {
+            enableScope('gridEdit')
+            return function cleanup() {
+                disableScope('gridEdit')
+            }
+        }
+    }, [onCreate])
+    
     const adjustColumnsWidths = (columns: Column[]): Column[] => {
 
         //Calculate width of columns, by splitting what remains when all columns with a percentWidth set have been taken into account
@@ -92,7 +105,7 @@ const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation
         })
     }
 
-    const addRow = () => {
+    const addLine = () => {
         //If an empty line is already there, just do nothing
         if(displayedLines[0] && displayedLines[0][columns[0].key] === NEW_LINE_KEY) return
         const newLine = {} as LineData
@@ -195,7 +208,7 @@ const Datagrid = ({ title, columns, lines, onUpdate, onCreate, getDeleteMutation
     return <Stack margin='1rem'>
         <Stack spacing={2} direction="row" alignItems="flex-end" margin="0 0 1rem 0">
             <Typography variant="h4">{title}</Typography>
-            {onCreate && <Button variant="outlined" size="small" startIcon={<AddIcon />} onClick={addRow}>Nouveau</Button>}
+            {onCreate && <Button variant="outlined" size="small" startIcon={<AddIcon />} onClick={addLine}>Nouveau</Button>}
             {getDeleteMutation && <Button variant="outlined" size="small" startIcon={<DeleteIcon />} onClick={confirmDeleteLines}>Effacer sélection</Button>}
             {customOps && customOps.map((op, idx) => (<Button key={idx} variant="outlined" size="small" startIcon={op.makeIcon()} onClick={op.fn}>{op.name}</Button>))}
         </Stack>

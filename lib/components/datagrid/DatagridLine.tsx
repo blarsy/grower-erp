@@ -3,7 +3,7 @@ import { Form, Formik, FormikErrors, FormikTouched, FormikValues } from "formik"
 import DeleteIcon from '@mui/icons-material/Close'
 import CheckIcon from '@mui/icons-material/Check'
 import SaveIcon from '@mui/icons-material/SaveAlt'
-import { ChangeEvent, HTMLInputTypeAttribute, useState } from "react"
+import { ChangeEvent, HTMLInputTypeAttribute, MutableRefObject, RefObject, useState } from "react"
 import * as yup from 'yup'
 import { CellContent, cellInnerPaddingLeftRight, CELL_SPACING, Column, getLeftButtonsFlex, LineData, LineOperation, NEW_LINE_KEY } from "./Datagrid"
 import RelationSelect from "./RelationSelect"
@@ -33,7 +33,9 @@ const SaveButton = ({ submitForm }: { submitForm:  () => Promise<void>}) => <Too
     <IconButton sx={{ padding: 0 }} onClick={submitForm}><SaveIcon /></IconButton>
 </Tooltip>
 
-const DatagridLine = ({ line, columns, canDelete, readonly, onUpdate, onCreate, onDismissNewLine, linesMarkedForDeletion, onLinesMarkedForDeletionChanged, lineOps }: Props) => {
+const DatagridLine = ({ line, columns, canDelete, readonly, onUpdate, onCreate, 
+        onDismissNewLine, linesMarkedForDeletion, onLinesMarkedForDeletionChanged, 
+        lineOps }: Props) => {
     const createFormValues = (cols: Column[], line: LineData): {[id: string]: any} => {
         const result = {} as FormValues
         cols.forEach(col => {
@@ -50,6 +52,7 @@ const DatagridLine = ({ line, columns, canDelete, readonly, onUpdate, onCreate, 
     }
 
     const makeCellContent = (col: Column, 
+        colIndex: number,
         keyOfIdCol: string,
         isLastCol: boolean,
         line: LineData, 
@@ -100,10 +103,12 @@ const DatagridLine = ({ line, columns, canDelete, readonly, onUpdate, onCreate, 
                 </Typography>
             }
         } else {
+            const shouldBeFocused = colIndex == 1 && line[keyOfIdCol] === NEW_LINE_KEY
             if(!onUpdate) throw new Error(`Column '${col.key}' is marked as editable, but not 'onUpdate' function have been provided`)
             const makeTextField = (type?: HTMLInputTypeAttribute) =>(
                 <TextField 
                     id={col.key}
+                    autoFocus={shouldBeFocused}
                     name={col.key}
                     size="small"
                     key={col.key}
@@ -121,6 +126,7 @@ const DatagridLine = ({ line, columns, canDelete, readonly, onUpdate, onCreate, 
             )
             if(col.relation) {
                 return <RelationSelect size="small" 
+                    autoFocus={shouldBeFocused}
                     name={col.key}
                     sx={colSx}
                     selectSx={{
@@ -155,8 +161,9 @@ const DatagridLine = ({ line, columns, canDelete, readonly, onUpdate, onCreate, 
             } else if(col.type === 'string') {
                 return makeTextField()
             } else if(col.type === 'boolean') {
+                HTMLButtonElement
                 return <FormControlLabel
-                    control={<Checkbox checked={values[col.key]} size="small" sx={{ padding: 0 }}/>}
+                    control={<Checkbox checked={values[col.key]} autoFocus={shouldBeFocused} size="small" sx={{ padding: 0 }}/>}
                     id={col.key}
                     label=""
                     name={col.key}
@@ -245,7 +252,8 @@ const DatagridLine = ({ line, columns, canDelete, readonly, onUpdate, onCreate, 
                     direction="row"
                     alignItems="center"
                     flex="1 0">
-                    {columns.map(col => makeCellContent(col, 
+                    {columns.map((col, idx) => makeCellContent(col, 
+                        idx,
                         columns[0].key, 
                         col === columns[columns.length - 1], 
                         line,

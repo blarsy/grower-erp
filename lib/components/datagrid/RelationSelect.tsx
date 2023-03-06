@@ -12,13 +12,14 @@ interface Props {
     selectSx: SxProps<Theme> | undefined
     value: string
     name: string
-    error: boolean,
+    error: boolean
     helperText: React.ReactNode
-    getLabel?: (item: any) => string,
+    getLabel?: (item: any) => string
     overrideFetchPolicy?: FetchPolicy
+    autoFocus: Boolean
 }
 
-function RelationSelect({query, onChange, value, overrideFetchPolicy, sx, name, size, error, helperText, selectSx, getLabel }: Props) {
+function RelationSelect({query, onChange, value, overrideFetchPolicy, sx, name, size, error, helperText, selectSx, getLabel, autoFocus }: Props) {
     const {loading, error: errorFetch, data, refetch} = useQuery(query, { variables: { search: '' }, fetchPolicy: 'network-only', nextFetchPolicy: overrideFetchPolicy || 'cache-first' })
     const [open, setOpen] = useState(false)
     const [filter, setFilter] = useState('')
@@ -42,7 +43,8 @@ function RelationSelect({query, onChange, value, overrideFetchPolicy, sx, name, 
             size={size}
             options={options}
             renderInput={params => <TextField {...params} 
-                value={filter} 
+                value={filter}
+                autoFocus={!!autoFocus} 
                 onChange={e => setFilter(e.target.value)}
                 error={error}
                 helperText={helperText}/>}
