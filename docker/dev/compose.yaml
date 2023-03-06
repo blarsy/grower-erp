@@ -5,7 +5,7 @@ services:
       context: './../db'
     env_file:
       - ./../../.env
-    image: grower-erp-db
+    image: homeostasis-erp-db
     restart: always
     ports:
       - "5432:5432"
@@ -21,7 +21,7 @@ services:
       driver: "none"
     restart: unless-stopped
     networks:
-      - docs
+      - app
   wiki:
     image: ghcr.io/requarks/wiki:2
     depends_on:
@@ -32,7 +32,7 @@ services:
     ports:
       - "81:3000"
     networks:
-      - docs
-networks:
+      - app
+networks: 
   app:
   docs:

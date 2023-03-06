@@ -1,2 +1,2 @@
 docker compose build
-docker push blarsy/grower-erp:0.0.5
+docker push blarsy/homeostasis:0.0.1

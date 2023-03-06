@@ -3,15 +3,28 @@ services:
     build:
       context: './../db'
     env_file:
-      - ./../.env.production
-    image: grower-erp-db
+      - ./../../.env.production
+    image: homeostasis-erp-db
     restart: always
     ports:
       - "5432:5432"
   web:
     restart: always
-    image: blarsy/grower-erp:0.0.5
+    image: blarsy/homeostasis:0.0.1
+    env_file:
+      - ./../../.env.production
     depends_on:
         - db
     ports:
-        - "80:3000"
+        - "3000"
+  proxy:
+    build:
+      context: './../proxy'
+    depends_on:
+      - web
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/www:/var/www
+      - /etc/letsencrypt:/var/local

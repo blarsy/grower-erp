@@ -27,6 +27,7 @@ const mailApiKey = process.env.SENDGRID_API_KEY!
 const nodeEnv = process.env.NODE_ENV!
 const noreplyEmail = process.env.NOREPLY_EMAIL!
 const websiteUrl = process.env.PUBLIC_WEBSITE_URL!
+const mailTemplatesLocation = process.env.MAIL_TEMPLATES_LOCATION!
 
 interface ServerConfig {
     dateTimeFormat: string,
@@ -42,6 +43,7 @@ interface ServerConfig {
     production: boolean,
     noreplyEmail: string,
     websiteUrl: string,
+    mailTemplatesLocation: string,
     [prop: string]: any
 }
 export const config = <ServerConfig> {
@@ -57,6 +59,7 @@ export const config = <ServerConfig> {
     mailApiKey,
     noreplyEmail,
     websiteUrl,
+    mailTemplatesLocation,
     production: nodeEnv.toLowerCase() === 'production'
 }
 

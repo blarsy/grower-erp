@@ -342,7 +342,9 @@ BEGIN
 	
 	INSERT INTO erp.users_invitations (code, "role", email, create_date, expiration_date, grantor)
 	VALUES ( code, "role", email_invited, now, now + interval '72 hours', user_id )
-	RETURNING *;
+	RETURNING * INTO res;
+
+    RETURN res;
 END;
 $$;
 

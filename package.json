@@ -5,8 +5,7 @@
     "start": "next start",
     "test": "jest --watch",
     "test:ci": "jest --ci",
-    "build-image": "cd docker/local-build/;bash build-push.sh",
-    "deploy": "cd docker; bash deploy.sh"
+    "deploy": "bash deploy.sh"
   },
   "dependencies": {
     "@apollo/client": "^3.7.3",
