@@ -5,7 +5,8 @@
     "start": "next start",
     "test": "jest --watch",
     "test:ci": "jest --ci",
-    "deploy": "bash deploy.sh"
+    "deploy": "bash deploy.sh",
+    "regen-dbschema": "docker exec -u postgres dev-db-1 pg_dump --username=postgres --schema=erp -s grower_erp > ./docker/db/init/2-db.sql"
   },
   "dependencies": {
     "@apollo/client": "^3.7.3",

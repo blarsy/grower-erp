@@ -11,7 +11,6 @@ interface Props {
 }
 
 const Loader = ({ loading, error, children }: Props) => {
-    const appContext = useContext(AppContext)
     if(loading) return <Box display="flex" justifyContent="center" padding="0.5rem 0"><CircularProgress /></Box>
     if(error){
         const { message, detail } = parseUiError(error)

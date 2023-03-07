@@ -19,7 +19,7 @@ const Connected = ({ children } : Props) => {
         const load = async() => {
             errorHandlerHolder.handle = (e) => {
                 if(e.graphQLErrors && e.graphQLErrors.length > 0 && e.graphQLErrors.some(error => error.message === 'jwt expired')){
-                    localStorage.removeItem(TOKEN_KEY)
+                    appContext.authExpired()
                 }
             }
             const token = localStorage.getItem(TOKEN_KEY)

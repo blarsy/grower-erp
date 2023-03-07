@@ -49,6 +49,23 @@ CREATE TYPE erp.article_display AS (
 ALTER TYPE erp.article_display OWNER TO postgres;
 
 --
+-- Name: customer_session_data; Type: TYPE; Schema: erp; Owner: postgres
+--
+
+CREATE TYPE erp.customer_session_data AS (
+	customer_id integer,
+	contact_id integer,
+	firstname character varying,
+	lastname character varying,
+	email character varying,
+	company_id integer,
+	company_name character varying
+);
+
+
+ALTER TYPE erp.customer_session_data OWNER TO postgres;
+
+--
 -- Name: jwt_token; Type: TYPE; Schema: erp; Owner: postgres
 --
 
@@ -154,6 +171,35 @@ $$;
 
 
 ALTER FUNCTION erp.authenticate(login character varying, password character varying) OWNER TO postgres;
+
+--
+-- Name: authenticate_customer(character varying); Type: FUNCTION; Schema: erp; Owner: postgres
+--
+
+CREATE FUNCTION erp.authenticate_customer(input_slug character varying) RETURNS erp.jwt_token
+    LANGUAGE plpgsql SECURITY DEFINER
+    AS $$
+declare customer_id INTEGER;
+begin
+  select c.id INTO customer_id
+    from erp.customers c
+    where c.slug = input_slug;
+
+  if customer_id IS NOT NULL then
+    return (
+      'identified_customer',
+	  null,
+      customer_id,
+      extract(epoch from now() + interval '1 day')
+    )::erp.jwt_token;
+  else
+    return null;
+  end if;
+end;
+$$;
+
+
+ALTER FUNCTION erp.authenticate_customer(input_slug character varying) OWNER TO postgres;
 
 --
 -- Name: change_password(character varying, character varying, integer); Type: FUNCTION; Schema: erp; Owner: postgres
@@ -352,6 +398,30 @@ $$;
 ALTER FUNCTION erp.create_user_invitation(email_invited character varying, role character varying) OWNER TO postgres;
 
 --
+-- Name: current_customer_id(); Type: FUNCTION; Schema: erp; Owner: postgres
+--
+
+CREATE FUNCTION erp.current_customer_id() RETURNS integer
+    LANGUAGE sql
+    AS $$
+select nullif(current_setting('jwt.claims.customer_id', true), '')::integer;
+$$;
+
+
+ALTER FUNCTION erp.current_customer_id() OWNER TO postgres;
+
+--
+-- Name: current_role(); Type: FUNCTION; Schema: erp; Owner: postgres
+--
+
+CREATE FUNCTION erp."current_role"() RETURNS text
+    LANGUAGE sql
+    AS $$select nullif(current_setting('jwt.claims.role', true), '')::text;$$;
+
+
+ALTER FUNCTION erp."current_role"() OWNER TO postgres;
+
+--
 -- Name: customers; Type: TABLE; Schema: erp; Owner: postgres
 --
 
@@ -409,10 +479,10 @@ CREATE FUNCTION erp.filter_articles(search_term character varying) RETURNS SETOF
     AS $$
 SELECT a.id, c.name as containerName, a."quantityPerContainer", p.name as productName, ss.name as stockshapeName, u.abbreviation as unitAbbreviation
 FROM erp.articles a
-INNER JOIN containers c ON a."containerId" = c.id
-INNER JOIN stock_shapes ss ON a."stockShapeId" = ss.id
-INNER JOIN products p ON ss."productId" = p.id
-INNER JOIN units u ON ss."unitId" = u.id
+INNER JOIN erp.containers c ON a."containerId" = c.id
+INNER JOIN erp.stock_shapes ss ON a."stockShapeId" = ss.id
+INNER JOIN erp.products p ON ss."productId" = p.id
+INNER JOIN erp.units u ON ss."unitId" = u.id
 WHERE ss.name ILIKE '%' || search_term || '%' OR p.name ILIKE '%' || search_term || '%' OR c.name ILIKE '%' || search_term || '%'
 $$;
 
@@ -645,6 +715,23 @@ CREATE FUNCTION erp.get_current_user() RETURNS erp.contacts
 ALTER FUNCTION erp.get_current_user() OWNER TO postgres;
 
 --
+-- Name: get_customer_session_data(); Type: FUNCTION; Schema: erp; Owner: postgres
+--
+
+CREATE FUNCTION erp.get_customer_session_data() RETURNS erp.customer_session_data
+    LANGUAGE sql STABLE
+    AS $$
+SELECT c.id, c."contactId", ct.firstname, ct.lastname, ct.email, cp.id, cp.name
+FROM erp.customers c
+INNER JOIN erp.contacts ct ON c."contactId" = ct.id
+LEFT JOIN erp.companies cp ON c."companyId" = cp.id
+WHERE c.id = (SELECT NULLIF(current_setting('jwt.claims.customer_id', true), '')::integer)
+$$;
+
+
+ALTER FUNCTION erp.get_customer_session_data() OWNER TO postgres;
+
+--
 -- Name: get_password_hash_salt(character varying); Type: FUNCTION; Schema: erp; Owner: postgres
 --
 
@@ -676,6 +763,17 @@ $$;
 
 
 ALTER FUNCTION erp.get_session_data() OWNER TO postgres;
+
+--
+-- Name: owner_company_id(); Type: FUNCTION; Schema: erp; Owner: postgres
+--
+
+CREATE FUNCTION erp.owner_company_id() RETURNS integer
+    LANGUAGE sql
+    AS $$SELECT "ownerId" FROM erp.settings;$$;
+
+
+ALTER FUNCTION erp.owner_company_id() OWNER TO postgres;
 
 --
 -- Name: password_recoveries; Type: TABLE; Schema: erp; Owner: postgres
@@ -1836,11 +1934,76 @@ ALTER TABLE ONLY erp.users_invitations
 
 
 --
+-- Name: companies; Type: ROW SECURITY; Schema: erp; Owner: postgres
+--
+
+ALTER TABLE erp.companies ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: companies companies_managed_by_its_contacts; Type: POLICY; Schema: erp; Owner: postgres
+--
+
+CREATE POLICY companies_managed_by_its_contacts ON erp.companies USING (((( SELECT customers."companyId"
+   FROM erp.customers
+  WHERE (customers.id = erp.current_customer_id())) = id) OR (erp."current_role"() = 'administrator'::text)));
+
+
+--
+-- Name: contacts; Type: ROW SECURITY; Schema: erp; Owner: postgres
+--
+
+ALTER TABLE erp.contacts ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: contacts contacts_managed_by_its_linked_customer; Type: POLICY; Schema: erp; Owner: postgres
+--
+
+CREATE POLICY contacts_managed_by_its_linked_customer ON erp.contacts USING (((( SELECT customers."contactId"
+   FROM erp.customers
+  WHERE (customers.id = erp.current_customer_id())) = id) OR (erp."current_role"() = 'administrator'::text)));
+
+
+--
+-- Name: customers customer_views_itself; Type: POLICY; Schema: erp; Owner: postgres
+--
+
+CREATE POLICY customer_views_itself ON erp.customers USING (((id = erp.current_customer_id()) OR (erp."current_role"() = 'administrator'::text)));
+
+
+--
+-- Name: customers; Type: ROW SECURITY; Schema: erp; Owner: postgres
+--
+
+ALTER TABLE erp.customers ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: companies owner_changed_by_admin; Type: POLICY; Schema: erp; Owner: postgres
+--
+
+CREATE POLICY owner_changed_by_admin ON erp.companies FOR UPDATE USING (((id = erp.owner_company_id()) AND (erp."current_role"() = 'administrator'::text)));
+
+
+--
+-- Name: companies owner_created_by_admin; Type: POLICY; Schema: erp; Owner: postgres
+--
+
+CREATE POLICY owner_created_by_admin ON erp.companies FOR INSERT WITH CHECK ((erp."current_role"() = 'administrator'::text));
+
+
+--
+-- Name: companies owner_visible_to_all; Type: POLICY; Schema: erp; Owner: postgres
+--
+
+CREATE POLICY owner_visible_to_all ON erp.companies FOR SELECT USING ((id = erp.owner_company_id()));
+
+
+--
 -- Name: SCHEMA erp; Type: ACL; Schema: -; Owner: pg_database_owner
 --
 
 GRANT USAGE ON SCHEMA erp TO anonymous;
 GRANT USAGE ON SCHEMA erp TO administrator;
+GRANT USAGE ON SCHEMA erp TO identified_customer;
 
 
 --
@@ -1895,10 +2058,30 @@ GRANT ALL ON FUNCTION erp.create_user_invitation(email_invited character varying
 
 
 --
+-- Name: FUNCTION current_customer_id(); Type: ACL; Schema: erp; Owner: postgres
+--
+
+GRANT ALL ON FUNCTION erp.current_customer_id() TO administrator;
+GRANT ALL ON FUNCTION erp.current_customer_id() TO anonymous;
+GRANT ALL ON FUNCTION erp.current_customer_id() TO identified_customer;
+
+
+--
+-- Name: FUNCTION "current_role"(); Type: ACL; Schema: erp; Owner: postgres
+--
+
+REVOKE ALL ON FUNCTION erp."current_role"() FROM PUBLIC;
+GRANT ALL ON FUNCTION erp."current_role"() TO anonymous;
+GRANT ALL ON FUNCTION erp."current_role"() TO administrator;
+GRANT ALL ON FUNCTION erp."current_role"() TO identified_customer;
+
+
+--
 -- Name: TABLE customers; Type: ACL; Schema: erp; Owner: postgres
 --
 
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.customers TO administrator;
+GRANT SELECT ON TABLE erp.customers TO identified_customer;
 
 
 --
@@ -1921,6 +2104,8 @@ GRANT USAGE ON SEQUENCE erp.companies_id_seq TO administrator;
 --
 
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.companies TO administrator;
+GRANT SELECT ON TABLE erp.companies TO anonymous;
+GRANT SELECT ON TABLE erp.companies TO identified_customer;
 
 
 --
@@ -1928,6 +2113,7 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.companies TO administrator;
 --
 
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.contacts TO administrator;
+GRANT SELECT,UPDATE ON TABLE erp.contacts TO identified_customer;
 
 
 --
@@ -1963,6 +2149,13 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.units TO administrator;
 --
 
 GRANT ALL ON FUNCTION erp.get_current_user() TO administrator;
+
+
+--
+-- Name: FUNCTION get_customer_session_data(); Type: ACL; Schema: erp; Owner: postgres
+--
+
+GRANT ALL ON FUNCTION erp.get_customer_session_data() TO administrator;
 
 
 --
@@ -2138,6 +2331,8 @@ GRANT USAGE ON SEQUENCE erp.settings_id_seq TO administrator;
 --
 
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.settings TO administrator;
+GRANT SELECT ON TABLE erp.settings TO identified_customer;
+GRANT SELECT ON TABLE erp.settings TO anonymous;
 
 
 --

@@ -1,6 +1,7 @@
 import sgMail from '@sendgrid/mail'
 import { readFile } from 'fs/promises'
 import Handlebars from 'handlebars'
+import { PRODUCT_NAME } from 'lib/constants'
 import { config } from '../apiCommon'
 import { recordMail } from './recordMail'
 
@@ -45,7 +46,7 @@ const preparePartials = async () => {
 }
 
 export const sendAdminInvitation = async (email: string, code: string) => {
-    const heading = 'Enregistrement sur Homeostasis'
+    const heading = `Enregistrement sur ${PRODUCT_NAME}`
     const text = 'Voici un lien pour vous enregistrer, et commencer immédiatement à gérer vos clients et produits: '
     const link = `${config.websiteUrl}/admin/invite/${code}`
 
@@ -65,7 +66,7 @@ export const sendAdminInvitation = async (email: string, code: string) => {
 }
 export const sendPasswordRecovery = async (email: string, code: string) => {
     const heading = 'Récupération de mot de passe'
-    const text = 'Voici un lien pour effectuer la récupération de votre mot de passe sur Homeostasis: '
+    const text = `Voici un lien pour effectuer la récupération de votre mot de passe sur ${PRODUCT_NAME}: `
     const link = `${config.websiteUrl}/admin/recovery/${code}`
 
     await preparePartials()

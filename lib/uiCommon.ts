@@ -1,5 +1,7 @@
-import { ApolloError } from "@apollo/client"
 import { AxiosError } from "axios"
+import { ApolloClient, from, InMemoryCache, createHttpLink,ApolloError } from "@apollo/client"
+import { setContext } from "@apollo/client/link/context"
+import apolloErrorLink from "./components/admin/apolloErrorLink"
 
 export const parseUiError = (e: Error): { message: string, detail: string} => {
   console.error(e)
@@ -68,4 +70,40 @@ export const config = <ClientConfig> {
 
 export const setConfig = (data: {[prop: string]:any}): void => {
     Object.keys(data).forEach(prop => config[prop] = data[prop])
+}
+
+export const getAuthenticatedApolloClient = (tokenKey: string) => {
+  const httpLink = createHttpLink({
+      uri: config.graphQlUrl,
+    })
+    
+    const authLink = setContext((_, { headers }) => {
+      // get the authentication token from local storage if it exists
+      const token = localStorage.getItem(tokenKey);
+      // return the headers to the context so httpLink can read them
+      if(token) {
+        return {
+          headers: {
+            ...headers,
+            authorization: token ? `Bearer ${token}` : "",
+          }
+        }
+      } else {
+        return headers
+      }
+    
+    })
+    return new ApolloClient({
+      link: from([
+        apolloErrorLink,
+        authLink,
+        httpLink
+      ]),
+      cache: new InMemoryCache(),
+      defaultOptions: {
+        watchQuery: {
+          fetchPolicy: 'cache-and-network'
+        }
+      }
+    })
 }
