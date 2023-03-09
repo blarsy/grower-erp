@@ -191,6 +191,35 @@ type Query implements Node {
     condition: CustomerCondition
   ): CustomersConnection
 
+  """Reads and enables pagination through a set of `CustomersCategory`."""
+  allCustomersCategories(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `CustomersCategory`."""
+    orderBy: [CustomersCategoriesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: CustomersCategoryCondition
+  ): CustomersCategoriesConnection
+
   """Reads and enables pagination through a set of `FulfillmentMethod`."""
   allFulfillmentMethods(
     """Only read the first `n` values of the set."""
@@ -522,6 +551,7 @@ type Query implements Node {
   contactByEmail(email: String!): Contact
   containerById(id: Int!): Container
   customerById(id: Int!): Customer
+  customersCategoryById(id: Int!): CustomersCategory
   fulfillmentMethodById(id: Int!): FulfillmentMethod
   pricelistById(id: Int!): Pricelist
   productById(id: Int!): Product
@@ -535,6 +565,27 @@ type Query implements Node {
   userByContactIdAndRole(contactId: Int!, role: String!): User
   usersInvitationById(id: Int!): UsersInvitation
   usersInvitationByCode(code: String!): UsersInvitation
+
+  """Reads and enables pagination through a set of `ArticleForSale`."""
+  articlesAvailable(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+  ): ArticleForSalesConnection
 
   """Reads and enables pagination through a set of `Customer`."""
   customerBySlug(
@@ -785,6 +836,14 @@ type Query implements Node {
     """The globally unique `ID` to be used in selecting a single `Customer`."""
     nodeId: ID!
   ): Customer
+
+  """Reads a single `CustomersCategory` using its globally unique `ID`."""
+  customersCategory(
+    """
+    The globally unique `ID` to be used in selecting a single `CustomersCategory`.
+    """
+    nodeId: ID!
+  ): CustomersCategory
 
   """Reads a single `FulfillmentMethod` using its globally unique `ID`."""
   fulfillmentMethod(
@@ -2500,6 +2559,72 @@ input ContainerCondition {
   description: String
 }
 
+"""A connection to a list of `CustomersCategory` values."""
+type CustomersCategoriesConnection {
+  """A list of `CustomersCategory` objects."""
+  nodes: [CustomersCategory!]!
+
+  """
+  A list of edges which contains the `CustomersCategory` and cursor to aid in pagination.
+  """
+  edges: [CustomersCategoriesEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `CustomersCategory` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+type CustomersCategory implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  name: String!
+  vatIncluded: Boolean!
+}
+
+"""A `CustomersCategory` edge in the connection."""
+type CustomersCategoriesEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `CustomersCategory` at the end of the edge."""
+  node: CustomersCategory!
+}
+
+"""Methods to use when ordering `CustomersCategory`."""
+enum CustomersCategoriesOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  NAME_ASC
+  NAME_DESC
+  VAT_INCLUDED_ASC
+  VAT_INCLUDED_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `CustomersCategory` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input CustomersCategoryCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `name` field."""
+  name: String
+
+  """Checks for equality with the object’s `vatIncluded` field."""
+  vatIncluded: Boolean
+}
+
 """A connection to a list of `FulfillmentMethod` values."""
 type FulfillmentMethodsConnection {
   """A list of `FulfillmentMethod` objects."""
@@ -2747,6 +2872,46 @@ input UnitCondition {
   abbreviation: String
 }
 
+"""A connection to a list of `ArticleForSale` values."""
+type ArticleForSalesConnection {
+  """A list of `ArticleForSale` objects."""
+  nodes: [ArticleForSale!]!
+
+  """
+  A list of edges which contains the `ArticleForSale` and cursor to aid in pagination.
+  """
+  edges: [ArticleForSalesEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `ArticleForSale` you could get from the connection."""
+  totalCount: Int!
+}
+
+type ArticleForSale {
+  shouldIncludeVat: Boolean
+  price: Float
+  quantityPerContainer: BigFloat
+  stockName: String
+  unitName: String
+  productName: String
+  containerName: String
+  available: Int
+  articleId: Int
+  orderClosureDate: Datetime
+  fulfillmentDate: Datetime
+}
+
+"""A `ArticleForSale` edge in the connection."""
+type ArticleForSalesEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `ArticleForSale` at the end of the edge."""
+  node: ArticleForSale!
+}
+
 """A connection to a list of `ArticleDisplay` values."""
 type ArticleDisplaysConnection {
   """A list of `ArticleDisplay` objects."""
@@ -2910,6 +3075,14 @@ type Mutation {
     """
     input: CreateCustomerInput!
   ): CreateCustomerPayload
+
+  """Creates a single `CustomersCategory`."""
+  createCustomersCategory(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateCustomersCategoryInput!
+  ): CreateCustomersCategoryPayload
 
   """Creates a single `FulfillmentMethod`."""
   createFulfillmentMethod(
@@ -3112,6 +3285,24 @@ type Mutation {
     """
     input: UpdateCustomerByIdInput!
   ): UpdateCustomerPayload
+
+  """
+  Updates a single `CustomersCategory` using its globally unique id and a patch.
+  """
+  updateCustomersCategory(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateCustomersCategoryInput!
+  ): UpdateCustomersCategoryPayload
+
+  """Updates a single `CustomersCategory` using a unique key and a patch."""
+  updateCustomersCategoryById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateCustomersCategoryByIdInput!
+  ): UpdateCustomersCategoryPayload
 
   """
   Updates a single `FulfillmentMethod` using its globally unique id and a patch.
@@ -3396,6 +3587,22 @@ type Mutation {
     """
     input: DeleteCustomerByIdInput!
   ): DeleteCustomerPayload
+
+  """Deletes a single `CustomersCategory` using its globally unique id."""
+  deleteCustomersCategory(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteCustomersCategoryInput!
+  ): DeleteCustomersCategoryPayload
+
+  """Deletes a single `CustomersCategory` using a unique key."""
+  deleteCustomersCategoryById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteCustomersCategoryByIdInput!
+  ): DeleteCustomersCategoryPayload
 
   """Deletes a single `FulfillmentMethod` using its globally unique id."""
   deleteFulfillmentMethod(
@@ -3938,6 +4145,48 @@ input CustomerInput {
   eshopAccess: Boolean
   contactId: Int
   companyId: Int
+}
+
+"""The output of our create `CustomersCategory` mutation."""
+type CreateCustomersCategoryPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `CustomersCategory` that was created by this mutation."""
+  customersCategory: CustomersCategory
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `CustomersCategory`. May be used by Relay 1."""
+  customersCategoryEdge(
+    """The method to use when ordering `CustomersCategory`."""
+    orderBy: [CustomersCategoriesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): CustomersCategoriesEdge
+}
+
+"""All input for the create `CustomersCategory` mutation."""
+input CreateCustomersCategoryInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `CustomersCategory` to be created by this mutation."""
+  customersCategory: CustomersCategoryInput!
+}
+
+"""An input for mutations affecting `CustomersCategory`"""
+input CustomersCategoryInput {
+  id: Int
+  name: String!
+  vatIncluded: Boolean
 }
 
 """The output of our create `FulfillmentMethod` mutation."""
@@ -4886,6 +5135,72 @@ input UpdateCustomerByIdInput {
   An object where the defined keys will be set on the `Customer` being updated.
   """
   customerPatch: CustomerPatch!
+  id: Int!
+}
+
+"""The output of our update `CustomersCategory` mutation."""
+type UpdateCustomersCategoryPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `CustomersCategory` that was updated by this mutation."""
+  customersCategory: CustomersCategory
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `CustomersCategory`. May be used by Relay 1."""
+  customersCategoryEdge(
+    """The method to use when ordering `CustomersCategory`."""
+    orderBy: [CustomersCategoriesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): CustomersCategoriesEdge
+}
+
+"""All input for the `updateCustomersCategory` mutation."""
+input UpdateCustomersCategoryInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `CustomersCategory` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `CustomersCategory` being updated.
+  """
+  customersCategoryPatch: CustomersCategoryPatch!
+}
+
+"""
+Represents an update to a `CustomersCategory`. Fields that are set will be updated.
+"""
+input CustomersCategoryPatch {
+  id: Int
+  name: String
+  vatIncluded: Boolean
+}
+
+"""All input for the `updateCustomersCategoryById` mutation."""
+input UpdateCustomersCategoryByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `CustomersCategory` being updated.
+  """
+  customersCategoryPatch: CustomersCategoryPatch!
   id: Int!
 }
 
@@ -5877,6 +6192,54 @@ input DeleteCustomerInput {
 
 """All input for the `deleteCustomerById` mutation."""
 input DeleteCustomerByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+}
+
+"""The output of our delete `CustomersCategory` mutation."""
+type DeleteCustomersCategoryPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `CustomersCategory` that was deleted by this mutation."""
+  customersCategory: CustomersCategory
+  deletedCustomersCategoryId: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `CustomersCategory`. May be used by Relay 1."""
+  customersCategoryEdge(
+    """The method to use when ordering `CustomersCategory`."""
+    orderBy: [CustomersCategoriesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): CustomersCategoriesEdge
+}
+
+"""All input for the `deleteCustomersCategory` mutation."""
+input DeleteCustomersCategoryInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `CustomersCategory` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""All input for the `deleteCustomersCategoryById` mutation."""
+input DeleteCustomersCategoryByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.

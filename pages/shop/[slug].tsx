@@ -1,5 +1,5 @@
 import { useRouter } from "next/router"
-import CustomerOrder from "lib/components/CustomerOrder"
+import CustomerOrder from "lib/components/shop/CustomerOrder"
 import Connected from "lib/components/shop/Connected"
 import { SHOP_TOKEN_KEY } from "lib/constants"
 import { ApolloProvider } from "@apollo/client"

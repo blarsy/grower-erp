@@ -49,6 +49,27 @@ CREATE TYPE erp.article_display AS (
 ALTER TYPE erp.article_display OWNER TO postgres;
 
 --
+-- Name: article_for_sale; Type: TYPE; Schema: erp; Owner: postgres
+--
+
+CREATE TYPE erp.article_for_sale AS (
+	should_include_vat boolean,
+	price money,
+	quantity_per_container numeric,
+	stock_name character varying,
+	unit_name character varying,
+	product_name character varying,
+	container_name character varying,
+	available integer,
+	article_id integer,
+	order_closure_date timestamp without time zone,
+	fulfillment_date timestamp without time zone
+);
+
+
+ALTER TYPE erp.article_for_sale OWNER TO postgres;
+
+--
 -- Name: customer_session_data; Type: TYPE; Schema: erp; Owner: postgres
 --
 
@@ -141,6 +162,34 @@ $$;
 
 
 ALTER FUNCTION erp.add_job(identifier text, payload json, queue_name text, run_at timestamp with time zone, max_attempts integer, job_key text, priority integer, flags text[], job_key_mode text) OWNER TO postgres;
+
+--
+-- Name: articles_available(); Type: FUNCTION; Schema: erp; Owner: postgres
+--
+
+CREATE FUNCTION erp.articles_available() RETURNS SETOF erp.article_for_sale
+    LANGUAGE sql STABLE
+    AS $$
+SELECT pl."vatIncluded", ap.price, a."quantityPerContainer", ss.name as "stockName",
+u.name as "unitName", p.name as "productName",
+c.name as "containerName", FLOOR(ss."inStock" / a."quantityPerContainer") as available,
+a.id, ssch.order_closure_date, ssch.fulfillment_date
+FROM erp.pricelists pl
+INNER JOIN erp.articles_prices ap ON pl.id = ap."priceListId"
+INNER JOIN erp.articles a ON a.id = ap."articleId"
+INNER JOIN erp.containers c ON c.id = a."containerId"
+INNER JOIN erp.stock_shapes ss ON ss.id = a."stockShapeId"
+INNER JOIN erp.units u ON u.id = ss."unitId"
+INNER JOIN erp.products p ON ss."productId" = p.id
+INNER JOIN erp.sales_schedules_pricelists sspl ON sspl.pricelist_id = pl.id
+INNER JOIN erp.sales_schedules ssch ON ssch.id = sspl.sales_schedule_id
+WHERE pl.id = (SELECT "pricelistId" FROM erp.customers WHERE id = erp.current_customer_id())
+AND ssch.order_closure_date > NOW() AND (ssch.begin_sales_date IS NULL OR ssch.begin_sales_date < NOW())
+AND NOT ssch.disabled
+$$;
+
+
+ALTER FUNCTION erp.articles_available() OWNER TO postgres;
 
 --
 -- Name: authenticate(character varying, character varying); Type: FUNCTION; Schema: erp; Owner: postgres
@@ -1103,6 +1152,41 @@ ALTER SEQUENCE erp.containers_id_seq OWNED BY erp.containers.id;
 
 
 --
+-- Name: customers_categories; Type: TABLE; Schema: erp; Owner: postgres
+--
+
+CREATE TABLE erp.customers_categories (
+    id integer NOT NULL,
+    name character varying NOT NULL,
+    vat_included boolean DEFAULT false NOT NULL
+);
+
+
+ALTER TABLE erp.customers_categories OWNER TO postgres;
+
+--
+-- Name: customers_categories_id_seq; Type: SEQUENCE; Schema: erp; Owner: postgres
+--
+
+CREATE SEQUENCE erp.customers_categories_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE erp.customers_categories_id_seq OWNER TO postgres;
+
+--
+-- Name: customers_categories_id_seq; Type: SEQUENCE OWNED BY; Schema: erp; Owner: postgres
+--
+
+ALTER SEQUENCE erp.customers_categories_id_seq OWNED BY erp.customers_categories.id;
+
+
+--
 -- Name: customers_id_seq; Type: SEQUENCE; Schema: erp; Owner: postgres
 --
 
@@ -1453,6 +1537,13 @@ ALTER TABLE ONLY erp.customers ALTER COLUMN id SET DEFAULT nextval('erp.customer
 
 
 --
+-- Name: customers_categories id; Type: DEFAULT; Schema: erp; Owner: postgres
+--
+
+ALTER TABLE ONLY erp.customers_categories ALTER COLUMN id SET DEFAULT nextval('erp.customers_categories_id_seq'::regclass);
+
+
+--
 -- Name: fulfillment_methods id; Type: DEFAULT; Schema: erp; Owner: postgres
 --
 
@@ -1538,6 +1629,14 @@ ALTER TABLE ONLY erp.contacts
 
 ALTER TABLE ONLY erp.containers
     ADD CONSTRAINT containers_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: customers_categories customers_categories_pkey; Type: CONSTRAINT; Schema: erp; Owner: postgres
+--
+
+ALTER TABLE ONLY erp.customers_categories
+    ADD CONSTRAINT customers_categories_pkey PRIMARY KEY (id);
 
 
 --
@@ -2007,6 +2106,14 @@ GRANT USAGE ON SCHEMA erp TO identified_customer;
 
 
 --
+-- Name: FUNCTION articles_available(); Type: ACL; Schema: erp; Owner: postgres
+--
+
+REVOKE ALL ON FUNCTION erp.articles_available() FROM PUBLIC;
+GRANT ALL ON FUNCTION erp.articles_available() TO identified_customer;
+
+
+--
 -- Name: FUNCTION authenticate(login character varying, password character varying); Type: ACL; Schema: erp; Owner: postgres
 --
 
@@ -2033,6 +2140,7 @@ GRANT ALL ON FUNCTION erp.create_password_recovery(recovery_email character vary
 --
 
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.sales_schedules TO administrator;
+GRANT SELECT ON TABLE erp.sales_schedules TO identified_customer;
 
 
 --
@@ -2121,6 +2229,7 @@ GRANT SELECT,UPDATE ON TABLE erp.contacts TO identified_customer;
 --
 
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.containers TO administrator;
+GRANT SELECT ON TABLE erp.containers TO identified_customer;
 
 
 --
@@ -2128,6 +2237,7 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.containers TO administrator;
 --
 
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.pricelists TO administrator;
+GRANT SELECT ON TABLE erp.pricelists TO identified_customer;
 
 
 --
@@ -2135,6 +2245,7 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.pricelists TO administrator;
 --
 
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.products TO administrator;
+GRANT SELECT ON TABLE erp.products TO identified_customer;
 
 
 --
@@ -2142,6 +2253,7 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.products TO administrator;
 --
 
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.units TO administrator;
+GRANT SELECT ON TABLE erp.units TO identified_customer;
 
 
 --
@@ -2226,6 +2338,7 @@ GRANT ALL ON FUNCTION erp.users_invitation_contact_by_code(invitation_code chara
 --
 
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.articles TO administrator;
+GRANT SELECT ON TABLE erp.articles TO identified_customer;
 
 
 --
@@ -2240,6 +2353,7 @@ GRANT USAGE ON SEQUENCE erp.articles_id_seq TO administrator;
 --
 
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.articles_prices TO administrator;
+GRANT SELECT ON TABLE erp.articles_prices TO identified_customer;
 
 
 --
@@ -2254,6 +2368,14 @@ GRANT USAGE ON SEQUENCE erp.contacts_id_seq TO administrator;
 --
 
 GRANT USAGE ON SEQUENCE erp.containers_id_seq TO administrator;
+
+
+--
+-- Name: TABLE customers_categories; Type: ACL; Schema: erp; Owner: postgres
+--
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.customers_categories TO administrator;
+GRANT SELECT ON TABLE erp.customers_categories TO identified_customer;
 
 
 --
@@ -2317,6 +2439,7 @@ GRANT USAGE ON SEQUENCE erp.sales_schedules_id_seq TO administrator;
 --
 
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.sales_schedules_pricelists TO administrator;
+GRANT SELECT ON TABLE erp.sales_schedules_pricelists TO identified_customer;
 
 
 --
@@ -2340,6 +2463,7 @@ GRANT SELECT ON TABLE erp.settings TO anonymous;
 --
 
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.stock_shapes TO administrator;
+GRANT SELECT ON TABLE erp.stock_shapes TO identified_customer;
 
 
 --

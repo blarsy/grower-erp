@@ -38,6 +38,7 @@ const Connected = ({ children, slug }: Props)  => {
             errorHandlerHolder.handle = (e) => {
                 if(e.graphQLErrors && e.graphQLErrors.length > 0 && e.graphQLErrors.some(error => error.message === 'jwt expired')){
                     // login again, silently
+                    localStorage.removeItem(SHOP_TOKEN_KEY)
                     authenticateFromSlug()
                 }
             }

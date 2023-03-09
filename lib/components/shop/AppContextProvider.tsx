@@ -1,14 +1,8 @@
 import { gql, useLazyQuery } from "@apollo/client"
 import { SHOP_TOKEN_KEY } from "lib/constants"
 import { createContext, useState } from "react"
-import { resolve } from "styled-jsx/css"
 
-interface AppStateData {
-  ownerCompany: {
-    id: number,
-    name: string
-  },
-  customer: {
+export interface IdentifiedCustomerData {
     id: number,
     contactId: number,
     firstname: string,
@@ -16,7 +10,14 @@ interface AppStateData {
     email: string,
     companyId: number,
     companyName: string
+}
+
+interface AppStateData {
+  ownerCompany: {
+    id: number,
+    name: string
   },
+  customer: IdentifiedCustomerData,
   auth: {
     token: string,
     error?: Error
