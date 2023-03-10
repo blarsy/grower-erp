@@ -14,9 +14,9 @@ const GET = gql`query SalesSchedules {
         id
         name
         orderClosureDate
-        salesSchedulesPricelistsBySalesScheduleId {
+        salesSchedulesCustomersCategoriesBySalesScheduleId {
           nodes {
-            pricelistByPricelistId {
+            customersCategoryByCustomersCategoryId {
               name
               id
             }
@@ -49,9 +49,9 @@ const SalesScheduleDataGrid = () => {
             { headerText: 'A partir de', type: 'datetime', widthPercent: 15, key: 'beginSalesDate' },
             { headerText: 'jusque', type: 'datetime', widthPercent: 15, key: 'orderClosureDate' },
             { headerText: 'Nom', type: 'string', widthPercent: 10, key: 'name' },
-            { headerText: 'Listes de prix', type: 'custom', key: 'salesSchedulesPricelistsBySalesScheduleId', widthPercent: 15, 
+            { headerText: 'Catégories clients', type: 'custom', key: 'salesSchedulesCustomersCategoriesBySalesScheduleId', widthPercent: 15, 
               customDisplay: (val) => {
-                return val.nodes.map((node: any) => node.pricelistByPricelistId.name).join(', ')
+                return val.nodes.map((node: any) => node.customersCategoryByCustomersCategoryId.name).join(', ')
               } },
             { headerText: 'Méthodes d\'acheminement', type: 'custom', key: 'salesSchedulesFulfillmentMethodsBySalesScheduleId', 
             customDisplay: (val) => {

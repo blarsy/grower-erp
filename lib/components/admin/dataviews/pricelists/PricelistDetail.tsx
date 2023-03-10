@@ -1,14 +1,25 @@
-import { gql, useQuery } from "@apollo/client"
-import { IconButton, Stack, Typography } from "@mui/material"
+import { gql, useMutation, useQuery } from "@apollo/client"
+import { Checkbox, CircularProgress, FormControl, FormControlLabel, IconButton, Stack, Typography } from "@mui/material"
 import { useRouter } from "next/router"
 import BackIcon from '@mui/icons-material/ArrowBack'
 import * as yup from 'yup'
 import DatagridAdminView from "../DatagridAdminView"
 import Loader from "lib/components/Loader"
+import { Formik } from "formik"
+import { useState } from "react"
+import Feedback from "lib/components/Feedback"
+import { parseUiError } from "lib/uiCommon"
 
 interface Props {
     pricelistId: number
 }
+
+interface Values {
+    customersCategories: {
+        id: number
+    }[]
+}
+
 const GET = gql`query ArticlespricesByPricelistId($id: Int!) {
   pricelistById(id: $id) {
     articlesPricesByPriceListId {
@@ -47,23 +58,88 @@ const CREATE = gql`
         }
     }`
 
+const UPDATE_CUSTOMERS_CATEGORIES = gql`mutation updateCustomersCategories($newCustomersCategoriesSet: [Int]!, $targetPricelistId: Int!) {
+    updatePricelistCustomersCategories(
+      input: {newCustomersCategoriesSet: $newCustomersCategoriesSet, targetPricelistId: $targetPricelistId}
+    ) {
+      clientMutationId
+    }
+  }`
+
+const PRICELIST_DATA = gql`query PricelistById($id: Int!) {
+    pricelistById(id: $id) {
+      id
+      name
+      pricelistsCustomersCategoriesByPricelistId {
+        nodes {
+            customersCategoryId
+        }
+      }
+    }
+    allCustomersCategories {
+        nodes {
+            id
+            name
+        }
+    }
+  }`
+
 const PricelistDetail = ({ pricelistId }: Props) => {
     const router = useRouter()
-    const { loading, error, data } = useQuery(gql`query PricelistById($id: Int!) {
-        pricelistById(id: $id) {
-          id
-          name
-          vatIncluded
-        }
-      }`, { variables: { id: pricelistId }})
+    const { loading, error, data } = useQuery(PRICELIST_DATA, { variables: { id: pricelistId }})
+    const [updateCustomersCategories] = useMutation(UPDATE_CUSTOMERS_CATEGORIES)
+    const [updateCustomersCategoriesStatus, setUpdateCustomersCategoriesStatus] = useState({ loading: false, error: undefined as Error | undefined})
     
+    let message: string, detail: string
+    if(updateCustomersCategoriesStatus.error) {
+        const feedback = parseUiError(updateCustomersCategoriesStatus.error)
+        message = feedback.message
+        detail = feedback.detail
+    }
+
     return <Loader loading={loading} error={error}>
-        <Stack>
+        {data && <Stack>
             <Stack direction="row" alignItems="center">
                 <IconButton onClick={() => router.push('/admin/pricelist')}><BackIcon /></IconButton>
-                <Typography>Tarifs</Typography>
+                <Typography>Listes de prix</Typography>
             </Stack>
-            <DatagridAdminView title={`Liste de prix "${data && data.pricelistById.name}"`} dataName="ArticlesPrice"
+            <Typography variant="h4" margin="0 1rem">{`Details liste de prix "${data.pricelistById.name}"`}</Typography>
+            <Formik initialValues={{
+                customersCategories: data.pricelistById.pricelistsCustomersCategoriesByPricelistId.nodes.map((cc: any) => ({ id: cc.customersCategoryId }))
+            } as Values} validate={() => {}} onSubmit={async values => {
+                try {
+                    setUpdateCustomersCategoriesStatus({ loading: true, error: undefined })
+                    await updateCustomersCategories({ variables: { newCustomersCategoriesSet: values.customersCategories.map(cc => cc.id), targetPricelistId: pricelistId } })
+                    setUpdateCustomersCategoriesStatus({ loading: false, error: undefined })
+                } catch(error: any) {
+                    setUpdateCustomersCategoriesStatus({ loading: false, error })
+                }
+            }}>
+            {({ values, setFieldValue, handleSubmit }) => <Stack alignItems="center">
+                <Typography variant="overline">S'applique aux catégores de clients:{updateCustomersCategoriesStatus.loading && <CircularProgress size="1rem" />}</Typography>
+                <Stack direction="row">
+                    {data.allCustomersCategories.nodes.map((customersCategory: any) => <Stack key={customersCategory.id} direction="row">
+                        <FormControl key="disabled">
+                            <FormControlLabel
+                                control={<Checkbox size="small" checked={values.customersCategories.some(cc => cc.id === customersCategory.id)} />}
+                                label={customersCategory.name}
+                                onChange={() => {
+                                    if(values.customersCategories.some(cc => cc.id === customersCategory.id)) {
+                                        setFieldValue('customersCategories', values.customersCategories.filter(cc => cc.id !== customersCategory.id))
+                                    } else {
+                                        setFieldValue('customersCategories', [...values.customersCategories, { id: customersCategory.id }])
+                                    }
+                                    handleSubmit()
+                                }}
+                            />
+                        </FormControl>
+                    </Stack>)}
+                </Stack>
+                {message && <Feedback onClose={() => setUpdateCustomersCategoriesStatus({ loading: false, error: undefined })}
+                    message={message} detail={detail} severity="error"/>}
+            </Stack>}
+            </Formik>
+            <DatagridAdminView title={`Articles`} dataName="ArticlesPrice"
                 getQuery={GET} filter={{ id: pricelistId }} updateQuery={UPDATE} createQuery={CREATE} getFromQueried={data => data && data.pricelistById.articlesPricesByPriceListId.nodes}
                 columns={[
                     { key: 'id', headerText: 'ID', widthPercent: 5, type: "number"},
@@ -81,11 +157,11 @@ const PricelistDetail = ({ pricelistId }: Props) => {
                                 }
                             }
                         }`, getLabel: item => `${item.productName} / ${item.stockshapeName} (${item.containerName}, ${item.quantityPerContainer} ${item.unitAbbreviation})`}},
-                    { key: 'price', headerText: `Prix ${data && data.pricelistById.vatIncluded ? 'TVAC': 'HTVA'}`, type: "number", editable: {
+                    { key: 'price', headerText: `Prix HTVA`, type: "number", editable: {
                         validation: yup.number().positive().required('Ce champ est requis')
                     }}
                 ]} fixedMutationVariables={{ priceListId: pricelistId }} />
-        </Stack>
+        </Stack>}
     </Loader>
 }
 

@@ -1,9 +1,9 @@
-import { Box, CircularProgress, IconButton, Stack, TextField, Typography, Checkbox, FormControlLabel, Tooltip } from "@mui/material"
+import { Box, CircularProgress, IconButton, Stack, TextField, Typography, Checkbox, FormControlLabel, Tooltip, Button } from "@mui/material"
 import { Form, Formik, FormikErrors, FormikTouched, FormikValues } from "formik"
 import DeleteIcon from '@mui/icons-material/Close'
 import CheckIcon from '@mui/icons-material/Check'
 import SaveIcon from '@mui/icons-material/SaveAlt'
-import { ChangeEvent, HTMLInputTypeAttribute, MutableRefObject, RefObject, useState } from "react"
+import { ChangeEvent, HTMLInputTypeAttribute, useState } from "react"
 import * as yup from 'yup'
 import { CellContent, cellInnerPaddingLeftRight, CELL_SPACING, Column, getLeftButtonsFlex, LineData, LineOperation, NEW_LINE_KEY } from "./Datagrid"
 import RelationSelect from "./RelationSelect"
@@ -264,9 +264,9 @@ const DatagridLine = ({ line, columns, canDelete, readonly, onUpdate, onCreate,
                         errors, 
                         working))}
                 </Stack>
-                { lineOps && <Box display="flex" flex={`0 0 ${Math.max(lineOps.length * 2, 4)}rem`}>{
+                { lineOps && <Box display="flex" margin='0 0.5rem' flex={`0 0 ${Math.max(lineOps.length * 2, 4)}rem`}>{
                     lineOps.map((op, idx) => {
-                        return <Tooltip key={idx} title={op.name}><IconButton sx={{ padding: 0 }} onClick={() => op.fn(line)}>{op.makeIcon()}</IconButton></Tooltip>
+                        return <Tooltip key={idx} title={op.name}><IconButton sx={{ padding: '0.25rem' }} onClick={() => op.fn(line)}>{op.makeIcon()}</IconButton></Tooltip>
                     })
                 }</Box>}
             </Stack>

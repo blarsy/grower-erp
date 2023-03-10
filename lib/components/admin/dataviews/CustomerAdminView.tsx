@@ -10,24 +10,24 @@ const GET = gql`query CustomerAdminViewAllCustomersQuery {
       companyId
       eshopAccess
       id
-      pricelistId
+      customersCategoryId
       slug
     }
   }
 }`
 
 const UPDATE = gql`
-  mutation UpdateCustomer($contactId: Int, $companyId: Int, $eshopAccess: Boolean!, $pricelistId: Int!,
+  mutation UpdateCustomer($contactId: Int, $companyId: Int, $eshopAccess: Boolean!, $customersCategoryId: Int!,
     $id: Int!) {
     updateCustomerById(
-      input: {customerPatch: {contactId: $contactId, companyId: $companyId, eshopAccess: $eshopAccess, pricelistId: $pricelistId}, id: $id}
+      input: {customerPatch: {contactId: $contactId, companyId: $companyId, eshopAccess: $eshopAccess, customersCategoryId: $customersCategoryId}, id: $id}
     ) {
         customer { 
             contactId
             companyId
             eshopAccess
             id
-            pricelistId
+            customersCategoryId
             slug
         }
     }
@@ -35,14 +35,14 @@ const UPDATE = gql`
 `
 
 const CREATE = gql`
-  mutation CreateCustomer($contactId: Int, $companyId: Int, $eshopAccess: Boolean!, $pricelistId: Int!, $slug: String!) {
-    createCustomer(input: {customer: {contactId: $contactId, companyId: $companyId, eshopAccess: $eshopAccess, pricelistId: $pricelistId, slug: $slug}}) {
+  mutation CreateCustomer($contactId: Int, $companyId: Int, $eshopAccess: Boolean!, $customersCategoryId: Int!, $slug: String!) {
+    createCustomer(input: {customer: {contactId: $contactId, companyId: $companyId, eshopAccess: $eshopAccess, customersCategoryId: $customersCategoryId, slug: $slug}}) {
         customer { 
             contactId
             companyId
             eshopAccess
             id
-            pricelistId
+            customersCategoryId
             slug
         }
     }
@@ -80,11 +80,11 @@ const CustomerAdminView = () => {
       { key: 'eshopAccess', headerText: 'Eshop ?', widthPercent: 7, type: "boolean", editable: {
           validation: yup.string()
         }
-      }, { key: 'pricelistId', headerText: 'Tarif', widthPercent: 15, type: "number", editable: {
+      }, { key: 'customersCategoryId', headerText: 'Catégorie', widthPercent: 15, type: "number", editable: {
           validation: yup.number().typeError('Ce champ est requis.')
         }, relation: {
-          query: gql`query pricelistsByName($search: String) {
-              filterPricelists(searchTerm: $search) {
+          query: gql`query customersCategoriesByName($search: String) {
+              filterCustomersCategories(searchTerm: $search) {
                 nodes {
                     id
                     name

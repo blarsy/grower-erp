@@ -170,20 +170,21 @@ ALTER FUNCTION erp.add_job(identifier text, payload json, queue_name text, run_a
 CREATE FUNCTION erp.articles_available() RETURNS SETOF erp.article_for_sale
     LANGUAGE sql STABLE
     AS $$
-SELECT pl."vatIncluded", ap.price, a."quantityPerContainer", ss.name as "stockName",
+SELECT cc.vat_included, ap.price, a."quantityPerContainer", ss.name as "stockName",
 u.name as "unitName", p.name as "productName",
 c.name as "containerName", FLOOR(ss."inStock" / a."quantityPerContainer") as available,
 a.id, ssch.order_closure_date, ssch.fulfillment_date
-FROM erp.pricelists pl
-INNER JOIN erp.articles_prices ap ON pl.id = ap."priceListId"
+FROM erp.customers_categories cc
+INNER JOIN erp.pricelists_customers_categories plcc ON plcc.customers_category_id = cc.id
+INNER JOIN erp.articles_prices ap ON plcc.pricelist_id = ap."priceListId"
 INNER JOIN erp.articles a ON a.id = ap."articleId"
 INNER JOIN erp.containers c ON c.id = a."containerId"
 INNER JOIN erp.stock_shapes ss ON ss.id = a."stockShapeId"
 INNER JOIN erp.units u ON u.id = ss."unitId"
 INNER JOIN erp.products p ON ss."productId" = p.id
-INNER JOIN erp.sales_schedules_pricelists sspl ON sspl.pricelist_id = pl.id
-INNER JOIN erp.sales_schedules ssch ON ssch.id = sspl.sales_schedule_id
-WHERE pl.id = (SELECT "pricelistId" FROM erp.customers WHERE id = erp.current_customer_id())
+INNER JOIN erp.sales_schedules_customers_categories sscc ON sscc.customers_category_id = cc.id
+INNER JOIN erp.sales_schedules ssch ON ssch.id = sscc.sales_schedule_id
+WHERE cc.id = (SELECT customers_category_id FROM erp.customers WHERE id = erp.current_customer_id())
 AND ssch.order_closure_date > NOW() AND (ssch.begin_sales_date IS NULL OR ssch.begin_sales_date < NOW())
 AND NOT ssch.disabled
 $$;
@@ -340,7 +341,7 @@ COMMENT ON TABLE erp.sales_schedules IS '@omit delete,update';
 -- Name: create_sales_schedule_with_deps(timestamp without time zone, character varying, timestamp without time zone, money, money, timestamp without time zone, boolean, integer[], integer[]); Type: FUNCTION; Schema: erp; Owner: postgres
 --
 
-CREATE FUNCTION erp.create_sales_schedule_with_deps(fulfillment_date timestamp without time zone, name character varying, order_closure_date timestamp without time zone, delivery_price money, free_delivery_turnover money, begin_sales_date timestamp without time zone, disabled boolean, fulfillment_methods integer[], pricelists integer[]) RETURNS erp.sales_schedules
+CREATE FUNCTION erp.create_sales_schedule_with_deps(fulfillment_date timestamp without time zone, name character varying, order_closure_date timestamp without time zone, delivery_price money, free_delivery_turnover money, begin_sales_date timestamp without time zone, disabled boolean, fulfillment_methods integer[], customers_categories integer[]) RETURNS erp.sales_schedules
     LANGUAGE plpgsql
     AS $$
 DECLARE ssid INTEGER;
@@ -355,8 +356,8 @@ INSERT INTO erp.sales_schedules (fulfillment_date, "name", order_closure_date, d
 VALUES (fulfillment_date, name, order_closure_date, delivery_price, free_delivery_turnover, begin_sales_date, disabled)
 RETURNING id INTO ssid;
 
-INSERT INTO erp.sales_schedules_pricelists (pricelist_id, sales_schedule_id)
-SELECT unnest(pricelists), ssid;
+INSERT INTO erp.sales_schedules_customers_categories (customers_category_id, sales_schedule_id)
+SELECT unnest(customers_categories), ssid;
 
 INSERT INTO erp.sales_schedules_fulfillment_methods (fulfillment_method_id, sales_schedule_id)
 SELECT unnest(fulfillment_methods), ssid;
@@ -368,7 +369,7 @@ END;
 $$;
 
 
-ALTER FUNCTION erp.create_sales_schedule_with_deps(fulfillment_date timestamp without time zone, name character varying, order_closure_date timestamp without time zone, delivery_price money, free_delivery_turnover money, begin_sales_date timestamp without time zone, disabled boolean, fulfillment_methods integer[], pricelists integer[]) OWNER TO postgres;
+ALTER FUNCTION erp.create_sales_schedule_with_deps(fulfillment_date timestamp without time zone, name character varying, order_closure_date timestamp without time zone, delivery_price money, free_delivery_turnover money, begin_sales_date timestamp without time zone, disabled boolean, fulfillment_methods integer[], customers_categories integer[]) OWNER TO postgres;
 
 --
 -- Name: users_invitations_id_seq; Type: SEQUENCE; Schema: erp; Owner: postgres
@@ -477,7 +478,7 @@ ALTER FUNCTION erp."current_role"() OWNER TO postgres;
 CREATE TABLE erp.customers (
     id integer NOT NULL,
     slug character varying NOT NULL,
-    "pricelistId" integer NOT NULL,
+    customers_category_id integer NOT NULL,
     "eshopAccess" boolean DEFAULT true NOT NULL,
     "contactId" integer,
     "companyId" integer
@@ -652,13 +653,53 @@ CREATE FUNCTION erp.filter_containers(search_term character varying) RETURNS SET
 ALTER FUNCTION erp.filter_containers(search_term character varying) OWNER TO postgres;
 
 --
+-- Name: customers_categories_id_seq; Type: SEQUENCE; Schema: erp; Owner: postgres
+--
+
+CREATE SEQUENCE erp.customers_categories_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE erp.customers_categories_id_seq OWNER TO postgres;
+
+--
+-- Name: customers_categories; Type: TABLE; Schema: erp; Owner: postgres
+--
+
+CREATE TABLE erp.customers_categories (
+    id integer DEFAULT nextval('erp.customers_categories_id_seq'::regclass) NOT NULL,
+    name character varying NOT NULL,
+    vat_included boolean DEFAULT false NOT NULL
+);
+
+
+ALTER TABLE erp.customers_categories OWNER TO postgres;
+
+--
+-- Name: filter_customers_categories(character varying); Type: FUNCTION; Schema: erp; Owner: postgres
+--
+
+CREATE FUNCTION erp.filter_customers_categories(search_term character varying) RETURNS SETOF erp.customers_categories
+    LANGUAGE sql STABLE
+    AS $$SELECT id, name, vat_included
+FROM erp.customers_categories
+WHERE name ILIKE '%' || search_term || '%'$$;
+
+
+ALTER FUNCTION erp.filter_customers_categories(search_term character varying) OWNER TO postgres;
+
+--
 -- Name: pricelists; Type: TABLE; Schema: erp; Owner: postgres
 --
 
 CREATE TABLE erp.pricelists (
     id integer NOT NULL,
-    name character varying NOT NULL,
-    "vatIncluded" boolean DEFAULT false NOT NULL
+    name character varying NOT NULL
 );
 
 
@@ -671,7 +712,7 @@ ALTER TABLE erp.pricelists OWNER TO postgres;
 CREATE FUNCTION erp.filter_pricelists(search_term character varying) RETURNS SETOF erp.pricelists
     LANGUAGE sql STABLE
     AS $$
-SELECT id, name, "vatIncluded"
+SELECT id, name
 FROM erp.priceLists
 WHERE name ILIKE '%' || search_term || '%'
 $$;
@@ -992,6 +1033,25 @@ $$;
 ALTER FUNCTION erp.register_user(updated_firstname character varying, updated_lastname character varying, invitation_id integer, password character varying) OWNER TO postgres;
 
 --
+-- Name: update_pricelist_customers_categories(integer[], integer); Type: FUNCTION; Schema: erp; Owner: postgres
+--
+
+CREATE FUNCTION erp.update_pricelist_customers_categories(new_customers_categories_set integer[], target_pricelist_id integer) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	DELETE FROM erp.pricelists_customers_categories
+	WHERE pricelist_id = target_pricelist_id;
+	
+	INSERT INTO erp.pricelists_customers_categories (pricelist_id, customers_category_id)
+	SELECT target_pricelist_id, UNNEST(new_customers_categories_set);
+END; 
+$$;
+
+
+ALTER FUNCTION erp.update_pricelist_customers_categories(new_customers_categories_set integer[], target_pricelist_id integer) OWNER TO postgres;
+
+--
 -- Name: update_sales_schedule_with_deps(integer, timestamp without time zone, character varying, timestamp without time zone, money, money, timestamp without time zone, boolean, integer[], integer[]); Type: FUNCTION; Schema: erp; Owner: postgres
 --
 
@@ -1152,41 +1212,6 @@ ALTER SEQUENCE erp.containers_id_seq OWNED BY erp.containers.id;
 
 
 --
--- Name: customers_categories; Type: TABLE; Schema: erp; Owner: postgres
---
-
-CREATE TABLE erp.customers_categories (
-    id integer NOT NULL,
-    name character varying NOT NULL,
-    vat_included boolean DEFAULT false NOT NULL
-);
-
-
-ALTER TABLE erp.customers_categories OWNER TO postgres;
-
---
--- Name: customers_categories_id_seq; Type: SEQUENCE; Schema: erp; Owner: postgres
---
-
-CREATE SEQUENCE erp.customers_categories_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE erp.customers_categories_id_seq OWNER TO postgres;
-
---
--- Name: customers_categories_id_seq; Type: SEQUENCE OWNED BY; Schema: erp; Owner: postgres
---
-
-ALTER SEQUENCE erp.customers_categories_id_seq OWNED BY erp.customers_categories.id;
-
-
---
 -- Name: customers_id_seq; Type: SEQUENCE; Schema: erp; Owner: postgres
 --
 
@@ -1267,6 +1292,41 @@ ALTER SEQUENCE erp.password_recoveries_id_seq OWNED BY erp.password_recoveries.i
 
 
 --
+-- Name: pricelists_customers_categories_id_seq; Type: SEQUENCE; Schema: erp; Owner: postgres
+--
+
+CREATE SEQUENCE erp.pricelists_customers_categories_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE erp.pricelists_customers_categories_id_seq OWNER TO postgres;
+
+--
+-- Name: pricelists_customers_categories; Type: TABLE; Schema: erp; Owner: postgres
+--
+
+CREATE TABLE erp.pricelists_customers_categories (
+    id integer DEFAULT nextval('erp.pricelists_customers_categories_id_seq'::regclass) NOT NULL,
+    pricelist_id integer NOT NULL,
+    customers_category_id integer NOT NULL
+);
+
+
+ALTER TABLE erp.pricelists_customers_categories OWNER TO postgres;
+
+--
+-- Name: TABLE pricelists_customers_categories; Type: COMMENT; Schema: erp; Owner: postgres
+--
+
+COMMENT ON TABLE erp.pricelists_customers_categories IS '@omit create,update,delete';
+
+
+--
 -- Name: pricelists_id_seq; Type: SEQUENCE; Schema: erp; Owner: postgres
 --
 
@@ -1333,10 +1393,54 @@ ALTER SEQUENCE erp.products_id_seq OWNED BY erp.products.id;
 
 
 --
+-- Name: sales_schedules_customers_categories_id_seq; Type: SEQUENCE; Schema: erp; Owner: postgres
+--
+
+CREATE SEQUENCE erp.sales_schedules_customers_categories_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE erp.sales_schedules_customers_categories_id_seq OWNER TO postgres;
+
+--
+-- Name: sales_schedules_customers_categories; Type: TABLE; Schema: erp; Owner: postgres
+--
+
+CREATE TABLE erp.sales_schedules_customers_categories (
+    id integer DEFAULT nextval('erp.sales_schedules_customers_categories_id_seq'::regclass) NOT NULL,
+    sales_schedule_id integer NOT NULL,
+    customers_category_id integer NOT NULL
+);
+
+
+ALTER TABLE erp.sales_schedules_customers_categories OWNER TO postgres;
+
+--
+-- Name: sales_schedules_fulfillment_methods_id_seq; Type: SEQUENCE; Schema: erp; Owner: postgres
+--
+
+CREATE SEQUENCE erp.sales_schedules_fulfillment_methods_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE erp.sales_schedules_fulfillment_methods_id_seq OWNER TO postgres;
+
+--
 -- Name: sales_schedules_fulfillment_methods; Type: TABLE; Schema: erp; Owner: postgres
 --
 
 CREATE TABLE erp.sales_schedules_fulfillment_methods (
+    id integer DEFAULT nextval('erp.sales_schedules_fulfillment_methods_id_seq'::regclass) NOT NULL,
     sales_schedule_id integer NOT NULL,
     fulfillment_method_id integer NOT NULL
 );
@@ -1365,18 +1469,6 @@ ALTER TABLE erp.sales_schedules_id_seq OWNER TO postgres;
 
 ALTER SEQUENCE erp.sales_schedules_id_seq OWNED BY erp.sales_schedules.id;
 
-
---
--- Name: sales_schedules_pricelists; Type: TABLE; Schema: erp; Owner: postgres
---
-
-CREATE TABLE erp.sales_schedules_pricelists (
-    pricelist_id integer NOT NULL,
-    sales_schedule_id integer NOT NULL
-);
-
-
-ALTER TABLE erp.sales_schedules_pricelists OWNER TO postgres;
 
 --
 -- Name: settings_id_seq; Type: SEQUENCE; Schema: erp; Owner: postgres
@@ -1537,13 +1629,6 @@ ALTER TABLE ONLY erp.customers ALTER COLUMN id SET DEFAULT nextval('erp.customer
 
 
 --
--- Name: customers_categories id; Type: DEFAULT; Schema: erp; Owner: postgres
---
-
-ALTER TABLE ONLY erp.customers_categories ALTER COLUMN id SET DEFAULT nextval('erp.customers_categories_id_seq'::regclass);
-
-
---
 -- Name: fulfillment_methods id; Type: DEFAULT; Schema: erp; Owner: postgres
 --
 
@@ -1664,6 +1749,14 @@ ALTER TABLE ONLY erp.password_recoveries
 
 
 --
+-- Name: pricelists_customers_categories pricelists_customers_categories_pkey; Type: CONSTRAINT; Schema: erp; Owner: postgres
+--
+
+ALTER TABLE ONLY erp.pricelists_customers_categories
+    ADD CONSTRAINT pricelists_customers_categories_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: pricelists pricelists_pkey; Type: CONSTRAINT; Schema: erp; Owner: postgres
 --
 
@@ -1688,11 +1781,19 @@ ALTER TABLE ONLY erp.products
 
 
 --
+-- Name: sales_schedules_customers_categories sales_schedules_customers_categories_pkey; Type: CONSTRAINT; Schema: erp; Owner: postgres
+--
+
+ALTER TABLE ONLY erp.sales_schedules_customers_categories
+    ADD CONSTRAINT sales_schedules_customers_categories_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: sales_schedules_fulfillment_methods sales_schedules_fulfillment_methods_pkey; Type: CONSTRAINT; Schema: erp; Owner: postgres
 --
 
 ALTER TABLE ONLY erp.sales_schedules_fulfillment_methods
-    ADD CONSTRAINT sales_schedules_fulfillment_methods_pkey PRIMARY KEY (sales_schedule_id, fulfillment_method_id);
+    ADD CONSTRAINT sales_schedules_fulfillment_methods_pkey PRIMARY KEY (id);
 
 
 --
@@ -1701,14 +1802,6 @@ ALTER TABLE ONLY erp.sales_schedules_fulfillment_methods
 
 ALTER TABLE ONLY erp.sales_schedules
     ADD CONSTRAINT sales_schedules_pkey PRIMARY KEY (id);
-
-
---
--- Name: sales_schedules_pricelists sales_schedules_pricelists_pkey; Type: CONSTRAINT; Schema: erp; Owner: postgres
---
-
-ALTER TABLE ONLY erp.sales_schedules_pricelists
-    ADD CONSTRAINT sales_schedules_pricelists_pkey PRIMARY KEY (pricelist_id, sales_schedule_id);
 
 
 --
@@ -1792,6 +1885,13 @@ ALTER TABLE ONLY erp.users
 
 
 --
+-- Name: fki_customers_customers_categories; Type: INDEX; Schema: erp; Owner: postgres
+--
+
+CREATE INDEX fki_customers_customers_categories ON erp.customers USING btree (customers_category_id);
+
+
+--
 -- Name: fki_fk_article_container; Type: INDEX; Schema: erp; Owner: postgres
 --
 
@@ -1834,34 +1934,6 @@ CREATE INDEX fki_fk_product_product ON erp.products USING btree ("parentProduct"
 
 
 --
--- Name: fki_fk_sales_schedules_fulfillment_methods_fulfillment_method; Type: INDEX; Schema: erp; Owner: postgres
---
-
-CREATE INDEX fki_fk_sales_schedules_fulfillment_methods_fulfillment_method ON erp.sales_schedules_fulfillment_methods USING btree (fulfillment_method_id);
-
-
---
--- Name: fki_fk_sales_schedules_fulfillment_methods_sales_schedule; Type: INDEX; Schema: erp; Owner: postgres
---
-
-CREATE INDEX fki_fk_sales_schedules_fulfillment_methods_sales_schedule ON erp.sales_schedules_fulfillment_methods USING btree (sales_schedule_id);
-
-
---
--- Name: fki_fk_sales_schedules_pricelists_pricelists; Type: INDEX; Schema: erp; Owner: postgres
---
-
-CREATE INDEX fki_fk_sales_schedules_pricelists_pricelists ON erp.sales_schedules_pricelists USING btree (pricelist_id);
-
-
---
--- Name: fki_fk_sales_schedules_pricelists_sales_schedules; Type: INDEX; Schema: erp; Owner: postgres
---
-
-CREATE INDEX fki_fk_sales_schedules_pricelists_sales_schedules ON erp.sales_schedules_pricelists USING btree (sales_schedule_id);
-
-
---
 -- Name: fki_fk_settings_companies; Type: INDEX; Schema: erp; Owner: postgres
 --
 
@@ -1894,6 +1966,56 @@ CREATE INDEX fki_fk_users_contacts ON erp.users USING btree (contact_id);
 --
 
 CREATE INDEX fki_fk_users_invitations_contacts ON erp.users_invitations USING btree (grantor);
+
+
+--
+-- Name: fki_pricelists_customers_categories_customers_categories; Type: INDEX; Schema: erp; Owner: postgres
+--
+
+CREATE INDEX fki_pricelists_customers_categories_customers_categories ON erp.pricelists_customers_categories USING btree (customers_category_id);
+
+
+--
+-- Name: fki_pricelists_customers_categories_pricelists; Type: INDEX; Schema: erp; Owner: postgres
+--
+
+CREATE INDEX fki_pricelists_customers_categories_pricelists ON erp.pricelists_customers_categories USING btree (pricelist_id);
+
+
+--
+-- Name: fki_sales_schedules_customers_categories_customers_categories; Type: INDEX; Schema: erp; Owner: postgres
+--
+
+CREATE INDEX fki_sales_schedules_customers_categories_customers_categories ON erp.sales_schedules_customers_categories USING btree (customers_category_id);
+
+
+--
+-- Name: fki_sales_schedules_customers_categories_sales_schedules; Type: INDEX; Schema: erp; Owner: postgres
+--
+
+CREATE INDEX fki_sales_schedules_customers_categories_sales_schedules ON erp.sales_schedules_customers_categories USING btree (sales_schedule_id);
+
+
+--
+-- Name: fki_sales_schedules_fulfillment_methods_fulfillment_methods; Type: INDEX; Schema: erp; Owner: postgres
+--
+
+CREATE INDEX fki_sales_schedules_fulfillment_methods_fulfillment_methods ON erp.sales_schedules_fulfillment_methods USING btree (fulfillment_method_id);
+
+
+--
+-- Name: fki_sales_schedules_fulfillment_methods_sales_schedules; Type: INDEX; Schema: erp; Owner: postgres
+--
+
+CREATE INDEX fki_sales_schedules_fulfillment_methods_sales_schedules ON erp.sales_schedules_fulfillment_methods USING btree (sales_schedule_id);
+
+
+--
+-- Name: customers customers_customers_categories; Type: FK CONSTRAINT; Schema: erp; Owner: postgres
+--
+
+ALTER TABLE ONLY erp.customers
+    ADD CONSTRAINT customers_customers_categories FOREIGN KEY (customers_category_id) REFERENCES erp.customers_categories(id) NOT VALID;
 
 
 --
@@ -1945,51 +2067,11 @@ ALTER TABLE ONLY erp.contacts
 
 
 --
--- Name: customers fk_customer_priceList; Type: FK CONSTRAINT; Schema: erp; Owner: postgres
---
-
-ALTER TABLE ONLY erp.customers
-    ADD CONSTRAINT "fk_customer_priceList" FOREIGN KEY ("pricelistId") REFERENCES erp.pricelists(id) NOT VALID;
-
-
---
 -- Name: products fk_product_product; Type: FK CONSTRAINT; Schema: erp; Owner: postgres
 --
 
 ALTER TABLE ONLY erp.products
     ADD CONSTRAINT fk_product_product FOREIGN KEY ("parentProduct") REFERENCES erp.products(id) NOT VALID;
-
-
---
--- Name: sales_schedules_fulfillment_methods fk_sales_schedules_fulfillment_methods_fulfillment_method; Type: FK CONSTRAINT; Schema: erp; Owner: postgres
---
-
-ALTER TABLE ONLY erp.sales_schedules_fulfillment_methods
-    ADD CONSTRAINT fk_sales_schedules_fulfillment_methods_fulfillment_method FOREIGN KEY (fulfillment_method_id) REFERENCES erp.fulfillment_methods(id);
-
-
---
--- Name: sales_schedules_fulfillment_methods fk_sales_schedules_fulfillment_methods_sales_schedule; Type: FK CONSTRAINT; Schema: erp; Owner: postgres
---
-
-ALTER TABLE ONLY erp.sales_schedules_fulfillment_methods
-    ADD CONSTRAINT fk_sales_schedules_fulfillment_methods_sales_schedule FOREIGN KEY (sales_schedule_id) REFERENCES erp.sales_schedules(id);
-
-
---
--- Name: sales_schedules_pricelists fk_sales_schedules_pricelists_pricelists; Type: FK CONSTRAINT; Schema: erp; Owner: postgres
---
-
-ALTER TABLE ONLY erp.sales_schedules_pricelists
-    ADD CONSTRAINT fk_sales_schedules_pricelists_pricelists FOREIGN KEY (pricelist_id) REFERENCES erp.pricelists(id) NOT VALID;
-
-
---
--- Name: sales_schedules_pricelists fk_sales_schedules_pricelists_sales_schedules; Type: FK CONSTRAINT; Schema: erp; Owner: postgres
---
-
-ALTER TABLE ONLY erp.sales_schedules_pricelists
-    ADD CONSTRAINT fk_sales_schedules_pricelists_sales_schedules FOREIGN KEY (sales_schedule_id) REFERENCES erp.sales_schedules(id) NOT VALID;
 
 
 --
@@ -2030,6 +2112,54 @@ ALTER TABLE ONLY erp.users
 
 ALTER TABLE ONLY erp.users_invitations
     ADD CONSTRAINT fk_users_invitations_users FOREIGN KEY (grantor) REFERENCES erp.users(id) NOT VALID;
+
+
+--
+-- Name: pricelists_customers_categories pricelists_customers_categories_customers_categories; Type: FK CONSTRAINT; Schema: erp; Owner: postgres
+--
+
+ALTER TABLE ONLY erp.pricelists_customers_categories
+    ADD CONSTRAINT pricelists_customers_categories_customers_categories FOREIGN KEY (customers_category_id) REFERENCES erp.customers_categories(id) NOT VALID;
+
+
+--
+-- Name: pricelists_customers_categories pricelists_customers_categories_pricelists; Type: FK CONSTRAINT; Schema: erp; Owner: postgres
+--
+
+ALTER TABLE ONLY erp.pricelists_customers_categories
+    ADD CONSTRAINT pricelists_customers_categories_pricelists FOREIGN KEY (pricelist_id) REFERENCES erp.pricelists(id) NOT VALID;
+
+
+--
+-- Name: sales_schedules_customers_categories sales_schedules_customers_categories_customers_categories; Type: FK CONSTRAINT; Schema: erp; Owner: postgres
+--
+
+ALTER TABLE ONLY erp.sales_schedules_customers_categories
+    ADD CONSTRAINT sales_schedules_customers_categories_customers_categories FOREIGN KEY (customers_category_id) REFERENCES erp.customers_categories(id) NOT VALID;
+
+
+--
+-- Name: sales_schedules_customers_categories sales_schedules_customers_categories_sales_schedules; Type: FK CONSTRAINT; Schema: erp; Owner: postgres
+--
+
+ALTER TABLE ONLY erp.sales_schedules_customers_categories
+    ADD CONSTRAINT sales_schedules_customers_categories_sales_schedules FOREIGN KEY (sales_schedule_id) REFERENCES erp.sales_schedules(id) NOT VALID;
+
+
+--
+-- Name: sales_schedules_fulfillment_methods sales_schedules_fulfillment_methods_fulfillment_methods; Type: FK CONSTRAINT; Schema: erp; Owner: postgres
+--
+
+ALTER TABLE ONLY erp.sales_schedules_fulfillment_methods
+    ADD CONSTRAINT sales_schedules_fulfillment_methods_fulfillment_methods FOREIGN KEY (fulfillment_method_id) REFERENCES erp.fulfillment_methods(id) NOT VALID;
+
+
+--
+-- Name: sales_schedules_fulfillment_methods sales_schedules_fulfillment_methods_sales_schedules; Type: FK CONSTRAINT; Schema: erp; Owner: postgres
+--
+
+ALTER TABLE ONLY erp.sales_schedules_fulfillment_methods
+    ADD CONSTRAINT sales_schedules_fulfillment_methods_sales_schedules FOREIGN KEY (sales_schedule_id) REFERENCES erp.sales_schedules(id) NOT VALID;
 
 
 --
@@ -2233,6 +2363,21 @@ GRANT SELECT ON TABLE erp.containers TO identified_customer;
 
 
 --
+-- Name: SEQUENCE customers_categories_id_seq; Type: ACL; Schema: erp; Owner: postgres
+--
+
+GRANT ALL ON SEQUENCE erp.customers_categories_id_seq TO administrator;
+
+
+--
+-- Name: TABLE customers_categories; Type: ACL; Schema: erp; Owner: postgres
+--
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.customers_categories TO administrator;
+GRANT SELECT ON TABLE erp.customers_categories TO identified_customer;
+
+
+--
 -- Name: TABLE pricelists; Type: ACL; Schema: erp; Owner: postgres
 --
 
@@ -2325,6 +2470,14 @@ GRANT ALL ON FUNCTION erp.register_user(updated_firstname character varying, upd
 
 
 --
+-- Name: FUNCTION update_pricelist_customers_categories(new_customers_categories_set integer[], target_pricelist_id integer); Type: ACL; Schema: erp; Owner: postgres
+--
+
+REVOKE ALL ON FUNCTION erp.update_pricelist_customers_categories(new_customers_categories_set integer[], target_pricelist_id integer) FROM PUBLIC;
+GRANT ALL ON FUNCTION erp.update_pricelist_customers_categories(new_customers_categories_set integer[], target_pricelist_id integer) TO administrator;
+
+
+--
 -- Name: FUNCTION users_invitation_contact_by_code(invitation_code character varying); Type: ACL; Schema: erp; Owner: postgres
 --
 
@@ -2371,14 +2524,6 @@ GRANT USAGE ON SEQUENCE erp.containers_id_seq TO administrator;
 
 
 --
--- Name: TABLE customers_categories; Type: ACL; Schema: erp; Owner: postgres
---
-
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.customers_categories TO administrator;
-GRANT SELECT ON TABLE erp.customers_categories TO identified_customer;
-
-
---
 -- Name: SEQUENCE customers_id_seq; Type: ACL; Schema: erp; Owner: postgres
 --
 
@@ -2397,6 +2542,21 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.fulfillment_methods TO administra
 --
 
 GRANT USAGE ON SEQUENCE erp.fulfillment_method_id_seq TO administrator;
+
+
+--
+-- Name: SEQUENCE pricelists_customers_categories_id_seq; Type: ACL; Schema: erp; Owner: postgres
+--
+
+GRANT ALL ON SEQUENCE erp.pricelists_customers_categories_id_seq TO administrator;
+
+
+--
+-- Name: TABLE pricelists_customers_categories; Type: ACL; Schema: erp; Owner: postgres
+--
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.pricelists_customers_categories TO administrator;
+GRANT SELECT ON TABLE erp.pricelists_customers_categories TO identified_customer;
 
 
 --
@@ -2421,10 +2581,33 @@ GRANT USAGE ON SEQUENCE erp.products_id_seq TO administrator;
 
 
 --
+-- Name: SEQUENCE sales_schedules_customers_categories_id_seq; Type: ACL; Schema: erp; Owner: postgres
+--
+
+GRANT ALL ON SEQUENCE erp.sales_schedules_customers_categories_id_seq TO administrator;
+
+
+--
+-- Name: TABLE sales_schedules_customers_categories; Type: ACL; Schema: erp; Owner: postgres
+--
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.sales_schedules_customers_categories TO administrator;
+GRANT SELECT ON TABLE erp.sales_schedules_customers_categories TO identified_customer;
+
+
+--
+-- Name: SEQUENCE sales_schedules_fulfillment_methods_id_seq; Type: ACL; Schema: erp; Owner: postgres
+--
+
+GRANT ALL ON SEQUENCE erp.sales_schedules_fulfillment_methods_id_seq TO administrator;
+
+
+--
 -- Name: TABLE sales_schedules_fulfillment_methods; Type: ACL; Schema: erp; Owner: postgres
 --
 
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.sales_schedules_fulfillment_methods TO administrator;
+GRANT SELECT ON TABLE erp.sales_schedules_fulfillment_methods TO identified_customer;
 
 
 --
@@ -2432,14 +2615,6 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.sales_schedules_fulfillment_metho
 --
 
 GRANT USAGE ON SEQUENCE erp.sales_schedules_id_seq TO administrator;
-
-
---
--- Name: TABLE sales_schedules_pricelists; Type: ACL; Schema: erp; Owner: postgres
---
-
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.sales_schedules_pricelists TO administrator;
-GRANT SELECT ON TABLE erp.sales_schedules_pricelists TO identified_customer;
 
 
 --

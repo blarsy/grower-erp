@@ -9,9 +9,9 @@ import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client"
 import Loader from "lib/components/Loader"
 import { useEffect, useState } from "react"
 
-const CREATE = gql`mutation newSalesSchedule($beginSalesDate: Datetime, $deliveryPrice: Float, $disabled: Boolean, $freeDeliveryTurnover: Float, $fulfillmentDate: Datetime, $fulfillmentMethods: [Int], $name: String, $orderClosureDate: Datetime, $pricelists: [Int]) {
+const CREATE = gql`mutation newSalesSchedule($beginSalesDate: Datetime, $deliveryPrice: Float, $disabled: Boolean, $freeDeliveryTurnover: Float, $fulfillmentDate: Datetime, $fulfillmentMethods: [Int], $name: String, $orderClosureDate: Datetime, $customersCategories: [Int]) {
     createSalesScheduleWithDeps(
-      input: {beginSalesDate: $beginSalesDate, deliveryPrice: $deliveryPrice, disabled: $disabled, freeDeliveryTurnover: $freeDeliveryTurnover, fulfillmentDate: $fulfillmentDate, fulfillmentMethods: $fulfillmentMethods, name: $name, orderClosureDate: $orderClosureDate, pricelists: $pricelists}
+      input: {beginSalesDate: $beginSalesDate, deliveryPrice: $deliveryPrice, disabled: $disabled, freeDeliveryTurnover: $freeDeliveryTurnover, fulfillmentDate: $fulfillmentDate, fulfillmentMethods: $fulfillmentMethods, name: $name, orderClosureDate: $orderClosureDate, customersCategories: $customersCategories}
     ) {
       salesSchedule {
         beginSalesDate
@@ -27,9 +27,9 @@ const CREATE = gql`mutation newSalesSchedule($beginSalesDate: Datetime, $deliver
     }
   }`
 
-const UPDATE = gql`mutation updateSalesSchedule($id: Int, $beginSalesDate: Datetime, $deliveryPrice: Float, $disabled: Boolean, $freeDeliveryTurnover: Float, $fulfillmentDate: Datetime, $fulfillmentMethods: [Int], $name: String, $orderClosureDate: Datetime, $pricelists: [Int]) {
+const UPDATE = gql`mutation updateSalesSchedule($id: Int, $beginSalesDate: Datetime, $deliveryPrice: Float, $disabled: Boolean, $freeDeliveryTurnover: Float, $fulfillmentDate: Datetime, $fulfillmentMethods: [Int], $name: String, $orderClosureDate: Datetime, $customersCategories: [Int]) {
     updateSalesScheduleWithDeps(
-      input: {ssid: $id, pbeginSalesDate: $beginSalesDate, pdeliveryPrice: $deliveryPrice, pdisabled: $disabled, pfreeDeliveryTurnover: $freeDeliveryTurnover, pfulfillmentDate: $fulfillmentDate, pfulfillmentMethods: $fulfillmentMethods, pname: $name, porderClosureDate: $orderClosureDate, ppricelists: $pricelists}
+      input: {ssid: $id, pbeginSalesDate: $beginSalesDate, pdeliveryPrice: $deliveryPrice, pdisabled: $disabled, pfreeDeliveryTurnover: $freeDeliveryTurnover, pfulfillmentDate: $fulfillmentDate, pfulfillmentMethods: $fulfillmentMethods, pname: $name, porderClosureDate: $orderClosureDate, customersCategories: $customersCategories}
     ) {
       salesSchedule {
         beginSalesDate
@@ -54,9 +54,9 @@ const GET = gql`query salesSchedule($id: Int!) {
     fulfillmentDate
     name
     orderClosureDate
-    salesSchedulesPricelistsBySalesScheduleId {
+    salesSchedulesCustomersCategoriesBySalesScheduleId {
       nodes {
-        pricelistByPricelistId {
+        customersCategoryByCustomersCategoryId {
           name
           id
         }
@@ -109,11 +109,11 @@ const SalesScheduleAdminView = () => {
                     fulfillmentDate: todayMidday.add(7, 'days').toDate(), beginSalesDate: null, 
                     orderClosureDate: todayMidday.add(5, 'days').toDate(), disabled: false, deliveryPrice: 0,
                     freeDeliveryTurnover: 0, 
-                    fulfillmentMethods: [], pricelists: []
+                    fulfillmentMethods: [], customersCategories: []
                 }} submit={values => {
                     return create({ variables: { ...values, ...{ 
                         fulfillmentMethods: values.fulfillmentMethods.map(fm => fm.id),
-                        pricelists: values.pricelists.map(pl => pl.id)
+                        customersCategories: values.customersCategories.map(cc => cc.id)
                     } }})
                 }}/>
             </Stack>
@@ -126,11 +126,11 @@ const SalesScheduleAdminView = () => {
                     <Loader loading={loading} error={salesScheduleDataInfo.error}>
                         { salesScheduleDataInfo.data && <SalesScheduleForm initial={{ ...salesScheduleDataInfo.data.salesScheduleById, ...{
                             fulfillmentMethods: salesScheduleDataInfo.data.salesScheduleById.salesSchedulesFulfillmentMethodsBySalesScheduleId.nodes.map((node: any) => node.fulfillmentMethodByFulfillmentMethodId), 
-                            pricelists: salesScheduleDataInfo.data.salesScheduleById.salesSchedulesPricelistsBySalesScheduleId.nodes.map((node: any) => node.pricelistByPricelistId)
+                            customersCategories: salesScheduleDataInfo.data.salesScheduleById.salesSchedulesCustomersCategoriesBySalesScheduleId.nodes.map((node: any) => node.customersCategoryByCustomersCategoryId)
                         } }} submit={values => {
                             return update({ variables: { ...values, ...{ 
                                 fulfillmentMethods: values.fulfillmentMethods.map(fm => fm.id),
-                                pricelists: values.pricelists.map(pl => pl.id)
+                                customersCategories: values.customersCategories.map(cc => cc.id)
                             } }})
                         }}/>}
                     </Loader>

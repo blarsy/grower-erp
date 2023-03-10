@@ -10,7 +10,6 @@ interface Props {
 const GET = gql`query ArticlespricesByPricelistId($id: Int!) {
     pricelistById(id: $id) {
         name
-        vatIncluded
         articlesPricesByPriceListId {
             nodes {
                 id
@@ -50,11 +49,10 @@ const PriceByPriceListAdminView = ({ pricelistId }:Props) => {
     const {loading, data, error} = useQuery(gql`query pricelistById($id: Int) {
         pricelistById(id: $id) {
           name
-          vatIncluded
         }
       }`, { variables: { id: pricelistId } })
     return <Loader loading={loading} error={error}>
-    <DatagridAdminView title="Tarifs" dataName="Pricelist" getQuery={GET} createQuery={CREATE}
+    <DatagridAdminView title={`Listes de prix "${data.name}"`} dataName="Pricelist" getQuery={GET} createQuery={CREATE}
         updateQuery={UPDATE} filter={{ id: pricelistId }}
         columns={[
             { key: 'id', headerText: 'ID', widthPercent: 5, type: "number"},
@@ -72,7 +70,7 @@ const PriceByPriceListAdminView = ({ pricelistId }:Props) => {
                         }
                     }
                 }`, getLabel: item => `${item.productName} / ${item.stockshapeName} (${item.containerName}, ${item.quantityPerContainer} ${item.unitAbbreviation})`}},
-            { key: 'price', headerText: `Prix ${data.pricelistById.vatIncluded ? 'TVAC': 'HTVA'}`, type: "number", editable: {
+            { key: 'price', headerText: `Prix HTVA`, type: "number", editable: {
                     validation: yup.number().positive().required('Ce champ est requis')
                 }}
         ]} />

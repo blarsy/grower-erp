@@ -69,7 +69,7 @@ const createDataChangesHelper = (columns: Column[], dataName: string, fixedVaria
     }
 }
 
-const DatagridAdminView = ({title, dataName, columns, getQuery, filter, updateQuery, createQuery, getFromQueried=(data) => data && data[`all${dataName}s`].nodes, lineOps, fixedMutationVariables, customOps}: Props) => {
+const DatagridAdminView = ({title, dataName, columns, getQuery, filter, updateQuery, createQuery, getFromQueried=data => data && data[`all${dataName}s`].nodes, lineOps, fixedMutationVariables, customOps}: Props) => {
     const { loading, error, data } = useQuery(getQuery, { variables: filter })
     const dataChanges = createDataChangesHelper(columns, dataName, fixedMutationVariables, updateQuery, createQuery)
 

@@ -10,34 +10,32 @@ const GET = gql`query PriceListsAdminViewAllPriceListsQuery {
     nodes {
       id
       name
-      vatIncluded
     }
   }
 }`
 
 const UPDATE = gql`
-  mutation UpdatePriceList($name: String, $vatIncluded: Boolean, $id: Int!) {
+  mutation UpdatePriceList($name: String, $id: Int!) {
     updatePricelistById(
-      input: {pricelistPatch: {name: $name, vatIncluded: $vatIncluded}, id: $id}
+      input: {pricelistPatch: { name: $name }, id: $id}
     ) {
         pricelist {
-        id
-        name
-        vatIncluded
+          id
+          name
         } 
     }
 }`
 
 const CREATE = gql`
-  mutation CreatePriceList($name: String!, $vatIncluded: Boolean!) {
-    createPricelist(input: {pricelist: {name: $name, vatIncluded: $vatIncluded}}) {
-      pricelist { id, name, vatIncluded }
+  mutation CreatePriceList($name: String!) {
+    createPricelist(input: {pricelist: { name: $name }}) {
+      pricelist { id, name }
     }
   }`
 
 const PriceListDataGrid = () => {
     const router = useRouter()
-    return <DatagridAdminView title="Tarifs" dataName="Pricelist" getQuery={GET} createQuery={CREATE}
+    return <DatagridAdminView title="Listes de prix" dataName="Pricelist" getQuery={GET} createQuery={CREATE}
         updateQuery={UPDATE} 
         lineOps={[{
             name: 'Editer prix des articles',
@@ -48,11 +46,7 @@ const PriceListDataGrid = () => {
             { key: 'id', headerText: 'ID', widthPercent: 5, type: "number"},
             { key: 'name', headerText: 'Nom', type: "string",  editable: {
                 validation: yup.string().required('Ce champ est requis') 
-            }},
-            { key: 'vatIncluded', headerText: 'Tvac ?', type: "boolean", widthPercent: 10, editable: {
-                    validation: yup.boolean()
-                }
-            }
+            }}
         ]} />
 }
    

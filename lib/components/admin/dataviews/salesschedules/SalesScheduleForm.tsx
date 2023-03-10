@@ -17,7 +17,7 @@ interface Values {
     deliveryPrice: number | null
     freeDeliveryTurnover: number | null
     fulfillmentMethods: {id: number, name: string, needsCustomerAddress: boolean }[]
-    pricelists: {id: number, name: string}[]
+    customersCategories: {id: number, name: string}[]
 }
 
 const depsQuery = gql`query SalesSchedules {
@@ -29,10 +29,10 @@ const depsQuery = gql`query SalesSchedules {
         needsPickupAddress
       }
     }
-    allPricelists {
+    allCustomersCategories {
         nodes {
-        id
-        name
+            id
+            name
         }
     }
   }`
@@ -67,9 +67,9 @@ const SalesScheduleForm = ({ initial, submit }: Props) => {
         fulfillmentMethods: yup.array().of(yup.object({
             id: yup.number()
         })).min(1, 'Veuillez sélectionner au moins une méthode d\'acheminement.'),
-        pricelists: yup.array().of(yup.object({
+        customersCategories: yup.array().of(yup.object({
             id: yup.number()
-        })).min(1, 'Veuillez sélectionner au moins un tarif auquel la vente s\'applique')
+        })).min(1, 'Veuillez sélectionner au moins une catégorie de clients à laquelle la vente s\'applique')
     })} onSubmit={async (values) => {
             await submit(values)
             router.push('/admin/salesschedule')
@@ -135,24 +135,24 @@ const SalesScheduleForm = ({ initial, submit }: Props) => {
                 </Loader>
                 { touched.fulfillmentMethods && errors.fulfillmentMethods && <Typography color="error">{errors.fulfillmentMethods as string}</Typography> }
             </FormControl>,
-            <FormControl key="pricelists" size="small">
-                <InputLabel id="labelPricelists">Tarifs</InputLabel>
+            <FormControl key="customersCategories" size="small">
+                <InputLabel id="labelCustomersCategories">Catégories de clients</InputLabel>
                 <Loader loading={loading} error={error}>
-                    <FieldArray name="pricelists" render={ArrayHelpers => {
-                        return <Select labelId="labelPricelists" 
-                            label="Tarifs" 
-                            multiple value={values.pricelists}
+                    <FieldArray name="customersCategories" render={ArrayHelpers => {
+                        return <Select labelId="labelCustomersCategories" 
+                            label="Catégories clients" 
+                            multiple value={values.customersCategories}
                             renderValue={value => value.map(val => val.name).join(', ')}>
                         {
-                            data.allPricelists.nodes.map((pl: any, idx: number) => (<MenuItem key={pl.id} value={pl.id} onClick={() => values.pricelists.some(selected => selected.id === pl.id) ? ArrayHelpers.remove(values.pricelists.findIndex(selected => selected.id === pl.id)) : ArrayHelpers.push(pl)}>
-                                <Checkbox checked={values.pricelists.some(selected => selected.id === pl.id)} />
-                                <ListItemText primary={pl.name} />
+                            data.allCustomersCategories.nodes.map((cust: any, idx: number) => (<MenuItem key={cust.id} value={cust.id} onClick={() => values.customersCategories.some(selected => selected.id === cust.id) ? ArrayHelpers.remove(values.customersCategories.findIndex(selected => selected.id === cust.id)) : ArrayHelpers.push(cust)}>
+                                <Checkbox checked={values.customersCategories.some(selected => selected.id === cust.id)} />
+                                <ListItemText primary={cust.name} />
                             </MenuItem>))
                         }
                         </Select>
                     }} />
                 </Loader>
-                { touched.pricelists && errors.pricelists && <Typography color="error">{errors.pricelists as string}</Typography> }
+                { touched.customersCategories && errors.customersCategories && <Typography color="error">{errors.customersCategories as string}</Typography> }
             </FormControl>
         ]
         if(values.fulfillmentMethods.some(fm => fm.needsCustomerAddress)) {

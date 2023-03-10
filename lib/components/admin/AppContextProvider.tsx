@@ -103,28 +103,31 @@ const AppContextProvider = ({ children }: Props) => {
 
     const loginComplete = async (token: string) => {
       localStorage.setItem(TOKEN_KEY, token)
-      try {
-        const result = await loadSessionInfo()
-        let newAppState: any = {}
-        if(result.data && result.data.allSettings.nodes && result.data.allSettings.nodes.length > 0 && result.data.allSettings.nodes[0].companyByOwnerId) {
-          const companyData = result.data.allSettings.nodes[0].companyByOwnerId
-          newAppState.company = { name: companyData.name, id: companyData.id }
-        }
-        const sessionData = result.data.getSessionData
-        newAppState.user = { id: sessionData.userId, contactId: sessionData.contactId, 
-          firstname: sessionData.firstname, 
-          lastname: sessionData.lastname, 
-          email: sessionData.email,
-          role: sessionData.role 
-        }
-        newAppState.auth = { error: undefined, token}
-
-        setAppState({...appState, ...newAppState})
-      } catch(error: any) {
-        setAppState({...appState, ...{
-          auth: { error, token: ''}
+      return new Promise<void>(resolve => {
+        loadSessionInfo({ notifyOnNetworkStatusChange: true, onCompleted: data => {
+          let newAppState: any = {}
+          if(data && data.allSettings.nodes && data.allSettings.nodes.length > 0 && data.allSettings.nodes[0].companyByOwnerId) {
+            const companyData = data.allSettings.nodes[0].companyByOwnerId
+            newAppState.company = { name: companyData.name, id: companyData.id }
+          }
+          const sessionData = data.getSessionData
+          newAppState.user = { id: sessionData.userId, contactId: sessionData.contactId, 
+            firstname: sessionData.firstname, 
+            lastname: sessionData.lastname, 
+            email: sessionData.email,
+            role: sessionData.role 
+          }
+          newAppState.auth = { error: undefined, token}
+  
+          setAppState({...appState, ...newAppState})
+          resolve()
+        }, onError: error => {
+          setAppState({...appState, ...{
+            auth: { error, token: ''}
+          }})
+          resolve()
         }})
-      }
+      })
     }
     const logout = () => {
       localStorage.removeItem(TOKEN_KEY)
