@@ -1,6 +1,7 @@
 import { gql, useLazyQuery } from "@apollo/client"
-import { SHOP_TOKEN_KEY } from "lib/constants"
-import { createContext, useState } from "react"
+import { CART_TOKEN, SHOP_TOKEN_KEY } from "lib/constants"
+import { createContext, useEffect, useState } from "react"
+import ConfirmDialog from "../ConfirmDialog"
 
 export interface IdentifiedCustomerData {
     id: number,
@@ -12,6 +13,24 @@ export interface IdentifiedCustomerData {
     companyName: string
 }
 
+export interface CartItem {
+  articleId: number
+  should_include_vat: boolean
+  price: number
+  quantityPerContainer: number
+  quantityOrdered: number
+  fulfillmentDate: Date
+  orderClosureDate: Date
+  stockName: string
+	unitAbbreviation: string
+	productName: string
+	containerName: string
+}
+
+export interface Cart {
+  articles: CartItem[]
+}
+
 interface AppStateData {
   ownerCompany: {
     id: number,
@@ -21,13 +40,17 @@ interface AppStateData {
   auth: {
     token: string,
     error?: Error
-  }
+  },
+  cart: Cart
 }
 
 export interface AppContext {
   data: AppStateData
   loginComplete: (token: string) => Promise<void>
   loginFailed: (e: Error) => void
+  setCartArticles: (items: CartItem[]) => void
+  clearCart: () => void
+  confirm: (question: string, title: string) => Promise<boolean>
 }
 
 interface Props {
@@ -76,16 +99,29 @@ const blankAppContext = { data: {
     auth: {
       token: '',
       error: undefined
+    },
+    cart: {
+      articles: []
     }
   },
   loginComplete: () => { return Promise.resolve()},
-  loginFailed: () => {}
+  loginFailed: () => {},
+  setCartArticles: (items: CartItem[]) => {},
+  clearCart: () => {},
+  confirm: async (question: string, title: string) => false
 } as AppContext
 export const AppContext = createContext<AppContext>(blankAppContext)
 
 const AppContextProvider = ({ children }: Props) => {
     const [appState, setAppState] = useState(blankAppContext.data)
     const [loadSessionInfo] = useLazyQuery(GET_SESSION)
+    const [confirmDialogData, setConfirmDialogData] = useState({ question: '', title: '', callback: (response: boolean) => {} })
+
+    useEffect(() => {
+      if(localStorage.getItem(CART_TOKEN)) {
+        setAppState({ ...appState, ...{ cart: JSON.parse(localStorage.getItem(CART_TOKEN)!)} })
+      }
+    }, [])
 
     const loginComplete = async (token: string): Promise<void> => {
         localStorage.setItem(SHOP_TOKEN_KEY, token)
@@ -117,8 +153,44 @@ const AppContextProvider = ({ children }: Props) => {
         setAppState({ ...appState, ...{ auth: { token: '', error: e } } })
     }
 
-    return <AppContext.Provider value={{ data: appState, loginComplete, loginFailed}}>
+    const clearCart = () => {
+        localStorage.removeItem(CART_TOKEN)
+        setAppState({ ...appState, ...{ cart: { articles: [] } } })
+    }
+
+    const setCartArticles = (items: CartItem[]) => {
+      let currentCartArticles = appState.cart.articles
+      items.forEach(item => {
+        const itemInCart = currentCartArticles.find(art => art.articleId === item.articleId)
+        if(itemInCart) {
+          if(item.quantityOrdered === 0) {
+            currentCartArticles = currentCartArticles.filter(art => art.articleId !== item.articleId)
+          } else {
+            itemInCart.quantityOrdered = item.quantityOrdered
+          }
+        } else {
+          if(item.quantityOrdered !== 0){
+            currentCartArticles.push(item)
+          }
+        }
+      })
+
+      const newCart = { ...appState.cart, ...{ articles: currentCartArticles } }
+      localStorage.setItem(CART_TOKEN, JSON.stringify(newCart))
+      setAppState({ ...appState, ...{ cart: newCart} })
+    }
+
+    const confirm = async (question: string, title: string, ) => {
+      return new Promise<boolean>((resolve) => setConfirmDialogData({ question, title, callback: resolve }))
+    }
+
+    return <AppContext.Provider value={{ data: appState, loginComplete, loginFailed, setCartArticles, clearCart, confirm}}>
         {children}
+        <ConfirmDialog opened={!!confirmDialogData.question} question={confirmDialogData.question}
+            title={confirmDialogData.title} onClose={async response => {
+              confirmDialogData.callback(response)
+              setConfirmDialogData({ question: '', title: '', callback: () => {}})
+            }} />
     </AppContext.Provider>
 }
 

@@ -9,12 +9,16 @@ import AppContextProvider from "lib/components/shop/AppContextProvider"
 const Order = () => {
     const router = useRouter()
     const { slug } = router.query
+    let slugFromUrl = ''
+    if(slug && slug.length > 0){
+        slugFromUrl = slug[0]
+    }
 
     return <ApolloProvider client={getAuthenticatedApolloClient(SHOP_TOKEN_KEY)}>
         <AppContextProvider>
-            <Connected slug={slug as string}>
-                <CustomerOrder slug={slug as string} />
-            </Connected>
+            {slugFromUrl ? <Connected slug={slugFromUrl}>
+                <CustomerOrder/>
+            </Connected> : <span />}
         </AppContextProvider>
     </ApolloProvider>
 }

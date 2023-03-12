@@ -62,7 +62,7 @@ const StockShapeAdminView = () => {
             }`
       }},
       { key: 'inStock', headerText: 'En stock', type: "number",  editable: {
-        validation: yup.number().positive().required('Ce champ est requis') 
+        validation: yup.number().min(0, 'Veuillez entrer un chiffre positif ou nul').required('Ce champ est requis') 
       }}
     ]}/>
 }

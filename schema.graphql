@@ -249,6 +249,64 @@ type Query implements Node {
     condition: FulfillmentMethodCondition
   ): FulfillmentMethodsConnection
 
+  """Reads and enables pagination through a set of `OrderLine`."""
+  allOrderLines(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `OrderLine`."""
+    orderBy: [OrderLinesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: OrderLineCondition
+  ): OrderLinesConnection
+
+  """Reads and enables pagination through a set of `Order`."""
+  allOrders(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Order`."""
+    orderBy: [OrdersOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: OrderCondition
+  ): OrdersConnection
+
   """Reads and enables pagination through a set of `Pricelist`."""
   allPricelists(
     """Only read the first `n` values of the set."""
@@ -574,6 +632,7 @@ type Query implements Node {
     condition: UsersInvitationCondition
   ): UsersInvitationsConnection
   articleById(id: Int!): Article
+  articleByStockShapeIdAndContainerId(stockShapeId: Int!, containerId: Int!): Article
   articlesPriceById(id: Int!): ArticlesPrice
   articlesPriceByArticleIdAndPriceListId(articleId: Int!, priceListId: Int!): ArticlesPrice
   companyById(id: Int!): Company
@@ -584,6 +643,8 @@ type Query implements Node {
   customerById(id: Int!): Customer
   customersCategoryById(id: Int!): CustomersCategory
   fulfillmentMethodById(id: Int!): FulfillmentMethod
+  orderLineById(id: Int!): OrderLine
+  orderById(id: Int!): Order
   pricelistById(id: Int!): Pricelist
   pricelistsCustomersCategoryById(id: Int!): PricelistsCustomersCategory
   productById(id: Int!): Product
@@ -848,6 +909,29 @@ type Query implements Node {
     """Read all values in the set after (below) this cursor."""
     after: Cursor
   ): UnitsConnection
+
+  """Reads and enables pagination through a set of `ArticleSalesInfo`."""
+  getArticlesSalesInfo(
+    articleIds: [Int]
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+  ): ArticleSalesInfosConnection
   getCurrentUser: Contact
   getCustomerSessionData: CustomerSessionDatum
   getSessionData: SessionDatum
@@ -907,6 +991,18 @@ type Query implements Node {
     """
     nodeId: ID!
   ): FulfillmentMethod
+
+  """Reads a single `OrderLine` using its globally unique `ID`."""
+  orderLine(
+    """The globally unique `ID` to be used in selecting a single `OrderLine`."""
+    nodeId: ID!
+  ): OrderLine
+
+  """Reads a single `Order` using its globally unique `ID`."""
+  order(
+    """The globally unique `ID` to be used in selecting a single `Order`."""
+    nodeId: ID!
+  ): Order
 
   """Reads a single `Pricelist` using its globally unique `ID`."""
   pricelist(
@@ -2900,6 +2996,169 @@ input FulfillmentMethodCondition {
   needsCustomerAddress: Boolean
 }
 
+"""A connection to a list of `OrderLine` values."""
+type OrderLinesConnection {
+  """A list of `OrderLine` objects."""
+  nodes: [OrderLine!]!
+
+  """
+  A list of edges which contains the `OrderLine` and cursor to aid in pagination.
+  """
+  edges: [OrderLinesEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `OrderLine` you could get from the connection."""
+  totalCount: Int!
+}
+
+type OrderLine implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  orderId: Int!
+  articleId: Int!
+  unitPrice: Float!
+  quantity: BigFloat!
+  taxRate: BigFloat!
+  fulfillmentDate: Datetime!
+  quantityFulfilled: BigFloat
+  quantityToInvoice: BigFloat
+}
+
+"""A `OrderLine` edge in the connection."""
+type OrderLinesEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `OrderLine` at the end of the edge."""
+  node: OrderLine!
+}
+
+"""Methods to use when ordering `OrderLine`."""
+enum OrderLinesOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  ORDER_ID_ASC
+  ORDER_ID_DESC
+  ARTICLE_ID_ASC
+  ARTICLE_ID_DESC
+  UNIT_PRICE_ASC
+  UNIT_PRICE_DESC
+  QUANTITY_ASC
+  QUANTITY_DESC
+  TAX_RATE_ASC
+  TAX_RATE_DESC
+  FULFILLMENT_DATE_ASC
+  FULFILLMENT_DATE_DESC
+  QUANTITY_FULFILLED_ASC
+  QUANTITY_FULFILLED_DESC
+  QUANTITY_TO_INVOICE_ASC
+  QUANTITY_TO_INVOICE_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `OrderLine` object types. All fields are tested
+for equality and combined with a logical ‘and.’
+"""
+input OrderLineCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `orderId` field."""
+  orderId: Int
+
+  """Checks for equality with the object’s `articleId` field."""
+  articleId: Int
+
+  """Checks for equality with the object’s `unitPrice` field."""
+  unitPrice: Float
+
+  """Checks for equality with the object’s `quantity` field."""
+  quantity: BigFloat
+
+  """Checks for equality with the object’s `taxRate` field."""
+  taxRate: BigFloat
+
+  """Checks for equality with the object’s `fulfillmentDate` field."""
+  fulfillmentDate: Datetime
+
+  """Checks for equality with the object’s `quantityFulfilled` field."""
+  quantityFulfilled: BigFloat
+
+  """Checks for equality with the object’s `quantityToInvoice` field."""
+  quantityToInvoice: BigFloat
+}
+
+"""A connection to a list of `Order` values."""
+type OrdersConnection {
+  """A list of `Order` objects."""
+  nodes: [Order!]!
+
+  """
+  A list of edges which contains the `Order` and cursor to aid in pagination.
+  """
+  edges: [OrdersEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Order` you could get from the connection."""
+  totalCount: Int!
+}
+
+type Order implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  confirmationDate: Datetime
+  customerId: Int!
+}
+
+"""A `Order` edge in the connection."""
+type OrdersEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Order` at the end of the edge."""
+  node: Order!
+}
+
+"""Methods to use when ordering `Order`."""
+enum OrdersOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  CONFIRMATION_DATE_ASC
+  CONFIRMATION_DATE_DESC
+  CUSTOMER_ID_ASC
+  CUSTOMER_ID_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `Order` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input OrderCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `confirmationDate` field."""
+  confirmationDate: Datetime
+
+  """Checks for equality with the object’s `customerId` field."""
+  customerId: Int
+}
+
 """A connection to a list of `Pricelist` values."""
 type PricelistsConnection {
   """A list of `Pricelist` objects."""
@@ -3103,7 +3362,7 @@ type ArticleForSale {
   price: Float
   quantityPerContainer: BigFloat
   stockName: String
-  unitName: String
+  unitAbbreviation: String
   productName: String
   containerName: String
   available: Int
@@ -3189,6 +3448,48 @@ type StockShapeDisplaysEdge {
 
   """The `StockShapeDisplay` at the end of the edge."""
   node: StockShapeDisplay!
+}
+
+"""A connection to a list of `ArticleSalesInfo` values."""
+type ArticleSalesInfosConnection {
+  """A list of `ArticleSalesInfo` objects."""
+  nodes: [ArticleSalesInfo!]!
+
+  """
+  A list of edges which contains the `ArticleSalesInfo` and cursor to aid in pagination.
+  """
+  edges: [ArticleSalesInfosEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `ArticleSalesInfo` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+type ArticleSalesInfo {
+  articleId: Int
+  availableQuantity: BigFloat
+  productName: String
+  stockName: String
+  containerName: String
+  unitAbbreviation: String
+  articleLatestPrice: Float
+  orderClosureDate: Datetime
+  fulfillmentDate: Datetime
+  disabledSalesSchedule: Boolean
+  quantityPerContainer: BigFloat
+}
+
+"""A `ArticleSalesInfo` edge in the connection."""
+type ArticleSalesInfosEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `ArticleSalesInfo` at the end of the edge."""
+  node: ArticleSalesInfo!
 }
 
 type CustomerSessionDatum {
@@ -3301,6 +3602,22 @@ type Mutation {
     input: CreateFulfillmentMethodInput!
   ): CreateFulfillmentMethodPayload
 
+  """Creates a single `OrderLine`."""
+  createOrderLine(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateOrderLineInput!
+  ): CreateOrderLinePayload
+
+  """Creates a single `Order`."""
+  createOrder(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateOrderInput!
+  ): CreateOrderPayload
+
   """Creates a single `Pricelist`."""
   createPricelist(
     """
@@ -3387,6 +3704,14 @@ type Mutation {
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
     input: UpdateArticleByIdInput!
+  ): UpdateArticlePayload
+
+  """Updates a single `Article` using a unique key and a patch."""
+  updateArticleByStockShapeIdAndContainerId(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateArticleByStockShapeIdAndContainerIdInput!
   ): UpdateArticlePayload
 
   """
@@ -3530,6 +3855,38 @@ type Mutation {
     """
     input: UpdateFulfillmentMethodByIdInput!
   ): UpdateFulfillmentMethodPayload
+
+  """Updates a single `OrderLine` using its globally unique id and a patch."""
+  updateOrderLine(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateOrderLineInput!
+  ): UpdateOrderLinePayload
+
+  """Updates a single `OrderLine` using a unique key and a patch."""
+  updateOrderLineById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateOrderLineByIdInput!
+  ): UpdateOrderLinePayload
+
+  """Updates a single `Order` using its globally unique id and a patch."""
+  updateOrder(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateOrderInput!
+  ): UpdateOrderPayload
+
+  """Updates a single `Order` using a unique key and a patch."""
+  updateOrderById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateOrderByIdInput!
+  ): UpdateOrderPayload
 
   """Updates a single `Pricelist` using its globally unique id and a patch."""
   updatePricelist(
@@ -3693,6 +4050,14 @@ type Mutation {
     input: DeleteArticleByIdInput!
   ): DeleteArticlePayload
 
+  """Deletes a single `Article` using a unique key."""
+  deleteArticleByStockShapeIdAndContainerId(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteArticleByStockShapeIdAndContainerIdInput!
+  ): DeleteArticlePayload
+
   """Deletes a single `ArticlesPrice` using its globally unique id."""
   deleteArticlesPrice(
     """
@@ -3828,6 +4193,38 @@ type Mutation {
     """
     input: DeleteFulfillmentMethodByIdInput!
   ): DeleteFulfillmentMethodPayload
+
+  """Deletes a single `OrderLine` using its globally unique id."""
+  deleteOrderLine(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteOrderLineInput!
+  ): DeleteOrderLinePayload
+
+  """Deletes a single `OrderLine` using a unique key."""
+  deleteOrderLineById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteOrderLineByIdInput!
+  ): DeleteOrderLinePayload
+
+  """Deletes a single `Order` using its globally unique id."""
+  deleteOrder(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteOrderInput!
+  ): DeleteOrderPayload
+
+  """Deletes a single `Order` using a unique key."""
+  deleteOrderById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteOrderByIdInput!
+  ): DeleteOrderPayload
 
   """Deletes a single `Pricelist` using its globally unique id."""
   deletePricelist(
@@ -4447,6 +4844,96 @@ input FulfillmentMethodInput {
   needsCustomerAddress: Boolean!
 }
 
+"""The output of our create `OrderLine` mutation."""
+type CreateOrderLinePayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `OrderLine` that was created by this mutation."""
+  orderLine: OrderLine
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `OrderLine`. May be used by Relay 1."""
+  orderLineEdge(
+    """The method to use when ordering `OrderLine`."""
+    orderBy: [OrderLinesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): OrderLinesEdge
+}
+
+"""All input for the create `OrderLine` mutation."""
+input CreateOrderLineInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `OrderLine` to be created by this mutation."""
+  orderLine: OrderLineInput!
+}
+
+"""An input for mutations affecting `OrderLine`"""
+input OrderLineInput {
+  id: Int
+  orderId: Int!
+  articleId: Int!
+  unitPrice: Float!
+  quantity: BigFloat!
+  taxRate: BigFloat!
+  fulfillmentDate: Datetime!
+  quantityFulfilled: BigFloat
+  quantityToInvoice: BigFloat
+}
+
+"""The output of our create `Order` mutation."""
+type CreateOrderPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Order` that was created by this mutation."""
+  order: Order
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `Order`. May be used by Relay 1."""
+  orderEdge(
+    """The method to use when ordering `Order`."""
+    orderBy: [OrdersOrderBy!] = [PRIMARY_KEY_ASC]
+  ): OrdersEdge
+}
+
+"""All input for the create `Order` mutation."""
+input CreateOrderInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `Order` to be created by this mutation."""
+  order: OrderInput!
+}
+
+"""An input for mutations affecting `Order`"""
+input OrderInput {
+  id: Int
+  confirmationDate: Datetime
+  customerId: Int!
+}
+
 """The output of our create `Pricelist` mutation."""
 type CreatePricelistPayload {
   """
@@ -4947,6 +5434,24 @@ input UpdateArticleByIdInput {
   """
   articlePatch: ArticlePatch!
   id: Int!
+}
+
+"""
+All input for the `updateArticleByStockShapeIdAndContainerId` mutation.
+"""
+input UpdateArticleByStockShapeIdAndContainerIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `Article` being updated.
+  """
+  articlePatch: ArticlePatch!
+  stockShapeId: Int!
+  containerId: Int!
 }
 
 """The output of our update `ArticlesPrice` mutation."""
@@ -5488,6 +5993,144 @@ input UpdateFulfillmentMethodByIdInput {
   An object where the defined keys will be set on the `FulfillmentMethod` being updated.
   """
   fulfillmentMethodPatch: FulfillmentMethodPatch!
+  id: Int!
+}
+
+"""The output of our update `OrderLine` mutation."""
+type UpdateOrderLinePayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `OrderLine` that was updated by this mutation."""
+  orderLine: OrderLine
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `OrderLine`. May be used by Relay 1."""
+  orderLineEdge(
+    """The method to use when ordering `OrderLine`."""
+    orderBy: [OrderLinesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): OrderLinesEdge
+}
+
+"""All input for the `updateOrderLine` mutation."""
+input UpdateOrderLineInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `OrderLine` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `OrderLine` being updated.
+  """
+  orderLinePatch: OrderLinePatch!
+}
+
+"""
+Represents an update to a `OrderLine`. Fields that are set will be updated.
+"""
+input OrderLinePatch {
+  id: Int
+  orderId: Int
+  articleId: Int
+  unitPrice: Float
+  quantity: BigFloat
+  taxRate: BigFloat
+  fulfillmentDate: Datetime
+  quantityFulfilled: BigFloat
+  quantityToInvoice: BigFloat
+}
+
+"""All input for the `updateOrderLineById` mutation."""
+input UpdateOrderLineByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `OrderLine` being updated.
+  """
+  orderLinePatch: OrderLinePatch!
+  id: Int!
+}
+
+"""The output of our update `Order` mutation."""
+type UpdateOrderPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Order` that was updated by this mutation."""
+  order: Order
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `Order`. May be used by Relay 1."""
+  orderEdge(
+    """The method to use when ordering `Order`."""
+    orderBy: [OrdersOrderBy!] = [PRIMARY_KEY_ASC]
+  ): OrdersEdge
+}
+
+"""All input for the `updateOrder` mutation."""
+input UpdateOrderInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Order` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `Order` being updated.
+  """
+  orderPatch: OrderPatch!
+}
+
+"""
+Represents an update to a `Order`. Fields that are set will be updated.
+"""
+input OrderPatch {
+  id: Int
+  confirmationDate: Datetime
+  customerId: Int
+}
+
+"""All input for the `updateOrderById` mutation."""
+input UpdateOrderByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `Order` being updated.
+  """
+  orderPatch: OrderPatch!
   id: Int!
 }
 
@@ -6135,6 +6778,19 @@ input DeleteArticleByIdInput {
   id: Int!
 }
 
+"""
+All input for the `deleteArticleByStockShapeIdAndContainerId` mutation.
+"""
+input DeleteArticleByStockShapeIdAndContainerIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  stockShapeId: Int!
+  containerId: Int!
+}
+
 """The output of our delete `ArticlesPrice` mutation."""
 type DeleteArticlesPricePayload {
   """
@@ -6511,6 +7167,102 @@ input DeleteFulfillmentMethodInput {
 
 """All input for the `deleteFulfillmentMethodById` mutation."""
 input DeleteFulfillmentMethodByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+}
+
+"""The output of our delete `OrderLine` mutation."""
+type DeleteOrderLinePayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `OrderLine` that was deleted by this mutation."""
+  orderLine: OrderLine
+  deletedOrderLineId: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `OrderLine`. May be used by Relay 1."""
+  orderLineEdge(
+    """The method to use when ordering `OrderLine`."""
+    orderBy: [OrderLinesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): OrderLinesEdge
+}
+
+"""All input for the `deleteOrderLine` mutation."""
+input DeleteOrderLineInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `OrderLine` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""All input for the `deleteOrderLineById` mutation."""
+input DeleteOrderLineByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+}
+
+"""The output of our delete `Order` mutation."""
+type DeleteOrderPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Order` that was deleted by this mutation."""
+  order: Order
+  deletedOrderId: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `Order`. May be used by Relay 1."""
+  orderEdge(
+    """The method to use when ordering `Order`."""
+    orderBy: [OrdersOrderBy!] = [PRIMARY_KEY_ASC]
+  ): OrdersEdge
+}
+
+"""All input for the `deleteOrder` mutation."""
+input DeleteOrderInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Order` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""All input for the `deleteOrderById` mutation."""
+input DeleteOrderByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.

@@ -57,7 +57,7 @@ CREATE TYPE erp.article_for_sale AS (
 	price money,
 	quantity_per_container numeric,
 	stock_name character varying,
-	unit_name character varying,
+	unit_abbreviation character varying,
 	product_name character varying,
 	container_name character varying,
 	available integer,
@@ -68,6 +68,27 @@ CREATE TYPE erp.article_for_sale AS (
 
 
 ALTER TYPE erp.article_for_sale OWNER TO postgres;
+
+--
+-- Name: article_sales_info; Type: TYPE; Schema: erp; Owner: postgres
+--
+
+CREATE TYPE erp.article_sales_info AS (
+	article_id integer,
+	available_quantity numeric,
+	product_name character varying,
+	stock_name character varying,
+	container_name character varying,
+	unit_abbreviation character varying,
+	article_latest_price money,
+	order_closure_date timestamp without time zone,
+	fulfillment_date timestamp without time zone,
+	disabled_sales_schedule boolean,
+	quantity_per_container numeric
+);
+
+
+ALTER TYPE erp.article_sales_info OWNER TO postgres;
 
 --
 -- Name: customer_session_data; Type: TYPE; Schema: erp; Owner: postgres
@@ -171,7 +192,7 @@ CREATE FUNCTION erp.articles_available() RETURNS SETOF erp.article_for_sale
     LANGUAGE sql STABLE
     AS $$
 SELECT cc.vat_included, ap.price, a."quantityPerContainer", ss.name as "stockName",
-u.name as "unitName", p.name as "productName",
+u.abbreviation as "unitAbbreviation", p.name as "productName",
 c.name as "containerName", FLOOR(ss."inStock" / a."quantityPerContainer") as available,
 a.id, ssch.order_closure_date, ssch.fulfillment_date
 FROM erp.customers_categories cc
@@ -186,7 +207,7 @@ INNER JOIN erp.sales_schedules_customers_categories sscc ON sscc.customers_categ
 INNER JOIN erp.sales_schedules ssch ON ssch.id = sscc.sales_schedule_id
 WHERE cc.id = (SELECT customers_category_id FROM erp.customers WHERE id = erp.current_customer_id())
 AND ssch.order_closure_date > NOW() AND (ssch.begin_sales_date IS NULL OR ssch.begin_sales_date < NOW())
-AND NOT ssch.disabled
+AND NOT ssch.disabled AND FLOOR(ss."inStock" / a."quantityPerContainer") > 0
 $$;
 
 
@@ -791,6 +812,45 @@ CREATE FUNCTION erp.filter_units(search_term character varying) RETURNS SETOF er
 ALTER FUNCTION erp.filter_units(search_term character varying) OWNER TO postgres;
 
 --
+-- Name: get_articles_sales_info(integer[]); Type: FUNCTION; Schema: erp; Owner: postgres
+--
+
+CREATE FUNCTION erp.get_articles_sales_info(article_ids integer[]) RETURNS SETOF erp.article_sales_info
+    LANGUAGE sql STABLE
+    AS $$
+SELECT a.id, FLOOR(ss."inStock" / a."quantityPerContainer"), p.name, ss.name,
+c.name, u.abbreviation, ap.price, ssch.order_closure_date, ssch.fulfillment_date, 
+ssch.disabled, a."quantityPerContainer"
+FROM erp.articles a
+INNER JOIN erp.stock_shapes ss ON a."stockShapeId" = ss.id
+INNER JOIN erp.products p ON ss."productId" = p.id
+INNER JOIN erp.containers c ON a."containerId" = c.id
+INNER JOIN erp.units u ON ss."unitId" = u.id
+LEFT JOIN
+(
+SELECT MIN(ap.price) as price, cust.id as customer_id, ap."articleId", cust.customers_category_id
+FROM erp.customers cust
+INNER JOIN erp.pricelists_customers_categories plcc ON plcc.customers_category_id = cust.customers_category_id
+INNER JOIN erp.articles_prices ap ON plcc.pricelist_id = ap."priceListId"
+GROUP BY cust.id, ap."articleId"
+) ap ON ap."articleId" = a.id AND ap.customer_id = erp.current_customer_id()
+LEFT JOIN
+-- any sales schedule applicable
+(
+SELECT sscc.customers_category_id, ssch.order_closure_date, ssch.fulfillment_date, ssch.disabled, ap2."articleId" as article_id
+FROM erp.sales_schedules_customers_categories sscc
+INNER JOIN erp.sales_schedules ssch ON sscc.sales_schedule_id = ssch.id
+INNER JOIN erp.pricelists_customers_categories plcc2 ON plcc2.customers_category_id = sscc.customers_category_id
+INNER JOIN erp.articles_prices ap2 ON plcc2.pricelist_id = ap2."priceListId"
+WHERE ssch.order_closure_date > NOW()
+) ssch ON ap.customers_category_id = ssch.customers_category_id
+WHERE a.id IN (SELECT UNNEST(article_ids))
+$$;
+
+
+ALTER FUNCTION erp.get_articles_sales_info(article_ids integer[]) OWNER TO postgres;
+
+--
 -- Name: get_current_user(); Type: FUNCTION; Schema: erp; Owner: postgres
 --
 
@@ -1270,6 +1330,82 @@ ALTER SEQUENCE erp.fulfillment_method_id_seq OWNED BY erp.fulfillment_methods.id
 
 
 --
+-- Name: order_lines; Type: TABLE; Schema: erp; Owner: postgres
+--
+
+CREATE TABLE erp.order_lines (
+    id integer NOT NULL,
+    order_id integer NOT NULL,
+    article_id integer NOT NULL,
+    unit_price money NOT NULL,
+    quantity numeric NOT NULL,
+    tax_rate numeric NOT NULL,
+    fulfillment_date timestamp without time zone NOT NULL,
+    quantity_fulfilled numeric,
+    quantity_to_invoice numeric
+);
+
+
+ALTER TABLE erp.order_lines OWNER TO postgres;
+
+--
+-- Name: order_lines_id_seq; Type: SEQUENCE; Schema: erp; Owner: postgres
+--
+
+CREATE SEQUENCE erp.order_lines_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE erp.order_lines_id_seq OWNER TO postgres;
+
+--
+-- Name: order_lines_id_seq; Type: SEQUENCE OWNED BY; Schema: erp; Owner: postgres
+--
+
+ALTER SEQUENCE erp.order_lines_id_seq OWNED BY erp.order_lines.id;
+
+
+--
+-- Name: orders; Type: TABLE; Schema: erp; Owner: postgres
+--
+
+CREATE TABLE erp.orders (
+    id integer NOT NULL,
+    confirmation_date timestamp without time zone,
+    customer_id integer NOT NULL
+);
+
+
+ALTER TABLE erp.orders OWNER TO postgres;
+
+--
+-- Name: orders_id_seq; Type: SEQUENCE; Schema: erp; Owner: postgres
+--
+
+CREATE SEQUENCE erp.orders_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE erp.orders_id_seq OWNER TO postgres;
+
+--
+-- Name: orders_id_seq; Type: SEQUENCE OWNED BY; Schema: erp; Owner: postgres
+--
+
+ALTER SEQUENCE erp.orders_id_seq OWNED BY erp.orders.id;
+
+
+--
 -- Name: password_recoveries_id_seq; Type: SEQUENCE; Schema: erp; Owner: postgres
 --
 
@@ -1636,6 +1772,20 @@ ALTER TABLE ONLY erp.fulfillment_methods ALTER COLUMN id SET DEFAULT nextval('er
 
 
 --
+-- Name: order_lines id; Type: DEFAULT; Schema: erp; Owner: postgres
+--
+
+ALTER TABLE ONLY erp.order_lines ALTER COLUMN id SET DEFAULT nextval('erp.order_lines_id_seq'::regclass);
+
+
+--
+-- Name: orders id; Type: DEFAULT; Schema: erp; Owner: postgres
+--
+
+ALTER TABLE ONLY erp.orders ALTER COLUMN id SET DEFAULT nextval('erp.orders_id_seq'::regclass);
+
+
+--
 -- Name: password_recoveries id; Type: DEFAULT; Schema: erp; Owner: postgres
 --
 
@@ -1741,6 +1891,22 @@ ALTER TABLE ONLY erp.fulfillment_methods
 
 
 --
+-- Name: order_lines order_lines_pkey; Type: CONSTRAINT; Schema: erp; Owner: postgres
+--
+
+ALTER TABLE ONLY erp.order_lines
+    ADD CONSTRAINT order_lines_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: orders orders_pkey; Type: CONSTRAINT; Schema: erp; Owner: postgres
+--
+
+ALTER TABLE ONLY erp.orders
+    ADD CONSTRAINT orders_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: password_recoveries password_recoveries_pkey; Type: CONSTRAINT; Schema: erp; Owner: postgres
 --
 
@@ -1818,6 +1984,14 @@ ALTER TABLE ONLY erp.settings
 
 ALTER TABLE ONLY erp.stock_shapes
     ADD CONSTRAINT stock_shapes_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: articles unique_article_stock_shape_container; Type: CONSTRAINT; Schema: erp; Owner: postgres
+--
+
+ALTER TABLE ONLY erp.articles
+    ADD CONSTRAINT unique_article_stock_shape_container UNIQUE ("stockShapeId", "containerId");
 
 
 --
@@ -2236,6 +2410,14 @@ GRANT USAGE ON SCHEMA erp TO identified_customer;
 
 
 --
+-- Name: TYPE article_sales_info; Type: ACL; Schema: erp; Owner: postgres
+--
+
+GRANT ALL ON TYPE erp.article_sales_info TO administrator;
+GRANT ALL ON TYPE erp.article_sales_info TO identified_customer;
+
+
+--
 -- Name: FUNCTION articles_available(); Type: ACL; Schema: erp; Owner: postgres
 --
 
@@ -2402,6 +2584,14 @@ GRANT SELECT ON TABLE erp.units TO identified_customer;
 
 
 --
+-- Name: FUNCTION get_articles_sales_info(article_ids integer[]); Type: ACL; Schema: erp; Owner: postgres
+--
+
+REVOKE ALL ON FUNCTION erp.get_articles_sales_info(article_ids integer[]) FROM PUBLIC;
+GRANT ALL ON FUNCTION erp.get_articles_sales_info(article_ids integer[]) TO identified_customer;
+
+
+--
 -- Name: FUNCTION get_current_user(); Type: ACL; Schema: erp; Owner: postgres
 --
 
@@ -2542,6 +2732,20 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.fulfillment_methods TO administra
 --
 
 GRANT USAGE ON SEQUENCE erp.fulfillment_method_id_seq TO administrator;
+
+
+--
+-- Name: TABLE order_lines; Type: ACL; Schema: erp; Owner: postgres
+--
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.order_lines TO administrator;
+
+
+--
+-- Name: TABLE orders; Type: ACL; Schema: erp; Owner: postgres
+--
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.orders TO administrator;
 
 
 --

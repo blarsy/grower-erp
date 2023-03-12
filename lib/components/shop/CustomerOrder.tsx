@@ -1,40 +1,25 @@
-import { gql, useQuery } from "@apollo/client"
-import { Stack, Typography } from "@mui/material"
-import { useContext } from "react"
+import { useQuery } from "@apollo/client"
+import { Stack } from "@mui/material"
+import { useRouter } from "next/router"
 import Loader from "../Loader"
-import { AppContext } from "./AppContextProvider"
+import { availableArticles } from "../queriesLib"
+import Cart from "./Cart"
 import Header from "./Header"
 import OrderLines from "./OrderLines"
 
-interface Props {
-  slug: string
-}
-
-const GET_ARTICLES = gql`query Articles {
-  articlesAvailable {
-    nodes {
-      articleId
-      containerName
-      available
-      productName
-      price
-      quantityPerContainer
-      shouldIncludeVat
-      stockName
-      unitName
-      fulfillmentDate
-      orderClosureDate
-    }
+const CustomerOrder = () => {
+  const { loading, error, data } = useQuery(availableArticles)
+  const router = useRouter()
+  let page = ''
+  if(router.query.slug && router.query.slug.length > 1) {
+    page = router.query.slug[1].toLowerCase()
   }
-}`
-
-const CustomerOrder = ({ slug }: Props) => {
-  const { loading, error, data } = useQuery(GET_ARTICLES)
   return <Stack>
-    <Header />
-    <Loader loading={loading} error={error}>
-      {data && <OrderLines articles={data.articlesAvailable.nodes} />}
-    </Loader>
+      <Header />
+      { page === 'cart' && <Cart />}
+      { page === '' && <Loader loading={loading} error={error}>
+        {data && <OrderLines articles={data.articlesAvailable.nodes} />}
+      </Loader>}
   </Stack>
 
 }
