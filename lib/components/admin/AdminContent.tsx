@@ -110,14 +110,11 @@ const AdminContent = () => {
             return undefined
         }
         return <TreeItem key={nodeData.id} nodeId={nodeData.id} label={nodeData.label} onClick={() => {
-                let newState = tree
                 if(nodeData.path) {
-                    newState = setSelected(nodeData, newState)
                     router.push(nodeData.path)
                 } else {
-                    newState = toggleNodeExpanded(nodeData.id, newState)
+                    setTree(toggleNodeExpanded(nodeData.id, tree))
                 }
-                setTree(newState)
             }}>
             {nodeData.children && nodeData.children.map(child => createTreeItem(child))}
         </TreeItem>
