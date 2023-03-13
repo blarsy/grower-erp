@@ -1,7 +1,10 @@
-import { gql, useQuery } from "@apollo/client"
+import { ApolloProvider, gql, useQuery } from "@apollo/client"
 import { Container, Stack, Typography } from "@mui/material"
+import RecoverPassword from "lib/components/admin/RecoverPassword"
 import RecoverPasswordForm from "lib/components/admin/RecoverPasswordForm"
 import Loader from "lib/components/Loader"
+import { TOKEN_KEY } from "lib/constants"
+import { getAuthenticatedApolloClient } from "lib/uiCommon"
 import { useRouter } from "next/router"
 
 const GET_RECOVERY = gql`query PasswordRecovery($recoveryCode: String!) {
@@ -14,16 +17,10 @@ const GET_RECOVERY = gql`query PasswordRecovery($recoveryCode: String!) {
 const Recover = () => {
     const router = useRouter()
     const { code } = router.query
-    const { loading, error, data} = useQuery(GET_RECOVERY, { variables: { recoveryCode: code }})
 
-    return <Stack sx={{flex: '1'}}>
-        <Container maxWidth="xl" sx={{ flex: '1', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <Typography variant="h3">Restauration de mot de passe</Typography>
-            <Loader loading={loading} error={error}>
-                <RecoverPasswordForm recovery={data && data.passwordRecoveryByCode} />
-            </Loader>
-        </Container>
-    </Stack>
+    return <ApolloProvider client={getAuthenticatedApolloClient(TOKEN_KEY)}>
+        <RecoverPassword code={code as string} />
+    </ApolloProvider>
 }
 
 export default Recover

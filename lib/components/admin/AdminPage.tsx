@@ -10,7 +10,7 @@ import { ApolloProvider } from "@apollo/client"
 import { getAuthenticatedApolloClient } from "lib/uiCommon"
 import { TOKEN_KEY } from "lib/constants"
 
-// passing an empty array to initiallyActiveScopes does not seem to make every scopes disabled (the '*' is still used)
+// HotkeysProvider: passing an empty array to initiallyActiveScopes does not seem to make every scopes disabled (the '*' is still used)
 // thus, passing a dummy scope, so that all other are disabled by default.
 const AdminPage = () => {
     return <ApolloProvider client={getAuthenticatedApolloClient(TOKEN_KEY)}>
