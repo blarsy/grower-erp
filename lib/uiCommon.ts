@@ -72,6 +72,9 @@ export const setConfig = (data: {[prop: string]:any}): void => {
     Object.keys(data).forEach(prop => config[prop] = data[prop])
 }
 
+const currencyFormat = new Intl.NumberFormat('fr-BE', {style: 'currency' ,currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2})
+export const asPrice = (num: number): string => currencyFormat.format(num)
+
 export const getAuthenticatedApolloClient = (tokenKey: string) => {
   const httpLink = createHttpLink({
       uri: config.graphQlUrl,

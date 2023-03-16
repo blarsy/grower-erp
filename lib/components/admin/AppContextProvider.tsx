@@ -1,5 +1,6 @@
 import { gql, useLazyQuery } from "@apollo/client"
 import { TOKEN_KEY } from "lib/constants"
+import { useRouter } from "next/router"
 import { createContext, useState } from "react"
 import { owner } from "../queriesLib"
 
@@ -85,6 +86,7 @@ export const AppContext = createContext<AppContext>(blankAppContext)
 const AppContextProvider = ({ children }: Props) => {
     const [appState, setAppState] = useState(blankAppContext.data)
     const [loadSessionInfo] = useLazyQuery(GET_SESSION)
+    const router = useRouter()
 
     const changeSessionInfo = (companyName?: string, userId?: number, contactId?: number, userFirstname?: string, userLastname?: string, userEmail?: string, userRole?: string) => setAppState({ ...appState, ...{ 
       company: {
@@ -135,8 +137,10 @@ const AppContextProvider = ({ children }: Props) => {
     }
 
     const authExpired = () => {
-      localStorage.removeItem(TOKEN_KEY)
-      setAppState({...appState, ...{ authState: { error: new Error(`Votre jeton d'accès a expiré, veuillez vous reconnecter.`), token: '' }}})
+      if(localStorage.getItem(TOKEN_KEY)) {
+        localStorage.removeItem(TOKEN_KEY)
+        router.reload()
+      }
     }
 
     return <AppContext.Provider value={{ data: appState, changeSessionInfo, loginComplete, authExpired, logout}}>

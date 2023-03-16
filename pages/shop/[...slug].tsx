@@ -6,6 +6,7 @@ import { ApolloProvider } from "@apollo/client"
 import { getAuthenticatedApolloClient } from "lib/uiCommon"
 import AppContextProvider from "lib/components/shop/AppContextProvider"
 
+const client = getAuthenticatedApolloClient(SHOP_TOKEN_KEY)
 const Order = () => {
     const router = useRouter()
     const { slug } = router.query
@@ -14,7 +15,7 @@ const Order = () => {
         slugFromUrl = slug[0]
     }
 
-    return <ApolloProvider client={getAuthenticatedApolloClient(SHOP_TOKEN_KEY)}>
+    return <ApolloProvider client={client}>
         <AppContextProvider>
             {slugFromUrl ? <Connected slug={slugFromUrl}>
                 <CustomerOrder/>

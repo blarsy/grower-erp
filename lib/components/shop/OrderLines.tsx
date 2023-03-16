@@ -1,11 +1,14 @@
-import { Box, Container, Stack, TextField, Tooltip, Typography } from "@mui/material"
+import { Box, Stack, TextField, Tooltip, Typography } from "@mui/material"
 import { FieldArray, Formik, FormikErrors, FormikTouched } from "formik"
 import TimeOutMarker from '@mui/icons-material/AccessAlarm'
 import * as yup from 'yup'
 import dayjs from "dayjs"
-import { config } from "lib/uiCommon"
+import { asPrice, config } from "lib/uiCommon"
 import { AppContext, CartItem } from "./AppContextProvider"
 import { useContext } from "react"
+import { useQuery } from "@apollo/client"
+import { availableArticles } from "../queriesLib"
+import Loader from "../Loader"
 
 interface ArticleForSale {
     articleId: number
@@ -26,11 +29,8 @@ interface FormValues {
     orderLines: ArticleForSale[]
 }
 
-interface Props {
-    articles: ArticleForSale[]
-}
-
-const OrderLines = ({ articles }: Props) => {
+const OrderLines = () => {
+    const { loading, error, data } = useQuery(availableArticles)
     const appContext = useContext(AppContext)
     const hasError = (touched: FormikTouched<FormValues>, errors: FormikErrors<FormValues>, idx: number): boolean => {
         return !!touched.orderLines && touched.orderLines[idx] && !!errors.orderLines  && Array.isArray(errors.orderLines) && !!errors.orderLines[idx]
@@ -47,20 +47,28 @@ const OrderLines = ({ articles }: Props) => {
             return {...art, ...{ quantityOrdered: 0}}
         })
     }
+
+    let articles: ArticleForSale[] = []
+
+    if(data) {
+        articles = data.getAvailableArticles.nodes
+    }
     
-    return <Container maxWidth="lg">
-        <Stack>
-            <Stack direction="row" columnGap="0.5rem">
-                <Typography sx={{ flex: '6 1' }} variant="overline">Produit</Typography>
-                <Typography sx={{ flex: '4 1' }} variant="overline">Conditionnement</Typography>
-                <Typography sx={{ flex: '1 1' }} variant="overline">Disponibles</Typography>
-                <Typography sx={{ flex: '1 1', textAlign: 'right' }} variant="overline">Prix</Typography>
-                <Typography sx={{ flex: '2 1' }} variant="overline">Votre commande</Typography>
-            </Stack>
+    return <Stack>
+        <Stack direction="row" columnGap="0.5rem">
+            <Typography sx={{ flex: '6 1' }} variant="overline">Produit</Typography>
+            <Typography sx={{ flex: '4 1' }} variant="overline">Conditionnement</Typography>
+            <Typography sx={{ flex: '1 1' }} variant="overline">Disponibles</Typography>
+            <Typography sx={{ flex: '1 1', textAlign: 'right' }} variant="overline">Prix</Typography>
+            <Typography sx={{ flex: '2 1' }} variant="overline">Votre commande</Typography>
+        </Stack>
+        <Loader loading={loading} error={error}>
             <Formik initialValues={{ orderLines: articlesInitialValue(articles) } as FormValues}
                 validationSchema={yup.object().shape({
                     orderLines: yup.array(yup.object().shape({
-                        quantityOrdered: yup.number().min(0,'Veuillez entrer un nombre positif')
+                        quantityOrdered: yup.number().min(0,'Veuillez entrer un nombre positif').test('WithinAvailableStock', `Il n'y a pas assez de stock disponible`, (val, context) => {
+                            return !val || val <= context.parent.available
+                        })
                     })).test('SomeQuantityOrdered', `Aucune quantité n'a été commandée`, val => {
                         return !!val &&
                             val.length > 0 &&
@@ -82,7 +90,7 @@ const OrderLines = ({ articles }: Props) => {
                         </Stack>
                         <Typography sx={{ flex: '4 1' }} variant="body1">{`${article.containerName}, ${article.quantityPerContainer} ${article.unitAbbreviation}`}</Typography>
                         <Typography sx={{ flex: '1 1' }} variant="body1">{article.available}</Typography>
-                        <Typography sx={{ flex: '1 1', textAlign: 'right' }} variant="body1">{article.price.toLocaleString()}€</Typography>
+                        <Typography sx={{ flex: '1 1', textAlign: 'right' }} variant="body1">{asPrice(article.price)}</Typography>
                         <Box sx={{ flex: '2 1' }}>
                             <TextField size="small" type="number" name={`orderLines.${idx}.quantityOrdered`} 
                                 value={values.orderLines[idx].quantityOrdered}
@@ -94,8 +102,8 @@ const OrderLines = ({ articles }: Props) => {
                     </Stack>)}
                 </FieldArray>}
             </Formik>
-        </Stack>
-    </Container>
+        </Loader>
+    </Stack>
 }
 
 export default OrderLines

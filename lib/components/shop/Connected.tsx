@@ -1,5 +1,6 @@
 import { gql, useMutation } from "@apollo/client"
 import { SHOP_TOKEN_KEY } from "lib/constants"
+import { useRouter } from "next/router"
 import { useContext, useEffect, useState } from "react"
 import { errorHandlerHolder } from "../admin/apolloErrorLink"
 import Loader from "../Loader"
@@ -20,6 +21,7 @@ const Connected = ({ children, slug }: Props)  => {
     const appContext = useContext(AppContext)
     const [loading, setLoading] = useState(true)
     const [authenticate] = useMutation(GET_JWT)
+    const router = useRouter()
     
     useEffect(() => {
         const authenticateFromSlug = async () => {
@@ -40,6 +42,7 @@ const Connected = ({ children, slug }: Props)  => {
                     // login again, silently
                     localStorage.removeItem(SHOP_TOKEN_KEY)
                     authenticateFromSlug()
+                    router.reload()
                 }
             }
             const token = localStorage.getItem(SHOP_TOKEN_KEY)

@@ -4,11 +4,12 @@ import { TOKEN_KEY } from "lib/constants"
 import { getAuthenticatedApolloClient } from "lib/uiCommon"
 import { useRouter } from "next/router"
 
+const client = getAuthenticatedApolloClient(TOKEN_KEY)
 const Invite = () => {
     const router = useRouter()
     const { code } = router.query
 
-    return <ApolloProvider client={getAuthenticatedApolloClient(TOKEN_KEY)}>
+    return <ApolloProvider client={client}>
         <RegisterUser code={code as string} />
     </ApolloProvider>
 }

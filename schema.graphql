@@ -17,6 +17,35 @@ type Query implements Node {
     nodeId: ID!
   ): Node
 
+  """Reads and enables pagination through a set of `ActiveSalesSchedule`."""
+  allActiveSalesSchedules(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `ActiveSalesSchedule`."""
+    orderBy: [ActiveSalesSchedulesOrderBy!] = [NATURAL]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: ActiveSalesScheduleCondition
+  ): ActiveSalesSchedulesConnection
+
   """Reads and enables pagination through a set of `Article`."""
   allArticles(
     """Only read the first `n` values of the set."""
@@ -45,6 +74,35 @@ type Query implements Node {
     """
     condition: ArticleCondition
   ): ArticlesConnection
+
+  """Reads and enables pagination through a set of `ArticlesForOrder`."""
+  allArticlesForOrders(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `ArticlesForOrder`."""
+    orderBy: [ArticlesForOrdersOrderBy!] = [NATURAL]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: ArticlesForOrderCondition
+  ): ArticlesForOrdersConnection
 
   """Reads and enables pagination through a set of `ArticlesPrice`."""
   allArticlesPrices(
@@ -659,27 +717,6 @@ type Query implements Node {
   usersInvitationById(id: Int!): UsersInvitation
   usersInvitationByCode(code: String!): UsersInvitation
 
-  """Reads and enables pagination through a set of `ArticleForSale`."""
-  articlesAvailable(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-  ): ArticleForSalesConnection
-
   """Reads and enables pagination through a set of `Customer`."""
   customerBySlug(
     slug: String!
@@ -932,9 +969,53 @@ type Query implements Node {
     """Read all values in the set after (below) this cursor."""
     after: Cursor
   ): ArticleSalesInfosConnection
+
+  """Reads and enables pagination through a set of `ArticleForSale`."""
+  getAvailableArticles(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+  ): ArticleForSalesConnection
   getCurrentUser: Contact
   getCustomerSessionData: CustomerSessionDatum
   getSessionData: SessionDatum
+
+  """Reads and enables pagination through a set of `Order`."""
+  myOrders(
+    since: Datetime
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+  ): OrdersConnection
   passwordRecoveryByCode(recoveryCode: String): PasswordRecovery
   usersInvitationContactByCode(invitationCode: String): UsersInvitationContact
 
@@ -1095,6 +1176,126 @@ interface Node {
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
+}
+
+"""A connection to a list of `ActiveSalesSchedule` values."""
+type ActiveSalesSchedulesConnection {
+  """A list of `ActiveSalesSchedule` objects."""
+  nodes: [ActiveSalesSchedule!]!
+
+  """
+  A list of edges which contains the `ActiveSalesSchedule` and cursor to aid in pagination.
+  """
+  edges: [ActiveSalesSchedulesEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `ActiveSalesSchedule` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+type ActiveSalesSchedule {
+  id: Int
+  fulfillmentDate: Datetime
+  name: String
+  orderClosureDate: Datetime
+  deliveryPrice: Float
+  freeDeliveryTurnover: Float
+  beginSalesDate: Datetime
+  disabled: Boolean
+  customersCategoryId: Int
+}
+
+"""
+A point in time as described by the [ISO
+8601](https://en.wikipedia.org/wiki/ISO_8601) standard. May or may not include a timezone.
+"""
+scalar Datetime
+
+"""A `ActiveSalesSchedule` edge in the connection."""
+type ActiveSalesSchedulesEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `ActiveSalesSchedule` at the end of the edge."""
+  node: ActiveSalesSchedule!
+}
+
+"""A location in a connection that can be used for resuming pagination."""
+scalar Cursor
+
+"""Information about pagination in a connection."""
+type PageInfo {
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+
+  """When paginating backwards, are there more items?"""
+  hasPreviousPage: Boolean!
+
+  """When paginating backwards, the cursor to continue."""
+  startCursor: Cursor
+
+  """When paginating forwards, the cursor to continue."""
+  endCursor: Cursor
+}
+
+"""Methods to use when ordering `ActiveSalesSchedule`."""
+enum ActiveSalesSchedulesOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  FULFILLMENT_DATE_ASC
+  FULFILLMENT_DATE_DESC
+  NAME_ASC
+  NAME_DESC
+  ORDER_CLOSURE_DATE_ASC
+  ORDER_CLOSURE_DATE_DESC
+  DELIVERY_PRICE_ASC
+  DELIVERY_PRICE_DESC
+  FREE_DELIVERY_TURNOVER_ASC
+  FREE_DELIVERY_TURNOVER_DESC
+  BEGIN_SALES_DATE_ASC
+  BEGIN_SALES_DATE_DESC
+  DISABLED_ASC
+  DISABLED_DESC
+  CUSTOMERS_CATEGORY_ID_ASC
+  CUSTOMERS_CATEGORY_ID_DESC
+}
+
+"""
+A condition to be used against `ActiveSalesSchedule` object types. All fields
+are tested for equality and combined with a logical ‘and.’
+"""
+input ActiveSalesScheduleCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `fulfillmentDate` field."""
+  fulfillmentDate: Datetime
+
+  """Checks for equality with the object’s `name` field."""
+  name: String
+
+  """Checks for equality with the object’s `orderClosureDate` field."""
+  orderClosureDate: Datetime
+
+  """Checks for equality with the object’s `deliveryPrice` field."""
+  deliveryPrice: Float
+
+  """Checks for equality with the object’s `freeDeliveryTurnover` field."""
+  freeDeliveryTurnover: Float
+
+  """Checks for equality with the object’s `beginSalesDate` field."""
+  beginSalesDate: Datetime
+
+  """Checks for equality with the object’s `disabled` field."""
+  disabled: Boolean
+
+  """Checks for equality with the object’s `customersCategoryId` field."""
+  customersCategoryId: Int
 }
 
 """A connection to a list of `Article` values."""
@@ -1308,24 +1509,6 @@ type ProductsEdge {
 
   """The `Product` at the end of the edge."""
   node: Product!
-}
-
-"""A location in a connection that can be used for resuming pagination."""
-scalar Cursor
-
-"""Information about pagination in a connection."""
-type PageInfo {
-  """When paginating forwards, are there more items?"""
-  hasNextPage: Boolean!
-
-  """When paginating backwards, are there more items?"""
-  hasPreviousPage: Boolean!
-
-  """When paginating backwards, the cursor to continue."""
-  startCursor: Cursor
-
-  """When paginating forwards, the cursor to continue."""
-  endCursor: Cursor
 }
 
 """Methods to use when ordering `Product`."""
@@ -1841,97 +2024,208 @@ type Customer implements Node {
 
   """Reads a single `CustomersCategory` that is related to this `Customer`."""
   customersCategoryByCustomersCategoryId: CustomersCategory
+
+  """Reads and enables pagination through a set of `Order`."""
+  ordersByCustomerId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Order`."""
+    orderBy: [OrdersOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: OrderCondition
+  ): OrdersConnection!
 }
 
-"""A `Customer` edge in the connection."""
-type CustomersEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `Customer` at the end of the edge."""
-  node: Customer!
-}
-
-"""Methods to use when ordering `Customer`."""
-enum CustomersOrderBy {
-  NATURAL
-  ID_ASC
-  ID_DESC
-  SLUG_ASC
-  SLUG_DESC
-  CUSTOMERS_CATEGORY_ID_ASC
-  CUSTOMERS_CATEGORY_ID_DESC
-  ESHOP_ACCESS_ASC
-  ESHOP_ACCESS_DESC
-  CONTACT_ID_ASC
-  CONTACT_ID_DESC
-  COMPANY_ID_ASC
-  COMPANY_ID_DESC
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""
-A condition to be used against `Customer` object types. All fields are tested
-for equality and combined with a logical ‘and.’
-"""
-input CustomerCondition {
-  """Checks for equality with the object’s `id` field."""
-  id: Int
-
-  """Checks for equality with the object’s `slug` field."""
-  slug: String
-
-  """Checks for equality with the object’s `customersCategoryId` field."""
-  customersCategoryId: Int
-
-  """Checks for equality with the object’s `eshopAccess` field."""
-  eshopAccess: Boolean
-
-  """Checks for equality with the object’s `contactId` field."""
-  contactId: Int
-
-  """Checks for equality with the object’s `companyId` field."""
-  companyId: Int
-}
-
-"""A connection to a list of `SalesSchedulesCustomersCategory` values."""
-type SalesSchedulesCustomersCategoriesConnection {
-  """A list of `SalesSchedulesCustomersCategory` objects."""
-  nodes: [SalesSchedulesCustomersCategory!]!
+"""A connection to a list of `Order` values."""
+type OrdersConnection {
+  """A list of `Order` objects."""
+  nodes: [Order!]!
 
   """
-  A list of edges which contains the `SalesSchedulesCustomersCategory` and cursor to aid in pagination.
+  A list of edges which contains the `Order` and cursor to aid in pagination.
   """
-  edges: [SalesSchedulesCustomersCategoriesEdge!]!
+  edges: [OrdersEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Order` you could get from the connection."""
+  totalCount: Int!
+}
+
+type Order implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  confirmationDate: Datetime
+  customerId: Int!
+  fulfillmentMethodId: Int!
+
+  """Reads a single `Customer` that is related to this `Order`."""
+  customerByCustomerId: Customer
+
+  """Reads a single `FulfillmentMethod` that is related to this `Order`."""
+  fulfillmentMethodByFulfillmentMethodId: FulfillmentMethod
+
+  """Reads and enables pagination through a set of `OrderLine`."""
+  orderLinesByOrderId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `OrderLine`."""
+    orderBy: [OrderLinesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: OrderLineCondition
+  ): OrderLinesConnection!
+}
+
+type FulfillmentMethod implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  name: String!
+  needsPickupAddress: Boolean!
+  needsCustomerAddress: Boolean!
+
+  """
+  Reads and enables pagination through a set of `SalesSchedulesFulfillmentMethod`.
+  """
+  salesSchedulesFulfillmentMethodsByFulfillmentMethodId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `SalesSchedulesFulfillmentMethod`."""
+    orderBy: [SalesSchedulesFulfillmentMethodsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: SalesSchedulesFulfillmentMethodCondition
+  ): SalesSchedulesFulfillmentMethodsConnection!
+
+  """Reads and enables pagination through a set of `Order`."""
+  ordersByFulfillmentMethodId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Order`."""
+    orderBy: [OrdersOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: OrderCondition
+  ): OrdersConnection!
+}
+
+"""A connection to a list of `SalesSchedulesFulfillmentMethod` values."""
+type SalesSchedulesFulfillmentMethodsConnection {
+  """A list of `SalesSchedulesFulfillmentMethod` objects."""
+  nodes: [SalesSchedulesFulfillmentMethod!]!
+
+  """
+  A list of edges which contains the `SalesSchedulesFulfillmentMethod` and cursor to aid in pagination.
+  """
+  edges: [SalesSchedulesFulfillmentMethodsEdge!]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
 
   """
-  The count of *all* `SalesSchedulesCustomersCategory` you could get from the connection.
+  The count of *all* `SalesSchedulesFulfillmentMethod` you could get from the connection.
   """
   totalCount: Int!
 }
 
-type SalesSchedulesCustomersCategory implements Node {
+type SalesSchedulesFulfillmentMethod implements Node {
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
   id: Int!
   salesScheduleId: Int!
-  customersCategoryId: Int!
+  fulfillmentMethodId: Int!
 
   """
-  Reads a single `SalesSchedule` that is related to this `SalesSchedulesCustomersCategory`.
+  Reads a single `SalesSchedule` that is related to this `SalesSchedulesFulfillmentMethod`.
   """
   salesScheduleBySalesScheduleId: SalesSchedule
 
   """
-  Reads a single `CustomersCategory` that is related to this `SalesSchedulesCustomersCategory`.
+  Reads a single `FulfillmentMethod` that is related to this `SalesSchedulesFulfillmentMethod`.
   """
-  customersCategoryByCustomersCategoryId: CustomersCategory
+  fulfillmentMethodByFulfillmentMethodId: FulfillmentMethod
 }
 
 type SalesSchedule implements Node {
@@ -2011,11 +2305,53 @@ type SalesSchedule implements Node {
   ): SalesSchedulesFulfillmentMethodsConnection!
 }
 
-"""
-A point in time as described by the [ISO
-8601](https://en.wikipedia.org/wiki/ISO_8601) standard. May or may not include a timezone.
-"""
-scalar Datetime
+"""A connection to a list of `SalesSchedulesCustomersCategory` values."""
+type SalesSchedulesCustomersCategoriesConnection {
+  """A list of `SalesSchedulesCustomersCategory` objects."""
+  nodes: [SalesSchedulesCustomersCategory!]!
+
+  """
+  A list of edges which contains the `SalesSchedulesCustomersCategory` and cursor to aid in pagination.
+  """
+  edges: [SalesSchedulesCustomersCategoriesEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `SalesSchedulesCustomersCategory` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+type SalesSchedulesCustomersCategory implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  salesScheduleId: Int!
+  customersCategoryId: Int!
+
+  """
+  Reads a single `SalesSchedule` that is related to this `SalesSchedulesCustomersCategory`.
+  """
+  salesScheduleBySalesScheduleId: SalesSchedule
+
+  """
+  Reads a single `CustomersCategory` that is related to this `SalesSchedulesCustomersCategory`.
+  """
+  customersCategoryByCustomersCategoryId: CustomersCategory
+}
+
+"""A `SalesSchedulesCustomersCategory` edge in the connection."""
+type SalesSchedulesCustomersCategoriesEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `SalesSchedulesCustomersCategory` at the end of the edge."""
+  node: SalesSchedulesCustomersCategory!
+}
 
 """Methods to use when ordering `SalesSchedulesCustomersCategory`."""
 enum SalesSchedulesCustomersCategoriesOrderBy {
@@ -2043,87 +2379,6 @@ input SalesSchedulesCustomersCategoryCondition {
 
   """Checks for equality with the object’s `customersCategoryId` field."""
   customersCategoryId: Int
-}
-
-"""A connection to a list of `SalesSchedulesFulfillmentMethod` values."""
-type SalesSchedulesFulfillmentMethodsConnection {
-  """A list of `SalesSchedulesFulfillmentMethod` objects."""
-  nodes: [SalesSchedulesFulfillmentMethod!]!
-
-  """
-  A list of edges which contains the `SalesSchedulesFulfillmentMethod` and cursor to aid in pagination.
-  """
-  edges: [SalesSchedulesFulfillmentMethodsEdge!]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """
-  The count of *all* `SalesSchedulesFulfillmentMethod` you could get from the connection.
-  """
-  totalCount: Int!
-}
-
-type SalesSchedulesFulfillmentMethod implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
-  id: Int!
-  salesScheduleId: Int!
-  fulfillmentMethodId: Int!
-
-  """
-  Reads a single `SalesSchedule` that is related to this `SalesSchedulesFulfillmentMethod`.
-  """
-  salesScheduleBySalesScheduleId: SalesSchedule
-
-  """
-  Reads a single `FulfillmentMethod` that is related to this `SalesSchedulesFulfillmentMethod`.
-  """
-  fulfillmentMethodByFulfillmentMethodId: FulfillmentMethod
-}
-
-type FulfillmentMethod implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
-  id: Int!
-  name: String!
-  needsPickupAddress: Boolean!
-  needsCustomerAddress: Boolean!
-
-  """
-  Reads and enables pagination through a set of `SalesSchedulesFulfillmentMethod`.
-  """
-  salesSchedulesFulfillmentMethodsByFulfillmentMethodId(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering `SalesSchedulesFulfillmentMethod`."""
-    orderBy: [SalesSchedulesFulfillmentMethodsOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: SalesSchedulesFulfillmentMethodCondition
-  ): SalesSchedulesFulfillmentMethodsConnection!
 }
 
 """Methods to use when ordering `SalesSchedulesFulfillmentMethod`."""
@@ -2163,13 +2418,248 @@ type SalesSchedulesFulfillmentMethodsEdge {
   node: SalesSchedulesFulfillmentMethod!
 }
 
-"""A `SalesSchedulesCustomersCategory` edge in the connection."""
-type SalesSchedulesCustomersCategoriesEdge {
+"""Methods to use when ordering `Order`."""
+enum OrdersOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  CONFIRMATION_DATE_ASC
+  CONFIRMATION_DATE_DESC
+  CUSTOMER_ID_ASC
+  CUSTOMER_ID_DESC
+  FULFILLMENT_METHOD_ID_ASC
+  FULFILLMENT_METHOD_ID_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `Order` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input OrderCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `confirmationDate` field."""
+  confirmationDate: Datetime
+
+  """Checks for equality with the object’s `customerId` field."""
+  customerId: Int
+
+  """Checks for equality with the object’s `fulfillmentMethodId` field."""
+  fulfillmentMethodId: Int
+}
+
+"""A connection to a list of `OrderLine` values."""
+type OrderLinesConnection {
+  """A list of `OrderLine` objects."""
+  nodes: [OrderLine!]!
+
+  """
+  A list of edges which contains the `OrderLine` and cursor to aid in pagination.
+  """
+  edges: [OrderLinesEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `OrderLine` you could get from the connection."""
+  totalCount: Int!
+}
+
+type OrderLine implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  orderId: Int!
+  articleId: Int!
+  quantityPerContainer: Int!
+  containerName: String!
+  containerId: Int!
+  stockShapeName: String!
+  inStock: BigFloat!
+  stockShapeId: Int!
+  unitName: String!
+  unitAbbreviation: String!
+  unitId: Int!
+  productName: String!
+  productId: Int!
+  price: Float!
+  quantityOrdered: BigFloat!
+  fulfillmentDate: Datetime!
+
+  """Reads a single `Order` that is related to this `OrderLine`."""
+  orderByOrderId: Order
+}
+
+"""A `OrderLine` edge in the connection."""
+type OrderLinesEdge {
   """A cursor for use in pagination."""
   cursor: Cursor
 
-  """The `SalesSchedulesCustomersCategory` at the end of the edge."""
-  node: SalesSchedulesCustomersCategory!
+  """The `OrderLine` at the end of the edge."""
+  node: OrderLine!
+}
+
+"""Methods to use when ordering `OrderLine`."""
+enum OrderLinesOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  ORDER_ID_ASC
+  ORDER_ID_DESC
+  ARTICLE_ID_ASC
+  ARTICLE_ID_DESC
+  QUANTITY_PER_CONTAINER_ASC
+  QUANTITY_PER_CONTAINER_DESC
+  CONTAINER_NAME_ASC
+  CONTAINER_NAME_DESC
+  CONTAINER_ID_ASC
+  CONTAINER_ID_DESC
+  STOCK_SHAPE_NAME_ASC
+  STOCK_SHAPE_NAME_DESC
+  IN_STOCK_ASC
+  IN_STOCK_DESC
+  STOCK_SHAPE_ID_ASC
+  STOCK_SHAPE_ID_DESC
+  UNIT_NAME_ASC
+  UNIT_NAME_DESC
+  UNIT_ABBREVIATION_ASC
+  UNIT_ABBREVIATION_DESC
+  UNIT_ID_ASC
+  UNIT_ID_DESC
+  PRODUCT_NAME_ASC
+  PRODUCT_NAME_DESC
+  PRODUCT_ID_ASC
+  PRODUCT_ID_DESC
+  PRICE_ASC
+  PRICE_DESC
+  QUANTITY_ORDERED_ASC
+  QUANTITY_ORDERED_DESC
+  FULFILLMENT_DATE_ASC
+  FULFILLMENT_DATE_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `OrderLine` object types. All fields are tested
+for equality and combined with a logical ‘and.’
+"""
+input OrderLineCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `orderId` field."""
+  orderId: Int
+
+  """Checks for equality with the object’s `articleId` field."""
+  articleId: Int
+
+  """Checks for equality with the object’s `quantityPerContainer` field."""
+  quantityPerContainer: Int
+
+  """Checks for equality with the object’s `containerName` field."""
+  containerName: String
+
+  """Checks for equality with the object’s `containerId` field."""
+  containerId: Int
+
+  """Checks for equality with the object’s `stockShapeName` field."""
+  stockShapeName: String
+
+  """Checks for equality with the object’s `inStock` field."""
+  inStock: BigFloat
+
+  """Checks for equality with the object’s `stockShapeId` field."""
+  stockShapeId: Int
+
+  """Checks for equality with the object’s `unitName` field."""
+  unitName: String
+
+  """Checks for equality with the object’s `unitAbbreviation` field."""
+  unitAbbreviation: String
+
+  """Checks for equality with the object’s `unitId` field."""
+  unitId: Int
+
+  """Checks for equality with the object’s `productName` field."""
+  productName: String
+
+  """Checks for equality with the object’s `productId` field."""
+  productId: Int
+
+  """Checks for equality with the object’s `price` field."""
+  price: Float
+
+  """Checks for equality with the object’s `quantityOrdered` field."""
+  quantityOrdered: BigFloat
+
+  """Checks for equality with the object’s `fulfillmentDate` field."""
+  fulfillmentDate: Datetime
+}
+
+"""A `Order` edge in the connection."""
+type OrdersEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Order` at the end of the edge."""
+  node: Order!
+}
+
+"""A `Customer` edge in the connection."""
+type CustomersEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Customer` at the end of the edge."""
+  node: Customer!
+}
+
+"""Methods to use when ordering `Customer`."""
+enum CustomersOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  SLUG_ASC
+  SLUG_DESC
+  CUSTOMERS_CATEGORY_ID_ASC
+  CUSTOMERS_CATEGORY_ID_DESC
+  ESHOP_ACCESS_ASC
+  ESHOP_ACCESS_DESC
+  CONTACT_ID_ASC
+  CONTACT_ID_DESC
+  COMPANY_ID_ASC
+  COMPANY_ID_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `Customer` object types. All fields are tested
+for equality and combined with a logical ‘and.’
+"""
+input CustomerCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `slug` field."""
+  slug: String
+
+  """Checks for equality with the object’s `customersCategoryId` field."""
+  customersCategoryId: Int
+
+  """Checks for equality with the object’s `eshopAccess` field."""
+  eshopAccess: Boolean
+
+  """Checks for equality with the object’s `contactId` field."""
+  contactId: Int
+
+  """Checks for equality with the object’s `companyId` field."""
+  companyId: Int
 }
 
 """Methods to use when ordering `PricelistsCustomersCategory`."""
@@ -2225,6 +2715,132 @@ type ArticlesEdge {
 
   """The `Article` at the end of the edge."""
   node: Article!
+}
+
+"""A connection to a list of `ArticlesForOrder` values."""
+type ArticlesForOrdersConnection {
+  """A list of `ArticlesForOrder` objects."""
+  nodes: [ArticlesForOrder!]!
+
+  """
+  A list of edges which contains the `ArticlesForOrder` and cursor to aid in pagination.
+  """
+  edges: [ArticlesForOrdersEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `ArticlesForOrder` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+type ArticlesForOrder {
+  articleId: Int
+  quantityPerContainer: BigFloat
+  containerName: String
+  containerId: Int
+  stockShapeName: String
+  inStock: BigFloat
+  stockShapeId: Int
+  unitName: String
+  unitAbbreviation: String
+  unitId: Int
+  productName: String
+  productId: Int
+  price: Float
+  customersCategoryId: Int
+}
+
+"""A `ArticlesForOrder` edge in the connection."""
+type ArticlesForOrdersEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `ArticlesForOrder` at the end of the edge."""
+  node: ArticlesForOrder!
+}
+
+"""Methods to use when ordering `ArticlesForOrder`."""
+enum ArticlesForOrdersOrderBy {
+  NATURAL
+  ARTICLE_ID_ASC
+  ARTICLE_ID_DESC
+  QUANTITY_PER_CONTAINER_ASC
+  QUANTITY_PER_CONTAINER_DESC
+  CONTAINER_NAME_ASC
+  CONTAINER_NAME_DESC
+  CONTAINER_ID_ASC
+  CONTAINER_ID_DESC
+  STOCK_SHAPE_NAME_ASC
+  STOCK_SHAPE_NAME_DESC
+  IN_STOCK_ASC
+  IN_STOCK_DESC
+  STOCK_SHAPE_ID_ASC
+  STOCK_SHAPE_ID_DESC
+  UNIT_NAME_ASC
+  UNIT_NAME_DESC
+  UNIT_ABBREVIATION_ASC
+  UNIT_ABBREVIATION_DESC
+  UNIT_ID_ASC
+  UNIT_ID_DESC
+  PRODUCT_NAME_ASC
+  PRODUCT_NAME_DESC
+  PRODUCT_ID_ASC
+  PRODUCT_ID_DESC
+  PRICE_ASC
+  PRICE_DESC
+  CUSTOMERS_CATEGORY_ID_ASC
+  CUSTOMERS_CATEGORY_ID_DESC
+}
+
+"""
+A condition to be used against `ArticlesForOrder` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input ArticlesForOrderCondition {
+  """Checks for equality with the object’s `articleId` field."""
+  articleId: Int
+
+  """Checks for equality with the object’s `quantityPerContainer` field."""
+  quantityPerContainer: BigFloat
+
+  """Checks for equality with the object’s `containerName` field."""
+  containerName: String
+
+  """Checks for equality with the object’s `containerId` field."""
+  containerId: Int
+
+  """Checks for equality with the object’s `stockShapeName` field."""
+  stockShapeName: String
+
+  """Checks for equality with the object’s `inStock` field."""
+  inStock: BigFloat
+
+  """Checks for equality with the object’s `stockShapeId` field."""
+  stockShapeId: Int
+
+  """Checks for equality with the object’s `unitName` field."""
+  unitName: String
+
+  """Checks for equality with the object’s `unitAbbreviation` field."""
+  unitAbbreviation: String
+
+  """Checks for equality with the object’s `unitId` field."""
+  unitId: Int
+
+  """Checks for equality with the object’s `productName` field."""
+  productName: String
+
+  """Checks for equality with the object’s `productId` field."""
+  productId: Int
+
+  """Checks for equality with the object’s `price` field."""
+  price: Float
+
+  """Checks for equality with the object’s `customersCategoryId` field."""
+  customersCategoryId: Int
 }
 
 """A connection to a list of `Company` values."""
@@ -2996,169 +3612,6 @@ input FulfillmentMethodCondition {
   needsCustomerAddress: Boolean
 }
 
-"""A connection to a list of `OrderLine` values."""
-type OrderLinesConnection {
-  """A list of `OrderLine` objects."""
-  nodes: [OrderLine!]!
-
-  """
-  A list of edges which contains the `OrderLine` and cursor to aid in pagination.
-  """
-  edges: [OrderLinesEdge!]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `OrderLine` you could get from the connection."""
-  totalCount: Int!
-}
-
-type OrderLine implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
-  id: Int!
-  orderId: Int!
-  articleId: Int!
-  unitPrice: Float!
-  quantity: BigFloat!
-  taxRate: BigFloat!
-  fulfillmentDate: Datetime!
-  quantityFulfilled: BigFloat
-  quantityToInvoice: BigFloat
-}
-
-"""A `OrderLine` edge in the connection."""
-type OrderLinesEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `OrderLine` at the end of the edge."""
-  node: OrderLine!
-}
-
-"""Methods to use when ordering `OrderLine`."""
-enum OrderLinesOrderBy {
-  NATURAL
-  ID_ASC
-  ID_DESC
-  ORDER_ID_ASC
-  ORDER_ID_DESC
-  ARTICLE_ID_ASC
-  ARTICLE_ID_DESC
-  UNIT_PRICE_ASC
-  UNIT_PRICE_DESC
-  QUANTITY_ASC
-  QUANTITY_DESC
-  TAX_RATE_ASC
-  TAX_RATE_DESC
-  FULFILLMENT_DATE_ASC
-  FULFILLMENT_DATE_DESC
-  QUANTITY_FULFILLED_ASC
-  QUANTITY_FULFILLED_DESC
-  QUANTITY_TO_INVOICE_ASC
-  QUANTITY_TO_INVOICE_DESC
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""
-A condition to be used against `OrderLine` object types. All fields are tested
-for equality and combined with a logical ‘and.’
-"""
-input OrderLineCondition {
-  """Checks for equality with the object’s `id` field."""
-  id: Int
-
-  """Checks for equality with the object’s `orderId` field."""
-  orderId: Int
-
-  """Checks for equality with the object’s `articleId` field."""
-  articleId: Int
-
-  """Checks for equality with the object’s `unitPrice` field."""
-  unitPrice: Float
-
-  """Checks for equality with the object’s `quantity` field."""
-  quantity: BigFloat
-
-  """Checks for equality with the object’s `taxRate` field."""
-  taxRate: BigFloat
-
-  """Checks for equality with the object’s `fulfillmentDate` field."""
-  fulfillmentDate: Datetime
-
-  """Checks for equality with the object’s `quantityFulfilled` field."""
-  quantityFulfilled: BigFloat
-
-  """Checks for equality with the object’s `quantityToInvoice` field."""
-  quantityToInvoice: BigFloat
-}
-
-"""A connection to a list of `Order` values."""
-type OrdersConnection {
-  """A list of `Order` objects."""
-  nodes: [Order!]!
-
-  """
-  A list of edges which contains the `Order` and cursor to aid in pagination.
-  """
-  edges: [OrdersEdge!]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `Order` you could get from the connection."""
-  totalCount: Int!
-}
-
-type Order implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
-  id: Int!
-  confirmationDate: Datetime
-  customerId: Int!
-}
-
-"""A `Order` edge in the connection."""
-type OrdersEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `Order` at the end of the edge."""
-  node: Order!
-}
-
-"""Methods to use when ordering `Order`."""
-enum OrdersOrderBy {
-  NATURAL
-  ID_ASC
-  ID_DESC
-  CONFIRMATION_DATE_ASC
-  CONFIRMATION_DATE_DESC
-  CUSTOMER_ID_ASC
-  CUSTOMER_ID_DESC
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""
-A condition to be used against `Order` object types. All fields are tested for equality and combined with a logical ‘and.’
-"""
-input OrderCondition {
-  """Checks for equality with the object’s `id` field."""
-  id: Int
-
-  """Checks for equality with the object’s `confirmationDate` field."""
-  confirmationDate: Datetime
-
-  """Checks for equality with the object’s `customerId` field."""
-  customerId: Int
-}
-
 """A connection to a list of `Pricelist` values."""
 type PricelistsConnection {
   """A list of `Pricelist` objects."""
@@ -3340,46 +3793,6 @@ input UnitCondition {
   abbreviation: String
 }
 
-"""A connection to a list of `ArticleForSale` values."""
-type ArticleForSalesConnection {
-  """A list of `ArticleForSale` objects."""
-  nodes: [ArticleForSale!]!
-
-  """
-  A list of edges which contains the `ArticleForSale` and cursor to aid in pagination.
-  """
-  edges: [ArticleForSalesEdge!]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `ArticleForSale` you could get from the connection."""
-  totalCount: Int!
-}
-
-type ArticleForSale {
-  shouldIncludeVat: Boolean
-  price: Float
-  quantityPerContainer: BigFloat
-  stockName: String
-  unitAbbreviation: String
-  productName: String
-  containerName: String
-  available: Int
-  articleId: Int
-  orderClosureDate: Datetime
-  fulfillmentDate: Datetime
-}
-
-"""A `ArticleForSale` edge in the connection."""
-type ArticleForSalesEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `ArticleForSale` at the end of the edge."""
-  node: ArticleForSale!
-}
-
 """A connection to a list of `ArticleDisplay` values."""
 type ArticleDisplaysConnection {
   """A list of `ArticleDisplay` objects."""
@@ -3490,6 +3903,46 @@ type ArticleSalesInfosEdge {
 
   """The `ArticleSalesInfo` at the end of the edge."""
   node: ArticleSalesInfo!
+}
+
+"""A connection to a list of `ArticleForSale` values."""
+type ArticleForSalesConnection {
+  """A list of `ArticleForSale` objects."""
+  nodes: [ArticleForSale!]!
+
+  """
+  A list of edges which contains the `ArticleForSale` and cursor to aid in pagination.
+  """
+  edges: [ArticleForSalesEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `ArticleForSale` you could get from the connection."""
+  totalCount: Int!
+}
+
+type ArticleForSale {
+  shouldIncludeVat: Boolean
+  price: Float
+  quantityPerContainer: BigFloat
+  stockName: String
+  unitAbbreviation: String
+  productName: String
+  containerName: String
+  available: Int
+  articleId: Int
+  orderClosureDate: Datetime
+  fulfillmentDate: Datetime
+}
+
+"""A `ArticleForSale` edge in the connection."""
+type ArticleForSalesEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `ArticleForSale` at the end of the edge."""
+  node: ArticleForSale!
 }
 
 type CustomerSessionDatum {
@@ -4389,6 +4842,12 @@ type Mutation {
     """
     input: ChangePasswordInput!
   ): ChangePasswordPayload
+  confirmOrder(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: ConfirmOrderInput!
+  ): ConfirmOrderPayload
   createPasswordRecovery(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -4860,6 +5319,9 @@ type CreateOrderLinePayload {
   """
   query: Query
 
+  """Reads a single `Order` that is related to this `OrderLine`."""
+  orderByOrderId: Order
+
   """An edge for our `OrderLine`. May be used by Relay 1."""
   orderLineEdge(
     """The method to use when ordering `OrderLine`."""
@@ -4884,12 +5346,20 @@ input OrderLineInput {
   id: Int
   orderId: Int!
   articleId: Int!
-  unitPrice: Float!
-  quantity: BigFloat!
-  taxRate: BigFloat!
+  quantityPerContainer: Int!
+  containerName: String!
+  containerId: Int!
+  stockShapeName: String!
+  inStock: BigFloat!
+  stockShapeId: Int!
+  unitName: String!
+  unitAbbreviation: String!
+  unitId: Int!
+  productName: String!
+  productId: Int!
+  price: Float!
+  quantityOrdered: BigFloat!
   fulfillmentDate: Datetime!
-  quantityFulfilled: BigFloat
-  quantityToInvoice: BigFloat
 }
 
 """The output of our create `Order` mutation."""
@@ -4907,6 +5377,12 @@ type CreateOrderPayload {
   Our root query field type. Allows us to run any query from our mutation payload.
   """
   query: Query
+
+  """Reads a single `Customer` that is related to this `Order`."""
+  customerByCustomerId: Customer
+
+  """Reads a single `FulfillmentMethod` that is related to this `Order`."""
+  fulfillmentMethodByFulfillmentMethodId: FulfillmentMethod
 
   """An edge for our `Order`. May be used by Relay 1."""
   orderEdge(
@@ -4932,6 +5408,7 @@ input OrderInput {
   id: Int
   confirmationDate: Datetime
   customerId: Int!
+  fulfillmentMethodId: Int!
 }
 
 """The output of our create `Pricelist` mutation."""
@@ -6012,6 +6489,9 @@ type UpdateOrderLinePayload {
   """
   query: Query
 
+  """Reads a single `Order` that is related to this `OrderLine`."""
+  orderByOrderId: Order
+
   """An edge for our `OrderLine`. May be used by Relay 1."""
   orderLineEdge(
     """The method to use when ordering `OrderLine`."""
@@ -6045,12 +6525,20 @@ input OrderLinePatch {
   id: Int
   orderId: Int
   articleId: Int
-  unitPrice: Float
-  quantity: BigFloat
-  taxRate: BigFloat
+  quantityPerContainer: Int
+  containerName: String
+  containerId: Int
+  stockShapeName: String
+  inStock: BigFloat
+  stockShapeId: Int
+  unitName: String
+  unitAbbreviation: String
+  unitId: Int
+  productName: String
+  productId: Int
+  price: Float
+  quantityOrdered: BigFloat
   fulfillmentDate: Datetime
-  quantityFulfilled: BigFloat
-  quantityToInvoice: BigFloat
 }
 
 """All input for the `updateOrderLineById` mutation."""
@@ -6083,6 +6571,12 @@ type UpdateOrderPayload {
   Our root query field type. Allows us to run any query from our mutation payload.
   """
   query: Query
+
+  """Reads a single `Customer` that is related to this `Order`."""
+  customerByCustomerId: Customer
+
+  """Reads a single `FulfillmentMethod` that is related to this `Order`."""
+  fulfillmentMethodByFulfillmentMethodId: FulfillmentMethod
 
   """An edge for our `Order`. May be used by Relay 1."""
   orderEdge(
@@ -6117,6 +6611,7 @@ input OrderPatch {
   id: Int
   confirmationDate: Datetime
   customerId: Int
+  fulfillmentMethodId: Int
 }
 
 """All input for the `updateOrderById` mutation."""
@@ -7192,6 +7687,9 @@ type DeleteOrderLinePayload {
   """
   query: Query
 
+  """Reads a single `Order` that is related to this `OrderLine`."""
+  orderByOrderId: Order
+
   """An edge for our `OrderLine`. May be used by Relay 1."""
   orderLineEdge(
     """The method to use when ordering `OrderLine`."""
@@ -7239,6 +7737,12 @@ type DeleteOrderPayload {
   Our root query field type. Allows us to run any query from our mutation payload.
   """
   query: Query
+
+  """Reads a single `Customer` that is related to this `Order`."""
+  customerByCustomerId: Customer
+
+  """Reads a single `FulfillmentMethod` that is related to this `Order`."""
+  fulfillmentMethodByFulfillmentMethodId: FulfillmentMethod
 
   """An edge for our `Order`. May be used by Relay 1."""
   orderEdge(
@@ -7831,6 +8335,38 @@ input ChangePasswordInput {
   currentPassword: String
   newPassword: String
   userId: Int
+}
+
+"""The output of our `confirmOrder` mutation."""
+type ConfirmOrderPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+  integer: Int
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+}
+
+"""All input for the `confirmOrder` mutation."""
+input ConfirmOrderInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  articlesQuantities: [ArticleQuantityInput]
+  inputFulfillmentMethodId: Int
+}
+
+"""An input for mutations affecting `ArticleQuantity`"""
+input ArticleQuantityInput {
+  articleId: Int
+  quantity: BigFloat
 }
 
 """The output of our `createPasswordRecovery` mutation."""

@@ -4,24 +4,13 @@ import { useContext, ReactNode } from "react"
 import WarnIcon from '@mui/icons-material/WarningAmber'
 import { config } from "lib/uiCommon"
 import { CartItem, AppContext } from "../AppContextProvider"
-
-interface ArticleSaleInfo {
-    unitAbbreviation: string
-    stockName: string
-    productName: string
-    orderClosureDate: Date
-    fulfillmentDate: Date
-    containerName: string
-    disabledSalesSchedule: boolean
-    availableQuantity: number
-    articleLatestPrice: number
-    articleId: number
-    quantityPerContainer: number
-}
+import { ArticleSaleInfo, CartItemMessages } from "."
+import OrderLine from "../OrderLine"
 
 interface CartItemProps {
     article: CartItem
     articlesSalesInfo: ArticleSaleInfo[]
+    articlesMessages: {[articleId: number]:CartItemMessages[]}
 }
 
 interface OrderLineMessage {
@@ -33,73 +22,110 @@ interface OrderLineMessage {
     }[]
 }
 
-const makeOrderLineMessages = (appContext: AppContext, articleInCart: CartItem, articleSaleInfo?: ArticleSaleInfo): OrderLineMessage[] => {
+const makeOrderLineMessages = (appContext: AppContext, articleInCart: CartItem, articlesMessages: {[articleId: number]: CartItemMessages[]}, articleSaleInfo?: ArticleSaleInfo): OrderLineMessage[] => {
     const removeArticleAction = {
         name: 'Enlever l\'article',
         operation: (article: CartItem) => {
-            appContext.setCartArticles(appContext.data.cart.articles.filter(art => art.articleId !== article.articleId))
+            appContext.setCartArticles(appContext.data.cart.articles.map(art => {
+                if(art.articleId == article.articleId) {
+                    art.quantityOrdered = 0
+                } 
+                return art
+            }))
         },
     }
-    if(!articleSaleInfo) {
-        return [{
-            severity: "error",
-            message: `Cet article n'est plus vendu, désolé.`,
-            actions: [removeArticleAction]
-        }]
-    } else {
-        let messages = [] as OrderLineMessage[]
-        if(articleSaleInfo && articleSaleInfo.articleLatestPrice !== articleInCart.price) {
-            messages.push({
-                severity: articleSaleInfo.articleLatestPrice < articleInCart.price ? "info" : "warning",
-                message: `Le prix unitaire de cet article a changé: il est de ${articleSaleInfo.articleLatestPrice}€ (au lieu de ${articleInCart.price}€ précedemment).`,
-                actions: [{
-                    name: 'Utiliser le nouveau prix',
-                    operation: (article, articleSaleInfo) => { 
-                        appContext.setCartArticles(appContext.data.cart.articles.map(art => {
-                            if(art.articleId === article.articleId) {
-                                art.price = articleSaleInfo!.articleLatestPrice
-                            }
-                            return art
-                        })) 
+    if(articlesMessages[articleInCart.articleId] && articlesMessages[articleInCart.articleId].length > 0) {
+        return articlesMessages[articleInCart.articleId].map(articleMsg => {
+            switch(articleMsg) {
+                case CartItemMessages.NotSoldAnymore:
+                    return {
+                        severity: "error",
+                        message: `Cet article n'est plus vendu, désolé.`,
+                        actions: [removeArticleAction]
                     }
-                }, removeArticleAction]
-            })
-        }
-        return messages
+                case CartItemMessages.FulfillmentDateChanged:
+                    return {
+                        severity: "warning",
+                        message: `La date de retrait/livraison annoncée ne pourra pas être honorée: elle a changé vers le ${dayjs(articleSaleInfo!.fulfillmentDate).format(config.dateTimeFormat)} (au lieu du ${dayjs(articleInCart.fulfillmentDate).format(config.dateTimeFormat)} précedemment).`,
+                        actions: [{
+                            name: 'Utiliser la nouvelle date',
+                            operation: (article, articleSaleInfo) => { 
+                                appContext.setCartArticles(appContext.data.cart.articles.map(art => {
+                                    if(art.articleId === article.articleId) {
+                                        art.fulfillmentDate = articleSaleInfo!.fulfillmentDate
+                                    }
+                                    return art
+                                })) 
+                            }
+                        }, removeArticleAction]
+                    }
+                case CartItemMessages.PriceChanged:
+                    return {
+                        severity: articleSaleInfo!.articleLatestPrice < articleInCart.price ? "info" : "warning",
+                        message: `Le prix unitaire de cet article a changé: il est de ${articleSaleInfo!.articleLatestPrice}€ (au lieu de ${articleInCart.price}€ précedemment).`,
+                        actions: [{
+                            name: 'Utiliser le nouveau prix',
+                            operation: (article, articleSaleInfo) => { 
+                                appContext.setCartArticles(appContext.data.cart.articles.map(art => {
+                                    if(art.articleId === article.articleId) {
+                                        art.price = articleSaleInfo!.articleLatestPrice
+                                    }
+                                    return art
+                                })) 
+                            }
+                        }, removeArticleAction]
+                    }
+                case CartItemMessages.QuantityPerContainerChanged:
+                        return {
+                            severity: "warning",
+                            message: `La quantité par contenant de cet article a changé: il est de ${articleSaleInfo!.quantityPerContainer} (au lieu de ${articleInCart.quantityPerContainer} précedemment). Le prix passe de ${articleInCart.price}€ à ${articleSaleInfo!.articleLatestPrice}€`,
+                            actions: [{
+                                name: 'Utiliser le nouveau conditionnement',
+                                operation: (article, articleSaleInfo) => { 
+                                    appContext.setCartArticles(appContext.data.cart.articles.map(art => {
+                                        if(art.articleId === article.articleId) {
+                                            art.quantityPerContainer = articleSaleInfo!.quantityPerContainer
+                                            art.price = articleSaleInfo!.articleLatestPrice
+                                        }
+                                        return art
+                                    })) 
+                                }
+                            }, removeArticleAction] 
+                        }
+                case CartItemMessages.InsufficientStock:
+                    return {
+                        severity: "warning",
+                        message: `Vous avez demandé ${articleInCart.quantityOrdered} unités, mais il n'en reste que ${articleSaleInfo!.availableQuantity}`,
+                        actions: [{
+                            name: "Commander le maximum",
+                            operation: (article, articleSaleInfo) => {
+                                appContext.setCartArticles(appContext.data.cart.articles.map(art => {
+                                    if(art.articleId === article.articleId) {
+                                        art.quantityOrdered = articleSaleInfo!.availableQuantity
+                                    }
+                                    return art
+                                }))
+                            }
+                        }, removeArticleAction]
+                    }
+                default:
+                    throw new Error('Unexpected message type')
+            }
+        })
+    } else {
+        return []
     }
+
 }
 
-const CartItemRow = ({ article, articlesSalesInfo }: CartItemProps) => {
+const CartItemRow = ({ article, articlesSalesInfo, articlesMessages }: CartItemProps) => {
     const appContext = useContext(AppContext)
     const articleSaleInfo = articlesSalesInfo.find(art => art.articleId === article.articleId)
     
-    let orderLineComponent = undefined as ReactNode | undefined
-    const orderLineMessages = makeOrderLineMessages(appContext, article, articleSaleInfo)
-    if(!articleSaleInfo) {
-        orderLineComponent = <Stack direction="row" columnGap="0.5rem">
-            <Typography sx={{ flex: '6 1' }} variant="body1">{article.productName} {article.stockName && ' - ' + article.stockName}</Typography>
-            <Typography sx={{ flex: '4 1' }} variant="body1">{`${article.containerName}, ${article.quantityPerContainer} ${article.unitAbbreviation}`}</Typography>
-            <Typography sx={{ flex: '1 1' }} variant="body1">{article.fulfillmentDate && dayjs(article.fulfillmentDate).format(config.dateTimeFormat)}</Typography>
-            <Typography sx={{ flex: '1 1', textAlign: 'right' }} variant="body1">{article.price && `${article.price}€`}</Typography>
-            <Typography sx={{ flex: '2 1' }} alignItems="flex-end" variant="body1">{article.quantityOrdered}</Typography>
-        </Stack>
-    } else {
-        orderLineComponent = <Stack direction="row" columnGap="0.5rem">
-            <Typography sx={{ flex: '6 1' }} variant="body1">{article.productName} {article.stockName && ' - ' + article.stockName}</Typography>
-            <Typography sx={{ flex: '4 1' }} variant="body1">{`${article.containerName}, ${article.quantityPerContainer} ${article.unitAbbreviation}`}</Typography>
-            <Typography sx={{ flex: '1 1' }} variant="body1">{article.fulfillmentDate && dayjs(article.fulfillmentDate).format(config.dateTimeFormat)}</Typography>
-            <Typography sx={{ flex: '1 1', textAlign: 'right' }} variant="body1">{article.price && `${article.price}€`}</Typography>
-            <Stack direction="column" sx={{ flex: '2 1' }} alignItems="flex-end">
-                <Typography variant="body1">{article.quantityOrdered <= articleSaleInfo.availableQuantity ? 
-                    article.quantityOrdered : 
-                    <span><WarnIcon color="warning" />{articleSaleInfo.availableQuantity}</span>
-                }</Typography>
-            </Stack>
-        </Stack>
-    }
+    const orderLineMessages = makeOrderLineMessages(appContext, article, articlesMessages, articleSaleInfo)
     return <Stack>
-        {orderLineComponent}
-        {orderLineMessages && <List>
+        <OrderLine article={article} />
+        {orderLineMessages && orderLineMessages.length > 0 && <List>
             {orderLineMessages.map((msg, idx) => <ListItem key={idx} sx={{ flexDirection: 'column' }}>
                 <Alert severity={msg.severity} sx={{ flex: 1 }}>
                     <Stack alignItems="center" gap="0.5rem">

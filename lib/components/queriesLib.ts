@@ -62,7 +62,7 @@ export const updateContact =  gql`mutation UpdateContact($addressLine1: String, 
 }`
 
 export const availableArticles = gql`query Articles {
-  articlesAvailable {
+  getAvailableArticles {
     nodes {
       articleId
       containerName
