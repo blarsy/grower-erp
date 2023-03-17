@@ -684,7 +684,9 @@ ALTER FUNCTION erp.filter_contacts(search_term character varying) OWNER TO postg
 CREATE TABLE erp.containers (
     id integer NOT NULL,
     name character varying NOT NULL,
-    description character varying NOT NULL
+    description character varying NOT NULL,
+    refund_price money DEFAULT 0 NOT NULL,
+    refund_tax_rate numeric DEFAULT 0 NOT NULL
 );
 
 
@@ -931,6 +933,18 @@ $$;
 
 
 ALTER FUNCTION erp.get_customer_session_data() OWNER TO postgres;
+
+--
+-- Name: get_default_tax_rate(); Type: FUNCTION; Schema: erp; Owner: postgres
+--
+
+CREATE FUNCTION erp.get_default_tax_rate() RETURNS numeric
+    LANGUAGE sql STABLE
+    AS $$SELECT default_tax_rate
+FROM erp.settings$$;
+
+
+ALTER FUNCTION erp.get_default_tax_rate() OWNER TO postgres;
 
 --
 -- Name: get_password_hash_salt(character varying); Type: FUNCTION; Schema: erp; Owner: postgres
@@ -1185,6 +1199,46 @@ $$;
 ALTER FUNCTION erp.register_user(updated_firstname character varying, updated_lastname character varying, invitation_id integer, password character varying) OWNER TO postgres;
 
 --
+-- Name: set_owner(integer); Type: FUNCTION; Schema: erp; Owner: postgres
+--
+
+CREATE FUNCTION erp.set_owner(input_owner_id integer) RETURNS void
+    LANGUAGE plpgsql
+    AS $$BEGIN
+	IF EXISTS (SELECT * FROM erp.settings) THEN
+		UPDATE erp.settings SET "ownerId" = input_owner_id
+		WHERE id = 1;
+	ELSE
+		INSERT INTO erp.settings (id, "ownerId") 
+		VALUES (1, input_owner_id);
+	END IF;
+END;$$;
+
+
+ALTER FUNCTION erp.set_owner(input_owner_id integer) OWNER TO postgres;
+
+--
+-- Name: set_settings(numeric); Type: FUNCTION; Schema: erp; Owner: postgres
+--
+
+CREATE FUNCTION erp.set_settings(input_default_tax_rate numeric) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	IF EXISTS (SELECT * FROM erp.settings) THEN
+		UPDATE erp.settings SET default_tax_rate = input_default_tax_rate
+		WHERE id = 1;
+	ELSE
+		INSERT INTO erp.settings (id, default_tax_rate) 
+		VALUES (1, input_default_tax_rate);
+	END IF;
+END;
+$$;
+
+
+ALTER FUNCTION erp.set_settings(input_default_tax_rate numeric) OWNER TO postgres;
+
+--
 -- Name: update_pricelist_customers_categories(integer[], integer); Type: FUNCTION; Schema: erp; Owner: postgres
 --
 
@@ -1326,7 +1380,8 @@ CREATE TABLE erp.articles (
     id integer NOT NULL,
     "stockShapeId" integer NOT NULL,
     "containerId" integer NOT NULL,
-    "quantityPerContainer" numeric NOT NULL
+    "quantityPerContainer" numeric NOT NULL,
+    tax_rate numeric DEFAULT erp.get_default_tax_rate() NOT NULL
 );
 
 
@@ -1730,31 +1785,24 @@ ALTER SEQUENCE erp.sales_schedules_id_seq OWNED BY erp.sales_schedules.id;
 
 
 --
--- Name: settings_id_seq; Type: SEQUENCE; Schema: erp; Owner: postgres
---
-
-CREATE SEQUENCE erp.settings_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE erp.settings_id_seq OWNER TO postgres;
-
---
 -- Name: settings; Type: TABLE; Schema: erp; Owner: postgres
 --
 
 CREATE TABLE erp.settings (
     "ownerId" integer NOT NULL,
-    id integer DEFAULT nextval('erp.settings_id_seq'::regclass) NOT NULL
+    id integer NOT NULL,
+    default_tax_rate numeric DEFAULT 6 NOT NULL
 );
 
 
 ALTER TABLE erp.settings OWNER TO postgres;
+
+--
+-- Name: TABLE settings; Type: COMMENT; Schema: erp; Owner: postgres
+--
+
+COMMENT ON TABLE erp.settings IS '@omit create,update,delete';
+
 
 --
 -- Name: stock_shapes_id_seq; Type: SEQUENCE; Schema: erp; Owner: postgres
@@ -2392,7 +2440,7 @@ ALTER TABLE ONLY erp.products
 --
 
 ALTER TABLE ONLY erp.settings
-    ADD CONSTRAINT fk_settings_companies FOREIGN KEY ("ownerId") REFERENCES erp.companies(id) NOT VALID;
+    ADD CONSTRAINT fk_settings_companies FOREIGN KEY ("ownerId") REFERENCES erp.companies(id);
 
 
 --
@@ -2760,6 +2808,14 @@ GRANT ALL ON FUNCTION erp.get_customer_session_data() TO administrator;
 
 
 --
+-- Name: FUNCTION get_default_tax_rate(); Type: ACL; Schema: erp; Owner: postgres
+--
+
+REVOKE ALL ON FUNCTION erp.get_default_tax_rate() FROM PUBLIC;
+GRANT ALL ON FUNCTION erp.get_default_tax_rate() TO administrator;
+
+
+--
 -- Name: FUNCTION get_password_hash_salt(password character varying, OUT hash character varying, OUT salt character varying); Type: ACL; Schema: erp; Owner: postgres
 --
 
@@ -2835,6 +2891,14 @@ GRANT ALL ON FUNCTION erp.recover_password(recovery_code character varying, new_
 
 GRANT ALL ON FUNCTION erp.register_user(updated_firstname character varying, updated_lastname character varying, invitation_id integer, password character varying) TO administrator;
 GRANT ALL ON FUNCTION erp.register_user(updated_firstname character varying, updated_lastname character varying, invitation_id integer, password character varying) TO anonymous;
+
+
+--
+-- Name: FUNCTION set_owner(input_owner_id integer); Type: ACL; Schema: erp; Owner: postgres
+--
+
+REVOKE ALL ON FUNCTION erp.set_owner(input_owner_id integer) FROM PUBLIC;
+GRANT ALL ON FUNCTION erp.set_owner(input_owner_id integer) TO administrator;
 
 
 --
@@ -3027,19 +3091,12 @@ GRANT USAGE ON SEQUENCE erp.sales_schedules_id_seq TO administrator;
 
 
 --
--- Name: SEQUENCE settings_id_seq; Type: ACL; Schema: erp; Owner: postgres
---
-
-GRANT USAGE ON SEQUENCE erp.settings_id_seq TO administrator;
-
-
---
 -- Name: TABLE settings; Type: ACL; Schema: erp; Owner: postgres
 --
 
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.settings TO administrator;
-GRANT SELECT ON TABLE erp.settings TO identified_customer;
 GRANT SELECT ON TABLE erp.settings TO anonymous;
+GRANT SELECT ON TABLE erp.settings TO identified_customer;
 
 
 --
