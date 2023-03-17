@@ -992,6 +992,7 @@ type Query implements Node {
   ): ArticleForSalesConnection
   getCurrentUser: Contact
   getCustomerSessionData: CustomerSessionDatum
+  getDefaultTaxRate: BigFloat
   getSessionData: SessionDatum
 
   """Reads and enables pagination through a set of `Order`."""
@@ -1324,6 +1325,7 @@ type Article implements Node {
   stockShapeId: Int!
   containerId: Int!
   quantityPerContainer: BigFloat!
+  taxRate: BigFloat!
 
   """Reads a single `StockShape` that is related to this `Article`."""
   stockShapeByStockShapeId: StockShape
@@ -1657,6 +1659,8 @@ enum ArticlesOrderBy {
   CONTAINER_ID_DESC
   QUANTITY_PER_CONTAINER_ASC
   QUANTITY_PER_CONTAINER_DESC
+  TAX_RATE_ASC
+  TAX_RATE_DESC
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
 }
@@ -1676,6 +1680,9 @@ input ArticleCondition {
 
   """Checks for equality with the object’s `quantityPerContainer` field."""
   quantityPerContainer: BigFloat
+
+  """Checks for equality with the object’s `taxRate` field."""
+  taxRate: BigFloat
 }
 
 type Container implements Node {
@@ -1686,6 +1693,8 @@ type Container implements Node {
   id: Int!
   name: String!
   description: String!
+  refundPrice: Float!
+  refundTaxRate: BigFloat!
 
   """Reads and enables pagination through a set of `Article`."""
   articlesByContainerId(
@@ -3396,6 +3405,7 @@ type Setting implements Node {
   nodeId: ID!
   ownerId: Int!
   id: Int!
+  defaultTaxRate: BigFloat!
 
   """Reads a single `Company` that is related to this `Setting`."""
   companyByOwnerId: Company
@@ -3417,6 +3427,8 @@ enum SettingsOrderBy {
   OWNER_ID_DESC
   ID_ASC
   ID_DESC
+  DEFAULT_TAX_RATE_ASC
+  DEFAULT_TAX_RATE_DESC
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
 }
@@ -3430,6 +3442,9 @@ input SettingCondition {
 
   """Checks for equality with the object’s `id` field."""
   id: Int
+
+  """Checks for equality with the object’s `defaultTaxRate` field."""
+  defaultTaxRate: BigFloat
 }
 
 """A `Company` edge in the connection."""
@@ -3476,6 +3491,10 @@ enum ContainersOrderBy {
   NAME_DESC
   DESCRIPTION_ASC
   DESCRIPTION_DESC
+  REFUND_PRICE_ASC
+  REFUND_PRICE_DESC
+  REFUND_TAX_RATE_ASC
+  REFUND_TAX_RATE_DESC
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
 }
@@ -3493,6 +3512,12 @@ input ContainerCondition {
 
   """Checks for equality with the object’s `description` field."""
   description: String
+
+  """Checks for equality with the object’s `refundPrice` field."""
+  refundPrice: Float
+
+  """Checks for equality with the object’s `refundTaxRate` field."""
+  refundTaxRate: BigFloat
 }
 
 """A connection to a list of `CustomersCategory` values."""
@@ -4111,14 +4136,6 @@ type Mutation {
     input: CreateSalesSchedulesFulfillmentMethodInput!
   ): CreateSalesSchedulesFulfillmentMethodPayload
 
-  """Creates a single `Setting`."""
-  createSetting(
-    """
-    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
-    """
-    input: CreateSettingInput!
-  ): CreateSettingPayload
-
   """Creates a single `StockShape`."""
   createStockShape(
     """
@@ -4412,22 +4429,6 @@ type Mutation {
     """
     input: UpdateSalesSchedulesFulfillmentMethodByIdInput!
   ): UpdateSalesSchedulesFulfillmentMethodPayload
-
-  """Updates a single `Setting` using its globally unique id and a patch."""
-  updateSetting(
-    """
-    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
-    """
-    input: UpdateSettingInput!
-  ): UpdateSettingPayload
-
-  """Updates a single `Setting` using a unique key and a patch."""
-  updateSettingById(
-    """
-    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
-    """
-    input: UpdateSettingByIdInput!
-  ): UpdateSettingPayload
 
   """
   Updates a single `StockShape` using its globally unique id and a patch.
@@ -4747,22 +4748,6 @@ type Mutation {
     input: DeleteSalesSchedulesFulfillmentMethodByIdInput!
   ): DeleteSalesSchedulesFulfillmentMethodPayload
 
-  """Deletes a single `Setting` using its globally unique id."""
-  deleteSetting(
-    """
-    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
-    """
-    input: DeleteSettingInput!
-  ): DeleteSettingPayload
-
-  """Deletes a single `Setting` using a unique key."""
-  deleteSettingById(
-    """
-    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
-    """
-    input: DeleteSettingByIdInput!
-  ): DeleteSettingPayload
-
   """Deletes a single `StockShape` using its globally unique id."""
   deleteStockShape(
     """
@@ -4914,6 +4899,18 @@ type Mutation {
     """
     input: RegisterUserInput!
   ): RegisterUserPayload
+  setOwner(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: SetOwnerInput!
+  ): SetOwnerPayload
+  setSettings(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: SetSettingsInput!
+  ): SetSettingsPayload
   updatePricelistCustomersCategories(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -4975,6 +4972,7 @@ input ArticleInput {
   stockShapeId: Int!
   containerId: Int!
   quantityPerContainer: BigFloat!
+  taxRate: BigFloat
 }
 
 """The output of our create `ArticlesPrice` mutation."""
@@ -5168,6 +5166,8 @@ input ContainerInput {
   id: Int
   name: String!
   description: String!
+  refundPrice: Float
+  refundTaxRate: BigFloat
 }
 
 """The output of our create `Customer` mutation."""
@@ -5657,50 +5657,6 @@ input SalesSchedulesFulfillmentMethodInput {
   fulfillmentMethodId: Int!
 }
 
-"""The output of our create `Setting` mutation."""
-type CreateSettingPayload {
-  """
-  The exact same `clientMutationId` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
-  """
-  clientMutationId: String
-
-  """The `Setting` that was created by this mutation."""
-  setting: Setting
-
-  """
-  Our root query field type. Allows us to run any query from our mutation payload.
-  """
-  query: Query
-
-  """Reads a single `Company` that is related to this `Setting`."""
-  companyByOwnerId: Company
-
-  """An edge for our `Setting`. May be used by Relay 1."""
-  settingEdge(
-    """The method to use when ordering `Setting`."""
-    orderBy: [SettingsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): SettingsEdge
-}
-
-"""All input for the create `Setting` mutation."""
-input CreateSettingInput {
-  """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
-  """
-  clientMutationId: String
-
-  """The `Setting` to be created by this mutation."""
-  setting: SettingInput!
-}
-
-"""An input for mutations affecting `Setting`"""
-input SettingInput {
-  ownerId: Int!
-  id: Int
-}
-
 """The output of our create `StockShape` mutation."""
 type CreateStockShapePayload {
   """
@@ -5896,6 +5852,7 @@ input ArticlePatch {
   stockShapeId: Int
   containerId: Int
   quantityPerContainer: BigFloat
+  taxRate: BigFloat
 }
 
 """All input for the `updateArticleById` mutation."""
@@ -6251,6 +6208,8 @@ input ContainerPatch {
   id: Int
   name: String
   description: String
+  refundPrice: Float
+  refundTaxRate: BigFloat
 }
 
 """All input for the `updateContainerById` mutation."""
@@ -6925,74 +6884,6 @@ input UpdateSalesSchedulesFulfillmentMethodByIdInput {
   An object where the defined keys will be set on the `SalesSchedulesFulfillmentMethod` being updated.
   """
   salesSchedulesFulfillmentMethodPatch: SalesSchedulesFulfillmentMethodPatch!
-  id: Int!
-}
-
-"""The output of our update `Setting` mutation."""
-type UpdateSettingPayload {
-  """
-  The exact same `clientMutationId` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
-  """
-  clientMutationId: String
-
-  """The `Setting` that was updated by this mutation."""
-  setting: Setting
-
-  """
-  Our root query field type. Allows us to run any query from our mutation payload.
-  """
-  query: Query
-
-  """Reads a single `Company` that is related to this `Setting`."""
-  companyByOwnerId: Company
-
-  """An edge for our `Setting`. May be used by Relay 1."""
-  settingEdge(
-    """The method to use when ordering `Setting`."""
-    orderBy: [SettingsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): SettingsEdge
-}
-
-"""All input for the `updateSetting` mutation."""
-input UpdateSettingInput {
-  """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
-  """
-  clientMutationId: String
-
-  """
-  The globally unique `ID` which will identify a single `Setting` to be updated.
-  """
-  nodeId: ID!
-
-  """
-  An object where the defined keys will be set on the `Setting` being updated.
-  """
-  settingPatch: SettingPatch!
-}
-
-"""
-Represents an update to a `Setting`. Fields that are set will be updated.
-"""
-input SettingPatch {
-  ownerId: Int
-  id: Int
-}
-
-"""All input for the `updateSettingById` mutation."""
-input UpdateSettingByIdInput {
-  """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
-  """
-  clientMutationId: String
-
-  """
-  An object where the defined keys will be set on the `Setting` being updated.
-  """
-  settingPatch: SettingPatch!
   id: Int!
 }
 
@@ -8002,57 +7893,6 @@ input DeleteSalesSchedulesFulfillmentMethodByIdInput {
   id: Int!
 }
 
-"""The output of our delete `Setting` mutation."""
-type DeleteSettingPayload {
-  """
-  The exact same `clientMutationId` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
-  """
-  clientMutationId: String
-
-  """The `Setting` that was deleted by this mutation."""
-  setting: Setting
-  deletedSettingId: ID
-
-  """
-  Our root query field type. Allows us to run any query from our mutation payload.
-  """
-  query: Query
-
-  """Reads a single `Company` that is related to this `Setting`."""
-  companyByOwnerId: Company
-
-  """An edge for our `Setting`. May be used by Relay 1."""
-  settingEdge(
-    """The method to use when ordering `Setting`."""
-    orderBy: [SettingsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): SettingsEdge
-}
-
-"""All input for the `deleteSetting` mutation."""
-input DeleteSettingInput {
-  """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
-  """
-  clientMutationId: String
-
-  """
-  The globally unique `ID` which will identify a single `Setting` to be deleted.
-  """
-  nodeId: ID!
-}
-
-"""All input for the `deleteSettingById` mutation."""
-input DeleteSettingByIdInput {
-  """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
-  """
-  clientMutationId: String
-  id: Int!
-}
-
 """The output of our delete `StockShape` mutation."""
 type DeleteStockShapePayload {
   """
@@ -8680,6 +8520,54 @@ input RegisterUserInput {
   updatedLastname: String
   invitationId: Int
   password: String
+}
+
+"""The output of our `setOwner` mutation."""
+type SetOwnerPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+}
+
+"""All input for the `setOwner` mutation."""
+input SetOwnerInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  inputOwnerId: Int
+}
+
+"""The output of our `setSettings` mutation."""
+type SetSettingsPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+}
+
+"""All input for the `setSettings` mutation."""
+input SetSettingsInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  inputDefaultTaxRate: BigFloat
 }
 
 """The output of our `updatePricelistCustomersCategories` mutation."""

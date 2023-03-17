@@ -3,15 +3,16 @@ import { gql } from "@apollo/client";
 export const owner = gql`query Owner {
     allSettings {
       nodes {
-      companyByOwnerId {
-        addressLine1
-        addressLine2
-        city
-        companyNumber
-        id
-        name
-        zipCode
-      }
+        companyByOwnerId {
+          addressLine1
+          addressLine2
+          city
+          companyNumber
+          id
+          name
+          zipCode
+        }
+        defaultTaxRate
     }
   }}`
 
@@ -76,5 +77,13 @@ export const availableArticles = gql`query Articles {
       fulfillmentDate
       orderClosureDate
     }
+  }
+}`
+
+export const setSettings = gql`mutation SetSettings($defaultTaxRate: BigFloat) {
+  setSettings(
+    input: {inputDefaultTaxRate: $defaultTaxRate}
+  ) {
+    clientMutationId
   }
 }`

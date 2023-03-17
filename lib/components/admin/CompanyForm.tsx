@@ -48,7 +48,7 @@ const CompanyForm = ({data, updateQuery, createQuery}: Props) => {
             name: yup.string().required('Ce champ est requis'),
             addressLine1: yup.string().nullable(),
             addressLine2: yup.string().nullable(),
-            zipCode: yup.string().nullable().matches(/\w{4,7}/, 'Veuille entrer entre 4 et 7 caractères.'),
+            zipCode: yup.string().nullable().matches(/\w{4,7}/, 'Veuillez entrer entre 4 et 7 caractères.'),
             city: yup.string().nullable(),
             companyNumber: yup.string().nullable().test({
                 test: val => {
@@ -59,14 +59,14 @@ const CompanyForm = ({data, updateQuery, createQuery}: Props) => {
         })} onSubmit={async (values) => {
             if(values.id) {
                 const result = await update({ variables: { id: values.id, 
-                    companyNumber: values.companyNumber, name: values.name, 
+                    companyNumber: values.companyNumber || undefined, name: values.name, 
                     addressLine1: values.addressLine1, addressLine2: values.addressLine2,
                     zipCode: values.zipCode, city: values.city }})
                 setCompanyData(result.data.updateCompanyById)
             } else {
                 if(create) {
                     const result = await create({ variables: { 
-                        companyNumber: values.companyNumber, name: values.name, 
+                        companyNumber: values.companyNumber || undefined, name: values.name, 
                         addressLine1: values.addressLine1, addressLine2: values.addressLine2,
                         zipCode: values.zipCode, city: values.city }})
                     setCompanyData(result.data.company)
