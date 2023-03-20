@@ -23,6 +23,9 @@ interface ArticleForSale {
     quantityOrdered: number
     fulfillmentDate: Date
     orderClosureDate: Date
+    articleTaxRate: number
+    containerRefundPrice: number
+    containerRefundTaxRate: number
 }
 
 interface FormValues {
@@ -56,7 +59,7 @@ const OrderLines = () => {
     
     return <Stack>
         <Stack direction="row" columnGap="0.5rem">
-            <Typography sx={{ flex: '6 1' }} variant="overline">Produit</Typography>
+            <Typography sx={{ flex: '4 1' }} variant="overline">Produit</Typography>
             <Typography sx={{ flex: '4 1' }} variant="overline">Conditionnement</Typography>
             <Typography sx={{ flex: '1 1' }} variant="overline">Disponibles</Typography>
             <Typography sx={{ flex: '1 1', textAlign: 'right' }} variant="overline">Prix</Typography>

@@ -992,6 +992,7 @@ type Query implements Node {
   ): ArticleForSalesConnection
   getCurrentUser: Contact
   getCustomerSessionData: CustomerSessionDatum
+  getDefaultContainerRefundTaxRate: BigFloat
   getDefaultTaxRate: BigFloat
   getSessionData: SessionDatum
 
@@ -2137,6 +2138,35 @@ type FulfillmentMethod implements Node {
   needsPickupAddress: Boolean!
   needsCustomerAddress: Boolean!
 
+  """Reads and enables pagination through a set of `Order`."""
+  ordersByFulfillmentMethodId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Order`."""
+    orderBy: [OrdersOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: OrderCondition
+  ): OrdersConnection!
+
   """
   Reads and enables pagination through a set of `SalesSchedulesFulfillmentMethod`.
   """
@@ -2167,35 +2197,38 @@ type FulfillmentMethod implements Node {
     """
     condition: SalesSchedulesFulfillmentMethodCondition
   ): SalesSchedulesFulfillmentMethodsConnection!
+}
 
-  """Reads and enables pagination through a set of `Order`."""
-  ordersByFulfillmentMethodId(
-    """Only read the first `n` values of the set."""
-    first: Int
+"""Methods to use when ordering `Order`."""
+enum OrdersOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  CONFIRMATION_DATE_ASC
+  CONFIRMATION_DATE_DESC
+  CUSTOMER_ID_ASC
+  CUSTOMER_ID_DESC
+  FULFILLMENT_METHOD_ID_ASC
+  FULFILLMENT_METHOD_ID_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
 
-    """Only read the last `n` values of the set."""
-    last: Int
+"""
+A condition to be used against `Order` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input OrderCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
 
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
+  """Checks for equality with the object’s `confirmationDate` field."""
+  confirmationDate: Datetime
 
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
+  """Checks for equality with the object’s `customerId` field."""
+  customerId: Int
 
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering `Order`."""
-    orderBy: [OrdersOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: OrderCondition
-  ): OrdersConnection!
+  """Checks for equality with the object’s `fulfillmentMethodId` field."""
+  fulfillmentMethodId: Int
 }
 
 """A connection to a list of `SalesSchedulesFulfillmentMethod` values."""
@@ -2425,38 +2458,6 @@ type SalesSchedulesFulfillmentMethodsEdge {
 
   """The `SalesSchedulesFulfillmentMethod` at the end of the edge."""
   node: SalesSchedulesFulfillmentMethod!
-}
-
-"""Methods to use when ordering `Order`."""
-enum OrdersOrderBy {
-  NATURAL
-  ID_ASC
-  ID_DESC
-  CONFIRMATION_DATE_ASC
-  CONFIRMATION_DATE_DESC
-  CUSTOMER_ID_ASC
-  CUSTOMER_ID_DESC
-  FULFILLMENT_METHOD_ID_ASC
-  FULFILLMENT_METHOD_ID_DESC
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""
-A condition to be used against `Order` object types. All fields are tested for equality and combined with a logical ‘and.’
-"""
-input OrderCondition {
-  """Checks for equality with the object’s `id` field."""
-  id: Int
-
-  """Checks for equality with the object’s `confirmationDate` field."""
-  confirmationDate: Datetime
-
-  """Checks for equality with the object’s `customerId` field."""
-  customerId: Int
-
-  """Checks for equality with the object’s `fulfillmentMethodId` field."""
-  fulfillmentMethodId: Int
 }
 
 """A connection to a list of `OrderLine` values."""
@@ -2760,6 +2761,9 @@ type ArticlesForOrder {
   productId: Int
   price: Float
   customersCategoryId: Int
+  articleTaxRate: BigFloat
+  containerRefundPrice: Float
+  containerRefundTaxRate: BigFloat
 }
 
 """A `ArticlesForOrder` edge in the connection."""
@@ -2802,6 +2806,12 @@ enum ArticlesForOrdersOrderBy {
   PRICE_DESC
   CUSTOMERS_CATEGORY_ID_ASC
   CUSTOMERS_CATEGORY_ID_DESC
+  ARTICLE_TAX_RATE_ASC
+  ARTICLE_TAX_RATE_DESC
+  CONTAINER_REFUND_PRICE_ASC
+  CONTAINER_REFUND_PRICE_DESC
+  CONTAINER_REFUND_TAX_RATE_ASC
+  CONTAINER_REFUND_TAX_RATE_DESC
 }
 
 """
@@ -2850,6 +2860,15 @@ input ArticlesForOrderCondition {
 
   """Checks for equality with the object’s `customersCategoryId` field."""
   customersCategoryId: Int
+
+  """Checks for equality with the object’s `articleTaxRate` field."""
+  articleTaxRate: BigFloat
+
+  """Checks for equality with the object’s `containerRefundPrice` field."""
+  containerRefundPrice: Float
+
+  """Checks for equality with the object’s `containerRefundTaxRate` field."""
+  containerRefundTaxRate: BigFloat
 }
 
 """A connection to a list of `Company` values."""
@@ -3406,6 +3425,7 @@ type Setting implements Node {
   ownerId: Int!
   id: Int!
   defaultTaxRate: BigFloat!
+  defaultContainerRefundTaxRate: BigFloat!
 
   """Reads a single `Company` that is related to this `Setting`."""
   companyByOwnerId: Company
@@ -3429,6 +3449,8 @@ enum SettingsOrderBy {
   ID_DESC
   DEFAULT_TAX_RATE_ASC
   DEFAULT_TAX_RATE_DESC
+  DEFAULT_CONTAINER_REFUND_TAX_RATE_ASC
+  DEFAULT_CONTAINER_REFUND_TAX_RATE_DESC
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
 }
@@ -3445,6 +3467,11 @@ input SettingCondition {
 
   """Checks for equality with the object’s `defaultTaxRate` field."""
   defaultTaxRate: BigFloat
+
+  """
+  Checks for equality with the object’s `defaultContainerRefundTaxRate` field.
+  """
+  defaultContainerRefundTaxRate: BigFloat
 }
 
 """A `Company` edge in the connection."""
@@ -3959,6 +3986,9 @@ type ArticleForSale {
   articleId: Int
   orderClosureDate: Datetime
   fulfillmentDate: Datetime
+  articleTaxRate: BigFloat
+  containerRefundPrice: Float
+  containerRefundTaxRate: BigFloat
 }
 
 """A `ArticleForSale` edge in the connection."""
@@ -8568,6 +8598,7 @@ input SetSettingsInput {
   """
   clientMutationId: String
   inputDefaultTaxRate: BigFloat
+  inputDefaultContainerRefundTaxRate: BigFloat
 }
 
 """The output of our `updatePricelistCustomersCategories` mutation."""

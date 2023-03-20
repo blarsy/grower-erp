@@ -63,7 +63,10 @@ CREATE TYPE erp.article_for_sale AS (
 	available integer,
 	article_id integer,
 	order_closure_date timestamp without time zone,
-	fulfillment_date timestamp without time zone
+	fulfillment_date timestamp without time zone,
+	article_tax_rate numeric,
+	container_refund_price money,
+	container_refund_tax_rate numeric
 );
 
 
@@ -678,6 +681,19 @@ $$;
 ALTER FUNCTION erp.filter_contacts(search_term character varying) OWNER TO postgres;
 
 --
+-- Name: get_default_container_refund_tax_rate(); Type: FUNCTION; Schema: erp; Owner: postgres
+--
+
+CREATE FUNCTION erp.get_default_container_refund_tax_rate() RETURNS numeric
+    LANGUAGE sql STABLE
+    AS $$SELECT default_container_refund_tax_rate
+FROM erp.settings
+WHERE id = 1$$;
+
+
+ALTER FUNCTION erp.get_default_container_refund_tax_rate() OWNER TO postgres;
+
+--
 -- Name: containers; Type: TABLE; Schema: erp; Owner: postgres
 --
 
@@ -686,7 +702,7 @@ CREATE TABLE erp.containers (
     name character varying NOT NULL,
     description character varying NOT NULL,
     refund_price money DEFAULT 0 NOT NULL,
-    refund_tax_rate numeric DEFAULT 0 NOT NULL
+    refund_tax_rate numeric DEFAULT erp.get_default_container_refund_tax_rate() NOT NULL
 );
 
 
@@ -891,7 +907,8 @@ CREATE FUNCTION erp.get_available_articles() RETURNS SETOF erp.article_for_sale
     AS $$
 SELECT cc.vat_included, ao.price, ao.quantity_per_container, ao.stock_shape_name,
 ao.unit_abbreviation, ao.product_name, ao.container_name, ao.in_stock as available,
-ao.article_id, ass.order_closure_date, ass.fulfillment_date
+ao.article_id, ass.order_closure_date, ass.fulfillment_date, ao.article_tax_rate, 
+ao.container_refund_price, ao.container_refund_tax_rate
 FROM erp.customers_categories cc
 INNER JOIN erp.articles_for_orders ao ON ao.customers_category_id = cc.id
 INNER JOIN erp.active_sales_schedules ass ON ass.customers_category_id = cc.id
@@ -1218,25 +1235,26 @@ END;$$;
 ALTER FUNCTION erp.set_owner(input_owner_id integer) OWNER TO postgres;
 
 --
--- Name: set_settings(numeric); Type: FUNCTION; Schema: erp; Owner: postgres
+-- Name: set_settings(numeric, numeric); Type: FUNCTION; Schema: erp; Owner: postgres
 --
 
-CREATE FUNCTION erp.set_settings(input_default_tax_rate numeric) RETURNS void
+CREATE FUNCTION erp.set_settings(input_default_tax_rate numeric, input_default_container_refund_tax_rate numeric) RETURNS void
     LANGUAGE plpgsql
     AS $$
 BEGIN
 	IF EXISTS (SELECT * FROM erp.settings) THEN
-		UPDATE erp.settings SET default_tax_rate = input_default_tax_rate
+		UPDATE erp.settings SET default_tax_rate = input_default_tax_rate, 
+			default_container_refund_tax_rate = input_default_container_refund_tax_rate
 		WHERE id = 1;
 	ELSE
-		INSERT INTO erp.settings (id, default_tax_rate) 
-		VALUES (1, input_default_tax_rate);
+		INSERT INTO erp.settings (id, default_tax_rate, default_container_refund_tax_rate) 
+		VALUES (1, input_default_tax_rate, input_default_container_refund_tax_rate);
 	END IF;
 END;
 $$;
 
 
-ALTER FUNCTION erp.set_settings(input_default_tax_rate numeric) OWNER TO postgres;
+ALTER FUNCTION erp.set_settings(input_default_tax_rate numeric, input_default_container_refund_tax_rate numeric) OWNER TO postgres;
 
 --
 -- Name: update_pricelist_customers_categories(integer[], integer); Type: FUNCTION; Schema: erp; Owner: postgres
@@ -1469,7 +1487,10 @@ CREATE VIEW erp.articles_for_orders AS
     p.name AS product_name,
     p.id AS product_id,
     ap.price,
-    plcc.customers_category_id
+    plcc.customers_category_id,
+    a.tax_rate AS article_tax_rate,
+    c.refund_price AS container_refund_price,
+    c.refund_tax_rate AS container_refund_tax_rate
    FROM ((((((erp.articles a
      JOIN erp.containers c ON ((a."containerId" = c.id)))
      JOIN erp.stock_shapes ss ON ((a."stockShapeId" = ss.id)))
@@ -1791,7 +1812,8 @@ ALTER SEQUENCE erp.sales_schedules_id_seq OWNED BY erp.sales_schedules.id;
 CREATE TABLE erp.settings (
     "ownerId" integer NOT NULL,
     id integer NOT NULL,
-    default_tax_rate numeric DEFAULT 6 NOT NULL
+    default_tax_rate numeric DEFAULT 6 NOT NULL,
+    default_container_refund_tax_rate numeric DEFAULT 0 NOT NULL
 );
 
 
@@ -2728,6 +2750,14 @@ GRANT SELECT ON TABLE erp.companies TO identified_customer;
 
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.contacts TO administrator;
 GRANT SELECT,UPDATE ON TABLE erp.contacts TO identified_customer;
+
+
+--
+-- Name: FUNCTION get_default_container_refund_tax_rate(); Type: ACL; Schema: erp; Owner: postgres
+--
+
+REVOKE ALL ON FUNCTION erp.get_default_container_refund_tax_rate() FROM PUBLIC;
+GRANT ALL ON FUNCTION erp.get_default_container_refund_tax_rate() TO administrator;
 
 
 --

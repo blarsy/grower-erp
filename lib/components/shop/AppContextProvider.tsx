@@ -1,5 +1,5 @@
 import { gql, useLazyQuery } from "@apollo/client"
-import { CART_TOKEN, SHOP_TOKEN_KEY } from "lib/constants"
+import { CART_TOKEN, SHOP_TOKEN_KEY, SLUG_TOKEN } from "lib/constants"
 import { createContext, useEffect, useState } from "react"
 import ConfirmDialog from "../ConfirmDialog"
 
@@ -25,6 +25,9 @@ export interface CartItem {
 	unitAbbreviation: string
 	productName: string
 	containerName: string
+  articleTaxRate: number
+  containerRefundPrice: number
+  containerRefundTaxRate: number
 }
 
 export interface Cart {
@@ -46,7 +49,7 @@ interface AppStateData {
 
 export interface AppContext {
   data: AppStateData
-  loginComplete: (token: string) => Promise<void>
+  loginComplete: (token: string, slug: string) => Promise<void>
   loginFailed: (e: Error) => void
   setCartArticles: (items: CartItem[]) => void
   clearCart: () => void
@@ -123,8 +126,9 @@ const AppContextProvider = ({ children }: Props) => {
       }
     }, [])
 
-    const loginComplete = async (token: string): Promise<void> => {
+    const loginComplete = async (token: string, slug: string): Promise<void> => {
         localStorage.setItem(SHOP_TOKEN_KEY, token)
+        localStorage.setItem(SLUG_TOKEN, slug)
         return new Promise((resolve, reject) => {
             loadSessionInfo({ notifyOnNetworkStatusChange: true, onCompleted: data => {
                 let newAppState: any = {}

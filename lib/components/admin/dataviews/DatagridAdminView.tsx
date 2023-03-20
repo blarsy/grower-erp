@@ -24,7 +24,7 @@ const updateVariablesFromValues = (values: FormikValues, columns: Column[], fixe
     return { variables}
 }
 const createVariablesFromValues = (values: FormikValues, columns: Column[], fixedVariables: Object | (() => Object)): {variables: {[id: string]: any}} => {
-    const variables: {[id: string]: any} = typeof fixedVariables === 'function' ? fixedVariables() : fixedVariables
+    const variables: {[id: string]: any} = typeof fixedVariables === 'function' ? fixedVariables() : {...fixedVariables}
     columns.forEach(col => {
         if(col.key !== 'id' && !variables[col.key]) {
             variables[col.key] = values[col.key]
@@ -44,6 +44,7 @@ const createDataChangesHelper = (columns: Column[], dataName: string, fixedVaria
             error?: string
         }>)
     }} | {editable: boolean, datagridProps: {}} => {
+
     const editable = columns.find(col => !!col.editable) && updateQuery && createQuery ? true : false
     if(editable) {
         if(!updateQuery || !createQuery) throw new Error(`Some columns are editable, but either or both of the 'updateQuery' or the 'createQuery' props are not provided.`)

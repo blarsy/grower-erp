@@ -10,7 +10,7 @@ import CartItemRow from "./CartItemRow"
 import { useRouter } from "next/router"
 import { LoadingButton } from "@mui/lab"
 import Feedback from "lib/components/Feedback"
-import { parseUiError } from "lib/uiCommon"
+import { asPrice, parseUiError } from "lib/uiCommon"
 import OrderLineHeader from "../OrderLineHeader"
 
 export interface ArticleSaleInfo {
@@ -136,7 +136,7 @@ const Cart = () => {
                 <Stack direction="row" columnGap="0.5rem">
                     <Typography sx={{ flex: '15 1', textAlign: 'right' }} variant="overline">Total</Typography>
                     <Typography sx={{ flex: '2 1', textAlign: 'right' }} variant="body1">
-                        {appContext.data.cart.articles.reduce((prev, art) => prev + art.price * art.quantityOrdered, 0)}€
+                        {asPrice(appContext.data.cart.articles.reduce((prev, art) => prev + (art.price * art.quantityOrdered * (1 + art.articleTaxRate / 100)), 0))}
                     </Typography>
                 </Stack>
                 <LoadingButton loading={submitInfo.processing} sx={{alignSelf: 'center'}} variant="contained" type="submit" disabled={hasMessages} onClick={async () => {

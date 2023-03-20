@@ -13,6 +13,7 @@ export const owner = gql`query Owner {
           zipCode
         }
         defaultTaxRate
+        defaultContainerRefundTaxRate
     }
   }}`
 
@@ -76,13 +77,16 @@ export const availableArticles = gql`query Articles {
       unitAbbreviation
       fulfillmentDate
       orderClosureDate
+      articleTaxRate
+      containerRefundPrice
+      containerRefundTaxRate
     }
   }
 }`
 
-export const setSettings = gql`mutation SetSettings($defaultTaxRate: BigFloat) {
+export const setSettings = gql`mutation SetSettings($defaultTaxRate: BigFloat, $defaultContainerRefundTaxRate: BigFloat) {
   setSettings(
-    input: {inputDefaultTaxRate: $defaultTaxRate}
+    input: {inputDefaultTaxRate: $defaultTaxRate, inputDefaultContainerRefundTaxRate: $defaultContainerRefundTaxRate}
   ) {
     clientMutationId
   }

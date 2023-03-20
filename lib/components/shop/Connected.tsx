@@ -1,5 +1,5 @@
 import { gql, useMutation } from "@apollo/client"
-import { SHOP_TOKEN_KEY } from "lib/constants"
+import { SHOP_TOKEN_KEY, SLUG_TOKEN } from "lib/constants"
 import { useRouter } from "next/router"
 import { useContext, useEffect, useState } from "react"
 import { errorHandlerHolder } from "../admin/apolloErrorLink"
@@ -31,7 +31,7 @@ const Connected = ({ children, slug }: Props)  => {
                     appContext.loginFailed(new Error('Echec lors de la connexion.'))
                     return 
                 }
-                await appContext.loginComplete(res.data.authenticateCustomer.jwtToken)
+                await appContext.loginComplete(res.data.authenticateCustomer.jwtToken, slug)
             } catch(e: any) {
                 appContext.loginFailed(e)
             }
@@ -45,10 +45,11 @@ const Connected = ({ children, slug }: Props)  => {
                     router.reload()
                 }
             }
+
             const token = localStorage.getItem(SHOP_TOKEN_KEY)
             try {
-                if (token) {
-                    await appContext.loginComplete(token)
+                if (token && localStorage.getItem(SLUG_TOKEN) === slug) {
+                    await appContext.loginComplete(token, slug)
                 } else {
                     await authenticateFromSlug()
                 }

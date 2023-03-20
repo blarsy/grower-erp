@@ -9,26 +9,39 @@ const GET = gql`query ContainerAdminViewAllContainersQuery {
       id
       name
       description
+      refundPrice
+      refundTaxRate
     }
   }
 }`
 
-const UPDATE = gql`
-  mutation UpdateContainer($name: String, $description: String, $id: Int!) {
-    updateContainerById(
-      input: {containerPatch: {name: $name, description: $description}, id: $id}
-    ) {
-      container { id, name, description }
+const UPDATE = gql`mutation UpdateContainer($description: String!, $name: String!, $refundPrice: Float, $refundTaxRate: BigFloat, $id: Int!) {
+  updateContainerById(
+    input: {containerPatch: {description: $description, name: $name, refundPrice: $refundPrice, refundTaxRate: $refundTaxRate}, id: $id}
+  ) {
+    container {
+      id
+      description
+      name
+      refundPrice
+      refundTaxRate
     }
   }
-`
+}`
 
-const CREATE = gql`
-  mutation CreateContainer($name: String!, $description: String!) {
-    createContainer(input: {container: {name: $name, description: $description}}) {
-      container { id, name, description }
+const CREATE = gql`mutation CreateContainer($description: String!, $name: String!, $refundPrice: Float, $refundTaxRate: BigFloat) {
+  createContainer(
+    input: {container: {name: $name, description: $description, refundPrice: $refundPrice, refundTaxRate: $refundTaxRate}}
+  ) {
+    container {
+      description
+      id
+      name
+      refundPrice
+      refundTaxRate
     }
-  }`
+  }
+}`
 
 const ContainerAdminView = () => {
   return <DatagridAdminView title="Contenants" dataName="Container" getQuery={GET} createQuery={CREATE}
@@ -37,10 +50,16 @@ const ContainerAdminView = () => {
       { key: 'name', headerText: 'Nom', widthPercent: 20, type: "string",  editable: {
         validation: yup.string().required('Ce champ est requis') 
       }},
-      { key: 'description', headerText: 'description', type: "string", editable: {
-          validation: yup.string().required('Ce champ est requis') 
-        }
-      }]} />
+      { key: 'description', headerText: 'Description', widthPercent: 30, type: "string", editable: {
+        validation: yup.string().required('Ce champ est requis') 
+      }},
+      { key: 'refundPrice', headerText: 'Prix vidange', widthPercent: 10, type: "number", editable: {
+        validation: yup.number().min(0, 'Veuillez entrer un nombre positif ou nul').required('Ce champ est requis')
+      }},
+      { key: 'refundTaxRate', headerText: 'Taux de TVA vidange (%)', type: "number", editable: {
+        validation: yup.number().min(0, 'Veuillez entrer un nombre positif ou nul').required('Ce champ est requis')
+      }}
+    ]} />
 }
    
 export default ContainerAdminView
