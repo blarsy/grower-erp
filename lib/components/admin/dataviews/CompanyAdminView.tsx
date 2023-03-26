@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client"
-import { filterContacts } from "lib/components/queriesLib"
+import { filterContactsQry } from "lib/components/queriesLib"
 import { isValidVatNumber } from "lib/uiCommon"
 import * as yup from 'yup'
 import DatagridAdminView from "./DatagridAdminView"
@@ -92,7 +92,7 @@ const CompanyAdminView = () => {
       { key: 'mainContactId', headerText: 'Contact principal', type: 'number', editable: {
         validation: yup.number().nullable()
       }, relation: {
-        query: filterContacts, getLabel: (rec) => {
+        query: filterContactsQry, getLabel: (rec) => {
             const words = []
             if(rec.firstname) words.push(rec.firstname)
             words.push(rec.lastname)

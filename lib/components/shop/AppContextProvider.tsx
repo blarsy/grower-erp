@@ -1,5 +1,5 @@
 import { gql, useLazyQuery } from "@apollo/client"
-import { CART_TOKEN, SHOP_TOKEN_KEY, SLUG_TOKEN } from "lib/constants"
+import { SHOP_TOKEN_KEY, SLUG_TOKEN } from "lib/constants"
 import { createContext, useEffect, useState } from "react"
 import ConfirmDialog from "../ConfirmDialog"
 
@@ -30,10 +30,6 @@ export interface CartItem {
   containerRefundTaxRate: number
 }
 
-export interface Cart {
-  articles: CartItem[]
-}
-
 interface AppStateData {
   ownerCompany: {
     id: number,
@@ -44,16 +40,15 @@ interface AppStateData {
     token: string,
     error?: Error
   },
-  cart: Cart
+  cart: { nbArticles: number }
 }
 
 export interface AppContext {
   data: AppStateData
   loginComplete: (token: string, slug: string) => Promise<void>
   loginFailed: (e: Error) => void
-  setCartArticles: (items: CartItem[]) => void
-  clearCart: () => void
   confirm: (question: string, title: string) => Promise<boolean>
+  setNbCartArticles: (number: number) => void
 }
 
 interface Props {
@@ -104,13 +99,12 @@ const blankAppContext = { data: {
       error: undefined
     },
     cart: {
-      articles: []
+      nbArticles: 0
     }
   },
   loginComplete: () => { return Promise.resolve()},
   loginFailed: () => {},
-  setCartArticles: (items: CartItem[]) => {},
-  clearCart: () => {},
+  setNbCartArticles: (number: number) => {},
   confirm: async (question: string, title: string) => false
 } as AppContext
 export const AppContext = createContext<AppContext>(blankAppContext)
@@ -119,12 +113,6 @@ const AppContextProvider = ({ children }: Props) => {
     const [appState, setAppState] = useState(blankAppContext.data)
     const [loadSessionInfo] = useLazyQuery(GET_SESSION)
     const [confirmDialogData, setConfirmDialogData] = useState({ question: '', title: '', callback: (response: boolean) => {} })
-
-    useEffect(() => {
-      if(localStorage.getItem(CART_TOKEN)) {
-        setAppState({ ...appState, ...{ cart: JSON.parse(localStorage.getItem(CART_TOKEN)!)} })
-      }
-    }, [])
 
     const loginComplete = async (token: string, slug: string): Promise<void> => {
         localStorage.setItem(SHOP_TOKEN_KEY, token)
@@ -157,38 +145,15 @@ const AppContextProvider = ({ children }: Props) => {
         setAppState({ ...appState, ...{ auth: { token: '', error: e } } })
     }
 
-    const clearCart = () => {
-        localStorage.removeItem(CART_TOKEN)
-        setAppState({ ...appState, ...{ cart: { articles: [] } } })
-    }
-
-    const setCartArticles = (items: CartItem[]) => {
-      let currentCartArticles = appState.cart.articles
-      items.forEach(item => {
-        const itemInCart = currentCartArticles.find(art => art.articleId === item.articleId)
-        if(itemInCart) {
-          if(item.quantityOrdered === 0) {
-            currentCartArticles = currentCartArticles.filter(art => art.articleId !== item.articleId)
-          } else {
-            itemInCart.quantityOrdered = item.quantityOrdered
-          }
-        } else {
-          if(item.quantityOrdered !== 0){
-            currentCartArticles.push(item)
-          }
-        }
-      })
-
-      const newCart = { ...appState.cart, ...{ articles: currentCartArticles } }
-      localStorage.setItem(CART_TOKEN, JSON.stringify(newCart))
-      setAppState({ ...appState, ...{ cart: newCart} })
-    }
-
     const confirm = async (question: string, title: string, ) => {
       return new Promise<boolean>((resolve) => setConfirmDialogData({ question, title, callback: resolve }))
     }
 
-    return <AppContext.Provider value={{ data: appState, loginComplete, loginFailed, setCartArticles, clearCart, confirm}}>
+    const setNbCartArticles = async (number: number) => {
+      setAppState({ ...appState, ...{ cart: { nbArticles: number } } })
+    }
+
+    return <AppContext.Provider value={{ data: appState, loginComplete, loginFailed, confirm, setNbCartArticles}}>
         {children}
         <ConfirmDialog opened={!!confirmDialogData.question} question={confirmDialogData.question}
             title={confirmDialogData.title} onClose={async response => {

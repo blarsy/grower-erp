@@ -305,13 +305,16 @@ BEGIN
 	RETURNING id INTO order_id;
 	
 	INSERT INTO erp.order_lines (order_id, article_id, quantity_per_container, 
-				 container_name, container_id, stock_shape_name, 
-				 in_stock, stock_shape_id, unit_name, unit_abbreviation, 
-				 unit_id, product_name, product_id, price, quantity_ordered, fulfillment_date)
+				container_name, container_id, stock_shape_name, 
+				in_stock, stock_shape_id, unit_name, unit_abbreviation, 
+				unit_id, product_name, product_id, price, quantity_ordered, 
+				fulfillment_date, article_tax_rate, container_refund_price,
+				container_refund_tax_rate)
 	SELECT order_id, aq.article_id, ao.quantity_per_container, ao.container_name,
 		ao.container_id, ao.stock_shape_name, ao.in_stock, ao.stock_shape_id, 
 		ao.unit_name, ao.unit_abbreviation, ao.unit_id, ao.product_name, 
-		ao.product_id, ao.price, quantity, ass.fulfillment_date
+		ao.product_id, ao.price, quantity, ass.fulfillment_date, ao.article_tax_rate,
+		ao.container_refund_price, ao.container_refund_tax_rate
 	FROM UNNEST(articles_quantities) aq
 	INNER JOIN erp.articles_for_orders ao ON ao.article_id = aq.article_id
 	INNER JOIN erp.customers c ON c.customers_category_id = ao.customers_category_id
@@ -1018,11 +1021,25 @@ CREATE TABLE erp.orders (
     id integer DEFAULT nextval('erp.orders_id_seq'::regclass) NOT NULL,
     confirmation_date timestamp without time zone,
     customer_id integer NOT NULL,
-    fulfillment_method_id integer NOT NULL
+    fulfillment_method_id integer
 );
 
 
 ALTER TABLE erp.orders OWNER TO postgres;
+
+--
+-- Name: my_draft_order(); Type: FUNCTION; Schema: erp; Owner: postgres
+--
+
+CREATE FUNCTION erp.my_draft_order() RETURNS erp.orders
+    LANGUAGE sql
+    AS $$SELECT o.*
+FROM erp.orders o
+WHERE o.confirmation_date IS NULL 
+AND o.customer_id = erp.current_customer_id()$$;
+
+
+ALTER FUNCTION erp.my_draft_order() OWNER TO postgres;
 
 --
 -- Name: my_orders(timestamp without time zone); Type: FUNCTION; Schema: erp; Owner: postgres
@@ -1032,7 +1049,8 @@ CREATE FUNCTION erp.my_orders(since timestamp without time zone) RETURNS SETOF e
     LANGUAGE sql STABLE
     AS $$SELECT o.*
 FROM erp.orders o
-WHERE o.confirmation_date > since$$;
+WHERE o.confirmation_date > since AND
+	o.customer_id = erp.current_customer_id()$$;
 
 
 ALTER FUNCTION erp.my_orders(since timestamp without time zone) OWNER TO postgres;
@@ -1214,6 +1232,58 @@ $$;
 
 
 ALTER FUNCTION erp.register_user(updated_firstname character varying, updated_lastname character varying, invitation_id integer, password character varying) OWNER TO postgres;
+
+--
+-- Name: set_order_line_from_shop(integer, numeric); Type: FUNCTION; Schema: erp; Owner: postgres
+--
+
+CREATE FUNCTION erp.set_order_line_from_shop(input_article_id integer, input_quantity numeric) RETURNS void
+    LANGUAGE plpgsql
+    AS $$DECLARE existing_order_id integer;
+DECLARE order_line_id integer;
+DECLARE current_customer_id integer;
+BEGIN
+	SELECT erp.current_customer_id() INTO current_customer_id;
+
+	SELECT id INTO existing_order_id
+	FROM erp.orders 
+	WHERE customer_id = current_customer_id AND
+		confirmation_date IS NULL;
+	
+	IF existing_order_id IS NULL THEN
+		INSERT INTO erp.orders (customer_id)
+		VALUES(current_customer_id)
+		RETURNING id INTO existing_order_id;
+	END IF;
+	
+	SELECT id INTO order_line_id
+	FROM erp.order_lines
+	WHERE order_id = existing_order_id AND article_id = input_article_id;
+	
+	IF order_line_id IS NOT NULL THEN
+		DELETE FROM erp.order_lines
+		WHERE id = order_line_id;
+	END IF;
+	
+	INSERT INTO erp.order_lines (order_id, article_id, quantity_per_container, 
+			container_name, container_id, stock_shape_name, 
+			in_stock, stock_shape_id, unit_name, unit_abbreviation, 
+			unit_id, product_name, product_id, price, quantity_ordered, 
+			fulfillment_date, article_tax_rate, container_refund_price,
+			container_refund_tax_rate)
+	SELECT existing_order_id, aq.article_id, ao.quantity_per_container, ao.container_name,
+		ao.container_id, ao.stock_shape_name, ao.in_stock, ao.stock_shape_id, 
+		ao.unit_name, ao.unit_abbreviation, ao.unit_id, ao.product_name, 
+		ao.product_id, ao.price, quantity, ass.fulfillment_date, ao.article_tax_rate,
+		ao.container_refund_price, ao.container_refund_tax_rate
+	FROM erp.articles_for_orders ao
+	INNER JOIN erp.customers c ON c.customers_category_id = ao.customers_category_id
+	INNER JOIN erp.active_sales_schedules ass ON ass.customers_category_id = ao.customers_category_id
+	WHERE ao.article_id = input_article_id AND c.id = current_customer_id;
+END;$$;
+
+
+ALTER FUNCTION erp.set_order_line_from_shop(input_article_id integer, input_quantity numeric) OWNER TO postgres;
 
 --
 -- Name: set_owner(integer); Type: FUNCTION; Schema: erp; Owner: postgres
@@ -1661,7 +1731,10 @@ CREATE TABLE erp.order_lines (
     product_id integer NOT NULL,
     price money NOT NULL,
     quantity_ordered numeric NOT NULL,
-    fulfillment_date timestamp without time zone NOT NULL
+    fulfillment_date timestamp without time zone NOT NULL,
+    container_refund_price money NOT NULL,
+    container_refund_tax_rate numeric NOT NULL,
+    article_tax_rate numeric NOT NULL
 );
 
 
@@ -2921,6 +2994,14 @@ GRANT ALL ON FUNCTION erp.recover_password(recovery_code character varying, new_
 
 GRANT ALL ON FUNCTION erp.register_user(updated_firstname character varying, updated_lastname character varying, invitation_id integer, password character varying) TO administrator;
 GRANT ALL ON FUNCTION erp.register_user(updated_firstname character varying, updated_lastname character varying, invitation_id integer, password character varying) TO anonymous;
+
+
+--
+-- Name: FUNCTION set_order_line_from_shop(input_article_id integer, input_quantity numeric); Type: ACL; Schema: erp; Owner: postgres
+--
+
+REVOKE ALL ON FUNCTION erp.set_order_line_from_shop(input_article_id integer, input_quantity numeric) FROM PUBLIC;
+GRANT ALL ON FUNCTION erp.set_order_line_from_shop(input_article_id integer, input_quantity numeric) TO identified_customer;
 
 
 --

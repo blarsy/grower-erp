@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client"
-import { filterCompanies, filterContacts } from "lib/components/queriesLib"
+import { filterCompaniesQry, filterContactsQry } from "lib/components/queriesLib"
 import * as yup from 'yup'
 import DatagridAdminView from "./DatagridAdminView"
 
@@ -64,7 +64,7 @@ const CustomerAdminView = () => {
       { key: 'contactId', headerText: 'Personne', widthPercent: 25, type: "number",  editable: {
         validation: yup.number().nullable()
       }, relation: {
-        query: filterContacts, getLabel: (rec) => {
+        query: filterContactsQry, getLabel: (rec) => {
           if(rec.companyByCompanyId && rec.companyByCompanyId.name) return `${rec.firstname} ${rec.lastname} (${rec.companyByCompanyId.name})`
           else return `${rec.firstname} ${rec.lastname}`
         }
@@ -72,7 +72,7 @@ const CustomerAdminView = () => {
       { key: 'companyId', headerText: 'Entreprise', widthPercent: 25, type: "number",  editable: {
         validation: yup.number().nullable()
       }, relation: {
-        query: filterCompanies, getLabel: (rec) => {
+        query: filterCompaniesQry, getLabel: (rec) => {
           if(rec.companyNumber) return `${rec.name} - ${rec.companyNumber}`
           else return rec.name
         }

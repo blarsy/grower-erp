@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client";
 
-export const owner = gql`query Owner {
+export const ownerQry = gql`query Owner {
     allSettings {
       nodes {
         companyByOwnerId {
@@ -17,7 +17,7 @@ export const owner = gql`query Owner {
     }
   }}`
 
-export const filterCompanies = gql`query FilteredCompanies($search: String) {
+export const filterCompaniesQry = gql`query FilteredCompanies($search: String) {
   filterCompanies(searchTerm: $search) {
     nodes {
       name
@@ -27,7 +27,7 @@ export const filterCompanies = gql`query FilteredCompanies($search: String) {
   }
 }`
 
-export const filterContacts = gql`query FilteredContacts($search: String) {
+export const filterContactsQry = gql`query FilteredContacts($search: String) {
   filterContacts(searchTerm: $search) {
     nodes {
       id
@@ -40,7 +40,7 @@ export const filterContacts = gql`query FilteredContacts($search: String) {
   }
 }`
 
-export const updateContact =  gql`mutation UpdateContact($addressLine1: String, $addressLine2: String, 
+export const updateContactQry =  gql`mutation UpdateContact($addressLine1: String, $addressLine2: String, 
   $city: String, $companyId: Int, $firstname: String!, $email: String, $id: Int!, 
   $lastname: String!, $phone: String, $zipCode: String) {
   updateContactById(
@@ -63,7 +63,7 @@ export const updateContact =  gql`mutation UpdateContact($addressLine1: String, 
   }
 }`
 
-export const availableArticles = gql`query Articles {
+export const availableArticlesQry = gql`query Articles {
   getAvailableArticles {
     nodes {
       articleId
@@ -84,10 +84,48 @@ export const availableArticles = gql`query Articles {
   }
 }`
 
-export const setSettings = gql`mutation SetSettings($defaultTaxRate: BigFloat, $defaultContainerRefundTaxRate: BigFloat) {
+export const setSettingsQry = gql`mutation SetSettings($defaultTaxRate: BigFloat, $defaultContainerRefundTaxRate: BigFloat) {
   setSettings(
     input: {inputDefaultTaxRate: $defaultTaxRate, inputDefaultContainerRefundTaxRate: $defaultContainerRefundTaxRate}
   ) {
     clientMutationId
+  }
+}`
+
+export const setOrderLineQry = gql`mutation SetOrderLine($inputArticleId: Int, $inputQuantity: BigFloat) {
+  setOrderLineFromShop(
+    input: {inputArticleId: $inputArticleId, inputQuantity: $inputQuantity}
+  ) {
+    query {
+      myDraftOrder {
+        orderLinesByOrderId {
+          nodes {
+            quantityOrdered
+            articleId
+          }
+        }
+      }
+    }
+    integer
+  }
+}`
+
+export const draftOrderLinesQry = gql`query DraftOrderLines {
+  myDraftOrder {
+    id
+    orderLinesByOrderId {
+      nodes {
+        articleId
+        quantityOrdered
+        productName
+        stockShapeName
+        containerName
+        quantityPerContainer
+        unitAbbreviation
+        fulfillmentDate
+        price
+        articleTaxRate
+      }
+    }
   }
 }`

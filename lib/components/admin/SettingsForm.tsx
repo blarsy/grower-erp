@@ -1,7 +1,7 @@
 import { useMutation } from '@apollo/client'
 import { TextField } from '@mui/material'
 import * as yup from 'yup'
-import { setSettings } from '../queriesLib'
+import { setSettingsQry } from '../queriesLib'
 import ItemForm from "./ItemForm"
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
 }
 
 const SettingsForm = ({ data }: Props) => {
-    const [save] = useMutation(setSettings)
+    const [save] = useMutation(setSettingsQry)
     return <ItemForm initialValues={data || { defaultTaxRate: 0 }} title="Paramètres système" validationSchema={yup.object().shape({ 
         defaultTaxRate: yup.number().min(0, 'Veuillez entrer une valeur numérique positive').required('Ce champs est requis')
     })} onSubmit={async (values) =>  {

@@ -995,6 +995,7 @@ type Query implements Node {
   getDefaultContainerRefundTaxRate: BigFloat
   getDefaultTaxRate: BigFloat
   getSessionData: SessionDatum
+  myDraftOrder: Order
 
   """Reads and enables pagination through a set of `Order`."""
   myOrders(
@@ -2090,7 +2091,7 @@ type Order implements Node {
   id: Int!
   confirmationDate: Datetime
   customerId: Int!
-  fulfillmentMethodId: Int!
+  fulfillmentMethodId: Int
 
   """Reads a single `Customer` that is related to this `Order`."""
   customerByCustomerId: Customer
@@ -2499,6 +2500,9 @@ type OrderLine implements Node {
   price: Float!
   quantityOrdered: BigFloat!
   fulfillmentDate: Datetime!
+  containerRefundPrice: Float!
+  containerRefundTaxRate: BigFloat!
+  articleTaxRate: BigFloat!
 
   """Reads a single `Order` that is related to this `OrderLine`."""
   orderByOrderId: Order
@@ -2550,6 +2554,12 @@ enum OrderLinesOrderBy {
   QUANTITY_ORDERED_DESC
   FULFILLMENT_DATE_ASC
   FULFILLMENT_DATE_DESC
+  CONTAINER_REFUND_PRICE_ASC
+  CONTAINER_REFUND_PRICE_DESC
+  CONTAINER_REFUND_TAX_RATE_ASC
+  CONTAINER_REFUND_TAX_RATE_DESC
+  ARTICLE_TAX_RATE_ASC
+  ARTICLE_TAX_RATE_DESC
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
 }
@@ -2609,6 +2619,15 @@ input OrderLineCondition {
 
   """Checks for equality with the object’s `fulfillmentDate` field."""
   fulfillmentDate: Datetime
+
+  """Checks for equality with the object’s `containerRefundPrice` field."""
+  containerRefundPrice: Float
+
+  """Checks for equality with the object’s `containerRefundTaxRate` field."""
+  containerRefundTaxRate: BigFloat
+
+  """Checks for equality with the object’s `articleTaxRate` field."""
+  articleTaxRate: BigFloat
 }
 
 """A `Order` edge in the connection."""
@@ -4857,6 +4876,12 @@ type Mutation {
     """
     input: ChangePasswordInput!
   ): ChangePasswordPayload
+  clearMyDraftOrder(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: ClearMyDraftOrderInput!
+  ): ClearMyDraftOrderPayload
   confirmOrder(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -4929,6 +4954,12 @@ type Mutation {
     """
     input: RegisterUserInput!
   ): RegisterUserPayload
+  setOrderLineFromShop(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: SetOrderLineFromShopInput!
+  ): SetOrderLineFromShopPayload
   setOwner(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -5390,6 +5421,9 @@ input OrderLineInput {
   price: Float!
   quantityOrdered: BigFloat!
   fulfillmentDate: Datetime!
+  containerRefundPrice: Float!
+  containerRefundTaxRate: BigFloat!
+  articleTaxRate: BigFloat!
 }
 
 """The output of our create `Order` mutation."""
@@ -5438,7 +5472,7 @@ input OrderInput {
   id: Int
   confirmationDate: Datetime
   customerId: Int!
-  fulfillmentMethodId: Int!
+  fulfillmentMethodId: Int
 }
 
 """The output of our create `Pricelist` mutation."""
@@ -6528,6 +6562,9 @@ input OrderLinePatch {
   price: Float
   quantityOrdered: BigFloat
   fulfillmentDate: Datetime
+  containerRefundPrice: Float
+  containerRefundTaxRate: BigFloat
+  articleTaxRate: BigFloat
 }
 
 """All input for the `updateOrderLineById` mutation."""
@@ -8207,6 +8244,29 @@ input ChangePasswordInput {
   userId: Int
 }
 
+"""The output of our `clearMyDraftOrder` mutation."""
+type ClearMyDraftOrderPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+}
+
+"""All input for the `clearMyDraftOrder` mutation."""
+input ClearMyDraftOrderInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+}
+
 """The output of our `confirmOrder` mutation."""
 type ConfirmOrderPayload {
   """
@@ -8550,6 +8610,32 @@ input RegisterUserInput {
   updatedLastname: String
   invitationId: Int
   password: String
+}
+
+"""The output of our `setOrderLineFromShop` mutation."""
+type SetOrderLineFromShopPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+  integer: Int
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+}
+
+"""All input for the `setOrderLineFromShop` mutation."""
+input SetOrderLineFromShopInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  inputArticleId: Int
+  inputQuantity: BigFloat
 }
 
 """The output of our `setOwner` mutation."""

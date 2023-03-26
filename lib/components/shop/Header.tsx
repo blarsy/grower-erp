@@ -2,7 +2,7 @@ import { Badge, Box, Button, Menu, MenuItem, Stack, Typography } from "@mui/mate
 import { useContext, useState } from "react"
 import CartIcon from '@mui/icons-material/ShoppingCart'
 import Avatar from '@mui/icons-material/AccountCircle'
-import { AppContext, Cart, IdentifiedCustomerData } from "../shop/AppContextProvider"
+import { AppContext, IdentifiedCustomerData } from "../shop/AppContextProvider"
 import { useRouter } from "next/router"
 
 const OwnerCompanyLabel = ({ data} : {data: { id: number,name: string }}) => <Typography variant="overline">{data.name}</Typography>
@@ -29,12 +29,17 @@ const CustomerMenu = ({ data }: { data: IdentifiedCustomerData }) => {
         
     </Stack>
 }
-const CartMenu = ({ cart }: { cart: Cart}) => {
+
+interface CartMenuProps {
+    numberArticles: number
+}
+
+const CartMenu = ({ numberArticles }: CartMenuProps) => {
     const router = useRouter()
 
     return <Box>
         <Button variant="contained" onClick={() => router.push(`/shop/${router.query.slug![0]}/cart`)}
-            endIcon={<Badge showZero badgeContent={Number(cart.articles.length)} color="secondary">
+            endIcon={<Badge showZero badgeContent={numberArticles} color="secondary">
                 <CartIcon/>
             </Badge>}>Panier
         </Button>
@@ -46,7 +51,7 @@ const Header = () => {
         <OwnerCompanyLabel data={appContext.data.ownerCompany}/>
         <Stack direction="row" gap="1rem">
             <CustomerMenu data={appContext.data.customer} />
-            <CartMenu cart={appContext.data.cart} />
+            <CartMenu numberArticles={appContext.data.cart.nbArticles} />
         </Stack>
     </Box>
 }

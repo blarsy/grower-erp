@@ -2,7 +2,6 @@ import { gql, useLazyQuery } from "@apollo/client"
 import { TOKEN_KEY } from "lib/constants"
 import { useRouter } from "next/router"
 import { createContext, useState } from "react"
-import { owner } from "../queriesLib"
 
 interface AppStateData {
   company: {

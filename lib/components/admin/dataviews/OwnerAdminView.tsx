@@ -2,7 +2,7 @@ import { gql, useQuery } from "@apollo/client"
 import Loader from "lib/components/Loader"
 import CompanyForm from "lib/components/admin/CompanyForm"
 import { useApolloClient } from "@apollo/client"
-import { owner } from "lib/components/queriesLib"
+import { ownerQry } from "lib/components/queriesLib"
 import SettingsForm from "../SettingsForm"
 import { Alert, Stack } from "@mui/material"
 
@@ -34,7 +34,7 @@ const SET_OWNER = gql`mutation SetSettings( $inputOwnerId: Int ) {
 
 const OwnerAdminView = () => {
     const client = useApolloClient()
-    const { loading, error, data } = useQuery(owner)
+    const { loading, error, data } = useQuery(ownerQry)
     return <Loader loading={loading} error={error}>
         <Stack>
           <CompanyForm data={(data && data.allSettings.nodes && data.allSettings.nodes.length > 0 && data.allSettings.nodes[0].companyByOwnerId) ? data.allSettings.nodes[0].companyByOwnerId : null} updateQuery={UPDATE} createQuery={async (values) => {

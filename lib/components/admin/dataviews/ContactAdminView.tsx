@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client"
-import { filterCompanies, updateContact } from "lib/components/queriesLib"
+import { filterCompaniesQry, updateContactQry } from "lib/components/queriesLib"
 import * as yup from 'yup'
 import DatagridAdminView from "./DatagridAdminView"
 
@@ -48,7 +48,7 @@ const CREATE = gql`mutation CreateContact($zipCode: String,
 
 const ContactAdminView = () => {
     return <DatagridAdminView title="Personnes" dataName="Contact" getQuery={GET} createQuery={CREATE}
-    updateQuery={updateContact} columns={[
+    updateQuery={updateContactQry} columns={[
       { key: 'id', headerText: 'ID', widthPercent: 3, type: "number"},
       { key: 'lastname', headerText: 'Nom', widthPercent: 10, type: "string",  editable: {
         validation: yup.string().required('Ce champ est requis') 
@@ -82,7 +82,7 @@ const ContactAdminView = () => {
       },
       { key: 'companyId', headerText: 'Entreprise', type: "number", editable: {
           validation: yup.number().nullable()
-        }, relation: { query: filterCompanies, getLabel: (rec) => {
+        }, relation: { query: filterCompaniesQry, getLabel: (rec) => {
             if(rec.companyNumber) return `${rec.name} - ${rec.companyNumber}`
             else return rec.name
           }}
