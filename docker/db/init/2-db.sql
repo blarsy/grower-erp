@@ -286,6 +286,28 @@ $$;
 ALTER FUNCTION erp.change_password(current_password character varying, new_password character varying, user_id integer) OWNER TO postgres;
 
 --
+-- Name: clear_my_draft_order(); Type: FUNCTION; Schema: erp; Owner: postgres
+--
+
+CREATE FUNCTION erp.clear_my_draft_order() RETURNS void
+    LANGUAGE plpgsql
+    AS $$DECLARE draft_order_id INTEGER;
+BEGIN
+	SELECT id INTO draft_order_id
+	FROM erp.orders
+	WHERE customer_id = erp.current_customer_id() AND confirmation_date IS NULL;
+	
+	DELETE FROM erp.order_lines
+	WHERE order_id = draft_order_id;
+	
+	DELETE FROM erp.orders
+	WHERE id = draft_order_id;
+END;$$;
+
+
+ALTER FUNCTION erp.clear_my_draft_order() OWNER TO postgres;
+
+--
 -- Name: confirm_order(erp.article_quantity[], integer); Type: FUNCTION; Schema: erp; Owner: postgres
 --
 
@@ -1032,7 +1054,7 @@ ALTER TABLE erp.orders OWNER TO postgres;
 --
 
 CREATE FUNCTION erp.my_draft_order() RETURNS erp.orders
-    LANGUAGE sql
+    LANGUAGE sql STABLE
     AS $$SELECT o.*
 FROM erp.orders o
 WHERE o.confirmation_date IS NULL 
@@ -1237,9 +1259,10 @@ ALTER FUNCTION erp.register_user(updated_firstname character varying, updated_la
 -- Name: set_order_line_from_shop(integer, numeric); Type: FUNCTION; Schema: erp; Owner: postgres
 --
 
-CREATE FUNCTION erp.set_order_line_from_shop(input_article_id integer, input_quantity numeric) RETURNS void
+CREATE FUNCTION erp.set_order_line_from_shop(input_article_id integer, input_quantity numeric) RETURNS integer
     LANGUAGE plpgsql
-    AS $$DECLARE existing_order_id integer;
+    AS $$
+DECLARE existing_order_id integer;
 DECLARE order_line_id integer;
 DECLARE current_customer_id integer;
 BEGIN
@@ -1265,22 +1288,27 @@ BEGIN
 		WHERE id = order_line_id;
 	END IF;
 	
-	INSERT INTO erp.order_lines (order_id, article_id, quantity_per_container, 
-			container_name, container_id, stock_shape_name, 
-			in_stock, stock_shape_id, unit_name, unit_abbreviation, 
-			unit_id, product_name, product_id, price, quantity_ordered, 
-			fulfillment_date, article_tax_rate, container_refund_price,
-			container_refund_tax_rate)
-	SELECT existing_order_id, aq.article_id, ao.quantity_per_container, ao.container_name,
-		ao.container_id, ao.stock_shape_name, ao.in_stock, ao.stock_shape_id, 
-		ao.unit_name, ao.unit_abbreviation, ao.unit_id, ao.product_name, 
-		ao.product_id, ao.price, quantity, ass.fulfillment_date, ao.article_tax_rate,
-		ao.container_refund_price, ao.container_refund_tax_rate
-	FROM erp.articles_for_orders ao
-	INNER JOIN erp.customers c ON c.customers_category_id = ao.customers_category_id
-	INNER JOIN erp.active_sales_schedules ass ON ass.customers_category_id = ao.customers_category_id
-	WHERE ao.article_id = input_article_id AND c.id = current_customer_id;
-END;$$;
+	IF input_quantity > 0 THEN
+		INSERT INTO erp.order_lines (order_id, article_id, quantity_per_container, 
+				container_name, container_id, stock_shape_name, 
+				in_stock, stock_shape_id, unit_name, unit_abbreviation, 
+				unit_id, product_name, product_id, price, quantity_ordered, 
+				fulfillment_date, article_tax_rate, container_refund_price,
+				container_refund_tax_rate)
+		SELECT existing_order_id, ao.article_id, ao.quantity_per_container, ao.container_name,
+			ao.container_id, ao.stock_shape_name, ao.in_stock, ao.stock_shape_id, 
+			ao.unit_name, ao.unit_abbreviation, ao.unit_id, ao.product_name, 
+			ao.product_id, ao.price, input_quantity, ass.fulfillment_date, ao.article_tax_rate,
+			ao.container_refund_price, ao.container_refund_tax_rate
+		FROM erp.articles_for_orders ao
+		INNER JOIN erp.customers c ON c.customers_category_id = ao.customers_category_id
+		INNER JOIN erp.active_sales_schedules ass ON ass.customers_category_id = ao.customers_category_id
+		WHERE ao.article_id = input_article_id AND c.id = current_customer_id;
+	END IF;
+	RETURN (SELECT COUNT(*) FROM erp.order_lines
+	WHERE order_id = (SELECT id FROM erp.my_draft_order()));
+END;
+$$;
 
 
 ALTER FUNCTION erp.set_order_line_from_shop(input_article_id integer, input_quantity numeric) OWNER TO postgres;
@@ -2946,7 +2974,14 @@ GRANT SELECT,USAGE ON SEQUENCE erp.orders_id_seq TO identified_customer;
 --
 
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.orders TO administrator;
-GRANT SELECT,INSERT,UPDATE ON TABLE erp.orders TO identified_customer;
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.orders TO identified_customer;
+
+
+--
+-- Name: FUNCTION my_draft_order(); Type: ACL; Schema: erp; Owner: postgres
+--
+
+GRANT ALL ON FUNCTION erp.my_draft_order() TO identified_customer;
 
 
 --
@@ -3155,7 +3190,7 @@ GRANT SELECT,USAGE ON SEQUENCE erp.order_lines_id_seq TO identified_customer;
 --
 
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.order_lines TO administrator;
-GRANT SELECT,INSERT,UPDATE ON TABLE erp.order_lines TO identified_customer;
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.order_lines TO identified_customer;
 
 
 --
