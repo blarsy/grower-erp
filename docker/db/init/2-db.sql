@@ -308,23 +308,34 @@ END;$$;
 ALTER FUNCTION erp.clear_my_draft_order() OWNER TO postgres;
 
 --
--- Name: confirm_order(erp.article_quantity[], integer); Type: FUNCTION; Schema: erp; Owner: postgres
+-- Name: confirm_order(integer); Type: FUNCTION; Schema: erp; Owner: postgres
 --
 
-CREATE FUNCTION erp.confirm_order(articles_quantities erp.article_quantity[], input_fulfillment_method_id integer) RETURNS integer
+CREATE FUNCTION erp.confirm_order(input_fulfillment_method_id integer) RETURNS integer
     LANGUAGE plpgsql
     AS $$
 DECLARE res integer;
-DECLARE order_id integer;
+DECLARE existing_order_id integer;
+DECLARE lines erp.article_quantity[];
 BEGIN
-	--check at least 1 article
-	IF array_length(articles_quantities, 1) IS NULL THEN
-		RAISE EXCEPTION 'NoArticle';
+	-- check order not already confirmed
+	IF NOT EXISTS(SELECT * FROM erp.orders WHERE confirmation_date IS NOT NULL) THEN
+		RAISE EXCEPTION 'OrderAlreadyConfirmed';
 	END IF;
 	
-	INSERT INTO erp.orders (confirmation_date, customer_id, fulfillment_method_id)
-	VALUES (NOW(), erp.current_customer_id(), input_fulfillment_method_id)
-	RETURNING id INTO order_id;
+	SELECT id FROM erp.orders
+	INTO existing_order_id
+	WHERE customer_id = erp.current_customer_id() AND confirmation_date IS NULL;
+	
+	UPDATE erp.orders SET confirmation_date = NOW(),
+		fulfillment_method_id = input_fulfillment_method_id
+	WHERE id = existing_order_id;
+	
+	SELECT ARRAY( SELECT ROW(article_id::INTEGER, quantity_ordered::NUMERIC)::erp.article_quantity
+	FROM erp.order_lines
+	WHERE order_id = existing_order_id) INTO lines;
+	
+	DELETE FROM erp.order_lines WHERE order_id = existing_order_id;
 	
 	INSERT INTO erp.order_lines (order_id, article_id, quantity_per_container, 
 				container_name, container_id, stock_shape_name, 
@@ -332,21 +343,34 @@ BEGIN
 				unit_id, product_name, product_id, price, quantity_ordered, 
 				fulfillment_date, article_tax_rate, container_refund_price,
 				container_refund_tax_rate)
-	SELECT order_id, aq.article_id, ao.quantity_per_container, ao.container_name,
+	SELECT existing_order_id, l.article_id, ao.quantity_per_container, ao.container_name,
 		ao.container_id, ao.stock_shape_name, ao.in_stock, ao.stock_shape_id, 
 		ao.unit_name, ao.unit_abbreviation, ao.unit_id, ao.product_name, 
-		ao.product_id, ao.price, quantity, ass.fulfillment_date, ao.article_tax_rate,
+		ao.product_id, ao.price, l.quantity, ass.fulfillment_date, ao.article_tax_rate,
 		ao.container_refund_price, ao.container_refund_tax_rate
-	FROM UNNEST(articles_quantities) aq
-	INNER JOIN erp.articles_for_orders ao ON ao.article_id = aq.article_id
+	FROM UNNEST(lines) l
+	INNER JOIN erp.articles_for_orders ao ON ao.article_id = l.article_id
 	INNER JOIN erp.customers c ON c.customers_category_id = ao.customers_category_id
 	INNER JOIN erp.active_sales_schedules ass ON ass.customers_category_id = ao.customers_category_id
 	INNER JOIN erp.sales_schedules_fulfillment_methods ssfm ON ssfm.sales_schedule_id = ass.id
 	WHERE c.id = erp.current_customer_id() AND ssfm.fulfillment_method_id = input_fulfillment_method_id;
 	
+	IF EXISTS(SELECT * 
+			  FROM erp.stock_shapes ss
+			  INNER JOIN erp.articles a ON a."stockShapeId" = ss.id
+			  INNER JOIN UNNEST(lines) l on l.article_id = a.id
+			  WHERE a."stockShapeId" = ss.id AND "inStock" < a."quantityPerContainer" * l.quantity) THEN
+		RAISE EXCEPTION 'InsufficientStock';
+	END IF;
+	
+	UPDATE erp.stock_shapes ss SET "inStock" = "inStock" - a."quantityPerContainer" * l.quantity
+	FROM erp.articles a
+	INNER JOIN UNNEST(lines) l on l.article_id = a.id
+	WHERE a."stockShapeId" = ss.id;
+	
 	GET DIAGNOSTICS res = ROW_COUNT;
 	
-	IF res != array_length(articles_quantities, 1) THEN
+	IF res != array_length(lines, 1) THEN
 		RAISE EXCEPTION 'MismatchedNumberOfArticles';
 	END IF;
 	
@@ -355,7 +379,7 @@ END;
 $$;
 
 
-ALTER FUNCTION erp.confirm_order(articles_quantities erp.article_quantity[], input_fulfillment_method_id integer) OWNER TO postgres;
+ALTER FUNCTION erp.confirm_order(input_fulfillment_method_id integer) OWNER TO postgres;
 
 --
 -- Name: create_password_recovery(character varying); Type: FUNCTION; Schema: erp; Owner: postgres
@@ -2749,11 +2773,11 @@ GRANT ALL ON FUNCTION erp.change_password(current_password character varying, ne
 
 
 --
--- Name: FUNCTION confirm_order(articles_quantities erp.article_quantity[], input_fulfillment_method_id integer); Type: ACL; Schema: erp; Owner: postgres
+-- Name: FUNCTION confirm_order(input_fulfillment_method_id integer); Type: ACL; Schema: erp; Owner: postgres
 --
 
-REVOKE ALL ON FUNCTION erp.confirm_order(articles_quantities erp.article_quantity[], input_fulfillment_method_id integer) FROM PUBLIC;
-GRANT ALL ON FUNCTION erp.confirm_order(articles_quantities erp.article_quantity[], input_fulfillment_method_id integer) TO identified_customer;
+REVOKE ALL ON FUNCTION erp.confirm_order(input_fulfillment_method_id integer) FROM PUBLIC;
+GRANT ALL ON FUNCTION erp.confirm_order(input_fulfillment_method_id integer) TO identified_customer;
 
 
 --
@@ -3123,7 +3147,7 @@ GRANT SELECT ON TABLE erp.pricelists_customers_categories TO identified_customer
 --
 
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE erp.stock_shapes TO administrator;
-GRANT SELECT ON TABLE erp.stock_shapes TO identified_customer;
+GRANT SELECT,UPDATE ON TABLE erp.stock_shapes TO identified_customer;
 
 
 --

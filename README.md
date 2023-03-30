@@ -1,21 +1,20 @@
-# Next.js + Jest
+# Grower ERP aka Homeostasis
+An ERP for people typically working with living things.
 
-This example shows how to configure Jest to work with Next.js.
+## Install on you dev machine
 
-This includes Next.js' built-in support for Global CSS, CSS Modules and TypeScript.
+Clone the repo
+cd' into the 'grower-erp' folder
 
-## How to Use
-
-Quickly get started using [Create Next App](https://github.com/vercel/next.js/tree/canary/packages/create-next-app#readme)!
-
-In your terminal, run the following command:
-
+Install dependencies
 ```bash
-npx create-next-app --example with-jest with-jest-app
+yarn install
 ```
 
+Launch the database server in a separate terminal window
 ```bash
-yarn create next-app --example with-jest with-jest-app
+cd docker/dev
+docker compose up
 ```
 
 ```bash

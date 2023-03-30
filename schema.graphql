@@ -8289,14 +8289,7 @@ input ConfirmOrderInput {
   payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
-  articlesQuantities: [ArticleQuantityInput]
   inputFulfillmentMethodId: Int
-}
-
-"""An input for mutations affecting `ArticleQuantity`"""
-input ArticleQuantityInput {
-  articleId: Int
-  quantity: BigFloat
 }
 
 """The output of our `createPasswordRecovery` mutation."""

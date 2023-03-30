@@ -49,19 +49,19 @@ const ARTICLES_SALES_INFO = gql`query ArticlesSalesInfo($articleIds: [Int]!) {
     }
   }`
 
-const CONFIRM_ORDER = gql`mutation ConfirmOrder($articlesQuantities: [ArticleQuantityInput], $fulfillmentMethodId: Int) {
-    confirmOrder(
-      input: {articlesQuantities: $articlesQuantities, inputFulfillmentMethodId: $fulfillmentMethodId}
-    ) {
-      integer
-    }
-  }`
+const CONFIRM_ORDER = gql`mutation ConfirmOrder($fulfillmentMethodId: Int) {
+  confirmOrder(
+    input: { inputFulfillmentMethodId: $fulfillmentMethodId}
+  ) {
+    integer
+  }
+}`
 
 const CLEAR_DRAFT_ORDER = gql`mutation ClearDraftOrder {
     clearMyDraftOrder(input: {clientMutationId: ""}) {
-      clientMutationId
+        clientMutationId
     }
-  }`
+}`
 
 export enum CartItemMessages {
     NotSoldAnymore,
@@ -125,6 +125,8 @@ const Cart = () => {
                     newArticleMessage[art.articleId] = createMessages(art, artSalesInfos.find((artInfo: ArticleSaleInfo) => artInfo.articleId === art.articleId))
                     setArticlesMessages(newArticleMessage)
                 })
+            } else {
+                setDraftOrderLines([])
             }
             setLoadStatus({ loading: false, error: undefined })
         } catch (error: any) {
@@ -140,6 +142,7 @@ const Cart = () => {
 
     const emptyCart = async () => {
         await clearDraftOrder()
+        appContext.setNbCartArticles(0)
         await load()
     }
     
@@ -170,17 +173,19 @@ const Cart = () => {
                     </Typography>
                 </Stack>
                 <LoadingButton loading={submitInfo.processing} sx={{alignSelf: 'center'}} variant="contained" type="submit" disabled={hasMessages} onClick={async () => {
-                    setSubmitInfo({ processing: true, error: undefined })
-                    try {
-                        await confirmOrder({ variables: {
-                            fulfillmentMethodId: 1,
-                            articlesQuantities: draftOrderLines.map(art => ({ articleId: art.articleId, quantity: art.quantityOrdered }))
-                        }})
-                        await emptyCart()
-                        setSubmitInfo({ processing: false, error: undefined })
-                        setSuccess(true)
-                    } catch(error: any) {
-                        setSubmitInfo({ processing: false, error })
+                    const response = await appContext.confirm('Etes-vous sûr(e) de vouloir confirmer cette commande ?', 'Commander') 
+                    if(response){
+                        setSubmitInfo({ processing: true, error: undefined })
+                        try {
+                            await confirmOrder({ variables: {
+                                fulfillmentMethodId: 1
+                            }})
+                            await emptyCart()
+                            setSubmitInfo({ processing: false, error: undefined })
+                            setSuccess(true)
+                        } catch(error: any) {
+                            setSubmitInfo({ processing: false, error })
+                        }
                     }
                 }}>Confirmer</LoadingButton>
                 {hasMessages && <Alert severity="warning">Veuillez d'abord traiter toutes les notifications sur les articles ci-dessus.</Alert>}

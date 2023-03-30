@@ -5,7 +5,7 @@ import * as yup from 'yup'
 import dayjs from "dayjs"
 import { asPrice, config } from "lib/uiCommon"
 import { AppContext } from "./AppContextProvider"
-import { useContext } from "react"
+import { useContext, useState } from "react"
 import { useMutation, useQuery } from "@apollo/client"
 import { availableArticlesQry, draftOrderLinesQry, setOrderLineQry } from "../queriesLib"
 import Loader from "../Loader"
@@ -34,11 +34,12 @@ interface FormValues {
 const OrderLines = () => {
     const appContext = useContext(AppContext)
     const { loading, error, data } = useQuery(availableArticlesQry)
+    const [lineToSet, setLineToSet] = useState({} as { articleId: number, quantity: number })
     const { loading: orderLinesLoading, error: orderLinesError, data: orderLinesData } = useQuery(draftOrderLinesQry, { onCompleted: (data) => {
-        appContext.setNbCartArticles(data.myDraftOrder.orderLinesByOrderId.nodes.length)
+        appContext.setNbCartArticles(data.myDraftOrder ? data.myDraftOrder.orderLinesByOrderId.nodes.length : 0)
     }})
     const [setOrderLine, { data: reloadedOrderLinesData }] = useMutation(setOrderLineQry, { onCompleted: (data) => {
-        appContext.setNbCartArticles(data.myDraftOrder.orderLinesByOrderId.nodes.length)
+        appContext.setNbCartArticles(data.myDraftOrder ? data.myDraftOrder.orderLinesByOrderId.nodes.length : 0)
     }})
     const hasError = (touched: FormikTouched<FormValues>, errors: FormikErrors<FormValues>, idx: number): boolean => {
         return !!touched.orderLines && touched.orderLines[idx] && !!errors.orderLines  && Array.isArray(errors.orderLines) && !!errors.orderLines[idx]
@@ -71,8 +72,6 @@ const OrderLines = () => {
         })
     }
 
-    let lineToSet: { articleId: number, quantity: number }
-    
     return <Stack>
         <Stack direction="row" columnGap="0.5rem">
             <Typography sx={{ flex: '4 1' }} variant="overline">Produit</Typography>
@@ -81,18 +80,17 @@ const OrderLines = () => {
             <Typography sx={{ flex: '1 1', textAlign: 'right' }} variant="overline">Prix</Typography>
             <Typography sx={{ flex: '2 1' }} variant="overline">Votre commande</Typography>
         </Stack>
-        <Loader loading={loading || orderLinesLoading} error={error || orderLinesError}>
+        { articles && articles.length === 0 && <Stack direction="row" justifyContent="center">
+            <Typography variant="h5">Pas d'article à vendre</Typography>
+        </Stack> }
+        { articles && articles.length > 0 && <Loader loading={loading || orderLinesLoading} error={error || orderLinesError}>
             <Formik initialValues={{ orderLines: articlesInitialValue(articles, orderLinesQuantities) } as FormValues}
                 validationSchema={yup.object().shape({
                     orderLines: yup.array(yup.object().shape({
                         quantityOrdered: yup.number().min(0,'Veuillez entrer un nombre positif').test('WithinAvailableStock', `Il n'y a pas assez de stock disponible`, (val, context) => {
                             return !val || val <= context.parent.available
                         })
-                    })).test('SomeQuantityOrdered', `Aucune quantité n'a été commandée`, val => {
-                        return !!val &&
-                            val.length > 0 &&
-                            val.reduce((prev, current) => prev + current.quantityOrdered!, 0) > 0
-                    })
+                    }))
                 })} onSubmit={async () => {
                     const res = await setOrderLine({ variables: { inputArticleId: lineToSet.articleId, inputQuantity: lineToSet.quantity }})
                     appContext.setNbCartArticles(res.data.setOrderLineFromShop.integer)
@@ -116,7 +114,7 @@ const OrderLines = () => {
                                 value={values.orderLines[idx].quantityOrdered}
                                 onChange={e => {
                                     handleChange(e)
-                                    lineToSet = { articleId: article.articleId, quantity: Number(e.target.value) }
+                                    setLineToSet({ articleId: article.articleId, quantity: Number(e.target.value) })
                                 }}
                                 error={hasError(touched, errors, idx)}
                                 helperText={getError(touched, errors, idx)}
@@ -125,7 +123,7 @@ const OrderLines = () => {
                     </Stack>)}
                 </FieldArray>}
             </Formik>
-        </Loader>
+        </Loader> }
     </Stack>
 }
 

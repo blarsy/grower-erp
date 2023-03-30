@@ -42,6 +42,8 @@ const DatagridLine = ({ line, columns, canDelete, readonly, onUpdate, onCreate,
             if(col.editable){
                 if(col.type === 'string' && line[col.key] === null) {
                     result[col.key] = ''
+                } else if(col.valueForNew && line[cols[0].key] === NEW_LINE_KEY && !line[col.key]) {
+                    result[col.key]= col.valueForNew
                 } else {
                     result[col.key] = line[col.key]
                 }
@@ -157,7 +159,7 @@ const DatagridLine = ({ line, columns, canDelete, readonly, onUpdate, onCreate,
                     }}
                     error={Boolean(touched[col.key] && errors[col.key])}
                     helperText={touched[col.key] && errors[col.key] as string}
-                    />
+                />
             } else if(col.type === 'string') {
                 return makeTextField()
             } else if(col.type === 'boolean') {

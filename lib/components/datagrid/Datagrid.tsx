@@ -23,7 +23,7 @@ export interface Column {
         getLabel?: (rec: any) => string
     },
     customDisplay?: (val: any) => string,
-    valueForNew?: string
+    valueForNew?: any
 }
 
 export type CellContent = string | number | null | boolean | Date
