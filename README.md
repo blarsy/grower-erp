@@ -1,5 +1,6 @@
-# Grower ERP aka Homeostasis
+# Grower ERP
 An ERP for people typically working with living things.
+Halted: socleo has adapted its codebase from France-centric to multinational
 
 ## Install on you dev machine
 
